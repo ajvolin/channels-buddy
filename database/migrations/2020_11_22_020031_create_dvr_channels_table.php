@@ -22,10 +22,15 @@ class CreateDvrChannelsTable extends Migration
         });
 
         DB::raw('
-            CREATE TRIGGER trg_mapped_default BEFORE INSERT ON dvr_channels FOR EACH ROW
-                IF NEW.mapped_channel_number IS NULL THEN
-                    SET NEW.mapped_channel_number := NEW.guide_number;
-                END IF;;
+            CREATE TRIGGER trg_mapped_default
+                AFTER INSERT ON dvr_channels
+                FOR EACH ROW
+                WHEN (NEW.mapped_channel_number IS NULL)
+                BEGIN
+                    UPDATE dvr_channels
+                    SET mapped_channel_number = NEW.guide_number
+                    WHERE id = NEW.id;
+                END;
         ');
     }
 
