@@ -1,51 +1,35 @@
-FROM php:apache-buster
+FROM php:cli-alpine3.12
 
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Update apk and add dependencies
+RUN apk update && \
+    apk add --no-cache git \
+                        curl \
+                        libpng-dev \
+                        oniguruma-dev \
+                        libxml2-dev \
+                        zip \
+                        unzip \
+                        composer \
+                        nodejs-current \
+                        npm
 
 # Install PHP extensions
 RUN docker-php-ext-install mbstring exif pcntl bcmath gd
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
-
-# move the apache document root to the laravel public directory
-RUN sed -i 's/\/var\/www\/html/\/var\/www\/html\/public/g' /etc/apache2/sites-available/000-default.conf
-
-# enable apache mod_rewrite
-RUN a2enmod rewrite
+# Clone current app code
+RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/app
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /usr/src/app
 
-# start web server
-CMD service apache2 start && \
-    touch /var/www/html/database/database.sqlite && \
-    chmod -R 777 /var/www/html/database/database.sqlite && \
-    chmod -R 777 /var/www/html/storage && \
+# Run setup commands
+RUN mv /usr/src/app/storage /channels_mapper/ && \
+    ln -s /channels_mapper/storage /usr/src/app/storage && \
+    mkdir /channels_mapper/database && \
+    touch /channels_mapper/database/database.sqlite && \
     composer install && \
     php artisan key:generate && \
-    php artisan migrate && \
-    tail -F /var/log/apache2/access.log && \
-    tail -F /var/log/apache2/error.log
+    php artisan migrate
 
-# USER $user
+# Start built-in PHP webserver
+CMD php artisan serve --host=0.0.0.0 --port=80
