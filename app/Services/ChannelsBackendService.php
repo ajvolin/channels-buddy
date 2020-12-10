@@ -11,17 +11,17 @@ class ChannelsBackendService
 
     public function __construct()
     {
-        if(env('CHANNELS_BACKEND_IP') === null) {
+        if(getenv('CHANNELS_BACKEND_IP') === null) {
             die('CHANNELS_BACKEND_IP .env variable must be set. Cannot continue.');
         }
 
-        if(env('CHANNELS_BACKEND_PORT') === null) {
+        if(getenv('CHANNELS_BACKEND_PORT') === null) {
             die('CHANNELS_BACKEND_PORT .env variable must be set. Cannot continue.');
         }
 
         $this->baseUrl =
             sprintf("http://%s:%s",
-                env('CHANNELS_BACKEND_IP'), env('CHANNELS_BACKEND_PORT')
+                getenv('CHANNELS_BACKEND_IP'), getenv('CHANNELS_BACKEND_PORT')
             );
 
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);

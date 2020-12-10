@@ -27,6 +27,8 @@ RUN mv /usr/src/app/storage /channels_mapper/ && \
     ln -s /channels_mapper/storage /usr/src/app/storage && \
     mkdir /channels_mapper/database && \
     touch /channels_mapper/database/database.sqlite && \
+    chmod -R 777 /channels_mapper && \
+    chmod o+x /usr/src/app/entrypoint.sh && \
     composer install && \
     php artisan key:generate && \
     php artisan migrate
