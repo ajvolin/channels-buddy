@@ -23,11 +23,11 @@ RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/app
 WORKDIR /usr/src/app
 
 # Run setup commands
-RUN mv /usr/src/app/storage /channels_mapper/ && \
-    ln -s /channels_mapper/storage /usr/src/app/storage && \
-    mkdir /channels_mapper/database && \
-    touch /channels_mapper/database/database.sqlite && \
-    chmod -R 777 /channels_mapper && \
+RUN mv /usr/src/app/storage /channel_mapper/ && \
+    ln -s /channel_mapper/storage /usr/src/app/storage && \
+    mkdir /channel_mapper/database && \
+    touch /channel_mapper/database/database.sqlite && \
+    chmod -R 777 /channel_mapper && \
     chmod o+x /usr/src/app/entrypoint.sh && \
     composer install && \
     php artisan key:generate && \
