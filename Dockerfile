@@ -23,16 +23,10 @@ RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/app
 WORKDIR /usr/src/app
 
 # Run setup commands
-RUN mkdir /channel_mapper/database && \
-    touch /channel_mapper/database.sqlite && \
-    chmod -R 777 /channel_mapper && \
-    chmod o+x /usr/src/app/entrypoint.sh && \
+RUN chmod o+x /usr/src/app/entrypoint.sh && \
     composer install && \
     php artisan key:generate && \
     php artisan migrate
 
-# Start built-in PHP webserver
-CMD php artisan serve --host=0.0.0.0 --port=80
-
-
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 

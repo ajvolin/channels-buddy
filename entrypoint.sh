@@ -1,6 +1,11 @@
 #!/bin/sh
 
+touch /channel_mapper/database.sqlite && chmod -R 777 /channel_mapper
+
 cd /usr/src/app
+
+sed '/^CHANNELS_BACKEND_IP=/{h;s/=.*/='"$CHANNELS_BACKEND_IP"'/};${x;/^$/{s//CHANNELS_BACKEND_IP='"$CHANNELS_BACKEND_IP"'/;H};x}' -i .env
+sed '/^CHANNELS_BACKEND_PORT=/{h;s/=.*/='"$CHANNELS_BACKEND_PORT"'/};${x;/^$/{s//CHANNELS_BACKEND_PORT='"$CHANNELS_BACKEND_PORT"'/;H};x}' -i .env
 
 while :
 do
