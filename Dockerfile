@@ -22,7 +22,7 @@ WORKDIR /usr/src/app
 
 # Add entrypoint and app code
 ADD entrypoint.sh /usr/src/app/entrypoint.sh
-ADD channel-mapper/* /usr/src/app/
+ADD ./channel-mapper /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
