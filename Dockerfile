@@ -39,6 +39,8 @@ WORKDIR /var/www/html
 
 # start web server
 CMD service apache2 start && \
+    touch /var/www/html/database/database.sqlite && \
+    chmod -R 777 /var/www/html/database/database.sqlite && \
     chmod -R 777 /var/www/html/storage && \
     composer install && \
     php artisan key:generate && \
