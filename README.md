@@ -4,6 +4,7 @@ This PHP application converts the output from a [Channels](https://getchannels.c
 
 ## Setup
 Run the container, substituting your Channels DVR server IP address and port.
+
     docker run -d \
       --restart unless-stopped \
       -p 8088:80 \
