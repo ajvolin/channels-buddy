@@ -41,19 +41,13 @@ class ChannelController extends Controller
 
         $channels = $this->channelsBackend->getScannedChannels($source);
 
-        $existingChannels = DvrChannel::pluck('mapped_channel_number', 'guide_number');
+        $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
-        foreach($channels as &$ch) {
-            if(($mapped = $existingChannels->get($ch->GuideNumber)) !== false) {
-                // existing channel number in db
-                $ch->mapped_channel_number = $mapped;
-            }
-            else {
-                // new channel number for db
-                $ch->mapped_channel_number = $ch->GuideNumber;
-            }
-
-        }
+        $channels->transform(function ($channel, $key) use ($existingChannels) {
+            $channel->mapped_channel_number = $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
+            $channel->channel_disabled = $existingChannels->get($key)->channel_disabled ?? false;
+            return $channel;
+        });
 
         return view('channels.map',
             [
@@ -80,14 +74,15 @@ class ChannelController extends Controller
             list(,,,$guideNumber) = explode('_', $guideNumberIdx);
             $data[] = [
                 'guide_number' => $guideNumber,
-                'mapped_channel_number' => $mappedNumber ?? $guideNumber,
+                'mapped_channel_number' => $mappedNumber ?? $guideNumber
             ];
         }
 
         DvrChannel::upsert(
             $data,
             [ 'guide_number' ],
-            [ 'mapped_channel_number' ]
+            [ 'mapped_channel_number' ],
+            ['channel_disabled']
         );
 
         return redirect(route('getChannelMapUI', ['source' => $source]));
@@ -101,17 +96,17 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $scannedChannels = collect($this->channelsBackend->getScannedChannels($source));
+        $scannedChannels = $this->channelsBackend->getScannedChannels($source);
         $existingChannels = DvrChannel::pluck('mapped_channel_number', 'guide_number');
 
-        $scannedChannels->map(function($channel) use ($source, $existingChannels) {
+        $scannedChannels->map(function($channel) use ($existingChannels) {
             $channel->mappedChannelNum =
                 $existingChannels->get($channel->GuideNumber) ?? $channel->GuideNumber;
         });
 
         return view('channels.playlist.full', [
             'scannedChannels' => $scannedChannels,
-            'channelsBackendUrl' => $this->channelsBackend->getBaseUrl(),
+            'channelsBackendUrl' => $this->channelsBackend->getPlaylistBaseUrl(),
             'source' => $source,
         ]);
 

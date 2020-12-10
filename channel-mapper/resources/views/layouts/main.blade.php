@@ -13,7 +13,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="{{ $channelsBackendUrl }}">Channels DVR BackEnd</a>
+                <a class="nav-link" href="{{ $channelsBackendUrl }}">Channels DVR Server</a>
             </li>
             @if(isset($sources))
             <li class="nav-item dropdown">
@@ -21,8 +21,8 @@
                     Available Sources
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    @foreach($sources as $src)
-                        <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{ $src }}</a>
+                    @foreach($sources as $src => $srcName)
+                        <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{ $srcName }}</a>
                     @endforeach
                 </div>
             </li>
@@ -30,7 +30,7 @@
             @if(isset($source))
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Current Source: {{ $source }}
+                        Current Source: {{ $sources->get($source) }}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         @include('channels.includes.routeLinks')

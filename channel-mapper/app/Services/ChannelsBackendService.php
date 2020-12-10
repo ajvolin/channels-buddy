@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 class ChannelsBackendService
 {
     protected $baseUrl;
+    protected $playlistBaseUrl;
     protected $httpClient;
 
     public function __construct()
@@ -23,6 +24,11 @@ class ChannelsBackendService
             sprintf("http://%s:%s",
                 env('CHANNELS_SERVER_IP'), env('CHANNELS_SERVER_PORT')
             );
+        
+        $this->playlistBaseUrl =
+            sprintf("http://%s:%s",
+                env('CHANNELS_SERVER_IP_FOR_PLAYLIST'), env('CHANNELS_SERVER_PORT_FOR_PLAYLIST')
+            );
 
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
 
@@ -33,11 +39,34 @@ class ChannelsBackendService
         return $this->baseUrl;
     }
 
+    public function getPlaylistBaseUrl()
+    {
+        return $this->playlistBaseUrl;
+    }
+
     public function getScannedChannels($source)
     {
-        $stream = $this->httpClient->get(sprintf('/devices/%s/channels?ScanResult=true', $source));
-        $json = $stream->getBody()->getContents();
-        return json_decode($json);
+        $deviceChannelsStream = $this->httpClient->get(sprintf('/devices/%s/channels?ScanResult=true', $source));
+        $deviceChannelsJson = $deviceChannelsStream->getBody()->getContents();
+        $deviceChannels = collect(json_decode($deviceChannelsJson))->filter(function ($channel, $key) {
+            return (property_exists($channel, 'Hidden') && $channel->Hidden == 1) ? false : true;
+        })->keyBy('GuideNumber');
+
+        $guideChannelsStream = $this->httpClient->get(sprintf('/devices/%s/guide?time=1&duration=1', $source));
+        $guideChannelsJson = $guideChannelsStream->getBody()->getContents();
+        $guideChannels = collect(json_decode($guideChannelsJson))->pluck('Channel')->keyBy("Number");
+
+        $deviceChannels->transform(function ($channel, $key) use ($guideChannels) {
+            $channel->CallSign = $guideChannels->get($key)->CallSign ?? $channel->GuideName;
+            return $channel;
+        });
+
+        unset($deviceChannelsStream, $deviceChannelsJson,
+                $guideChannelsStream, $guideChannelsJson,
+                $guideChannels
+            );
+
+        return $deviceChannels;
     }
 
     public function getGuideData($device, $startTimestamp, $duration)
@@ -50,17 +79,17 @@ class ChannelsBackendService
 
     public function isValidDevice($device)
     {
-        return ($this->getDevices(true)->search($device) !== false);
+        return ($this->getDevices(true)->has($device) !== false);
     }
 
-    public function getDevices($allowAny = false)
+    public function getDevices($allowAny = true)
     {
         $stream = $this->httpClient->get(sprintf('/devices'));
         $json = $stream->getBody()->getContents();
 
-        $devices = collect(json_decode($json))->pluck('DeviceID');
+        $devices = collect(json_decode($json))->pluck('FriendlyName', 'DeviceID');
         if($allowAny) {
-            $devices->push('ANY');
+            $devices->prepend('All Devices', 'ANY');
         }
 
         return $devices;

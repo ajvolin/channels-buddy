@@ -18,6 +18,7 @@ class CreateDvrChannelsTable extends Migration
             $table->id();
             $table->string('guide_number', 16)->unique();
             $table->string('mapped_channel_number', 16)->nullable();
+            $table->boolean('channel_disabled')->nullable()->default(false);
             $table->timestamps();
         });
 

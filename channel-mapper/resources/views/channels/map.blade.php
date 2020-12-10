@@ -7,7 +7,7 @@
 
     <div class="row">
         <div class="col-xs-8 text-center">
-            <h1>{{ $source }}</h1>
+            <h1>{{ $sources->get($source) }}</h1>
         </div>
         <div class="col-xs-4"></div>
     </div>
@@ -19,6 +19,7 @@
                     <th style="padding: 10px;">Channel</th>
                     <th style="padding: 10px;">DVR Channel Number</th>
                     <th style="padding: 10px;">Re-Mapped Channel Number</th>
+                    <th style="padding: 10px;">Disable Channel</th>
                 </tr>
 
                 @foreach($channels as $channel)
@@ -29,13 +30,16 @@
                         <td style="padding: 10px;">
                             <input type="text" class="form-control" name="mapped_channel_num_{{ $channel->GuideNumber }}" value="{{ ($channel->GuideNumber != $channel->mapped_channel_number) ? $channel->mapped_channel_number : '' }}" />
                         </td>
+                        <td style="padding: 10px;">
+                            <!-- <input type="checkbox" class="form-control" name="channel__disabled_{{ $channel->GuideNumber }}" value="1" {{ $channel->channel_disabled ? "checked" : "" }} /> -->
+                        </td>
                     </tr>
 
                 @endforeach
             </table>
         </div>
         <div class="col-xs-4 align-left" >
-            <input type="submit" value="Save {{ $source }} Channel Map" style="margin: 10px 0px 0px 20px;" />
+            <input type="submit" value="Save Channel Map" style="margin: 10px 0px 0px 20px;" />
         </div>
     </div>
 
