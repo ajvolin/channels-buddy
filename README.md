@@ -2,7 +2,7 @@
 
 This PHP application converts the output from a [Channels](https://getchannels.com) DVR server to an M3U playlist and XMLTV EPG that can be used as an input for any IPTV software, including Emby (requires Emby Premiere) or even another Channels DVR instance.
 
-Forked from @crackers8199, thanks for the code!
+Forked from [@crackers8199's](https://github.com/crackers8199) channels-dvr-mapper, thanks for the code!
 
 ## Setup
 Run the container, substituting your Channels DVR server IP address and port.
