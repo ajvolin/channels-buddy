@@ -23,10 +23,9 @@ RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/app
 WORKDIR /usr/src/app
 
 # Run setup commands
-RUN chmod o+x /usr/src/app/entrypoint.sh && \
-    composer install && \
-    php artisan key:generate && \
-    php artisan migrate
+RUN chmod o+x /usr/src/app/entrypoint.sh
+RUN composer install    
+RUN php artisan key:generate
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-touch /channel_mapper/database.sqlite && chmod -R 777 /channel_mapper
+[ -f /channel_mapper/database.sqlite ] || { touch /channel_mapper/database.sqlite; chmod -R 777 /channel_mapper; php artisan migrate; }
 
 cd /usr/src/app
 
@@ -13,3 +13,4 @@ do
     echo "Starting application"
     php artisan serve --host=0.0.0.0 --port=80
 done
+
