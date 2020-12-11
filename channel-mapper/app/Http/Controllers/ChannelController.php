@@ -104,11 +104,11 @@ class ChannelController extends Controller
                 return $channel;
             })->values()->sortBy('mappedChannelNum');
 
-        return view('channels.playlist.full', [
+        return response(view('channels.playlist.full', [
             'scannedChannels' => $scannedChannels,
             'channelsBackendUrl' => $this->channelsBackend->getPlaylistBaseUrl(),
             'source' => $source,
-        ]);
+        ]))->header('Content-Type', 'application/x-mpegurl');
 
     }
 
