@@ -45,7 +45,7 @@ class ChannelController extends Controller
 
         $channels->transform(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
-            $channel->channel_disabled = $existingChannels->get($key)->channel_disabled ?? false;
+            $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
         });
 
@@ -67,22 +67,18 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $channelMaps = $request->except('_token');
-
-        $data = [];
-        foreach($channelMaps as $guideNumberIdx => $mappedNumber) {
-            list(,,,$guideNumber) = explode('_', $guideNumberIdx);
-            $data[] = [
-                'guide_number' => $guideNumber,
-                'mapped_channel_number' => $mappedNumber ?? $guideNumber
+        $channels = collect($request->channel)->transform(function ($channel, $key) {
+            return [
+                'guide_number' => $key,
+                'mapped_channel_number' => $channel['mapped'] ?? $key,
+                'channel_enabled' => $channel['enabled'] ?? 0
             ];
-        }
+        })->values()->toArray();
 
         DvrChannel::upsert(
-            $data,
+            $channels,
             [ 'guide_number' ],
-            [ 'mapped_channel_number' ],
-            ['channel_disabled']
+            [ 'mapped_channel_number', 'channel_enabled' ],
         );
 
         return redirect(route('getChannelMapUI', ['source' => $source]));
@@ -97,12 +93,16 @@ class ChannelController extends Controller
         }
 
         $scannedChannels = $this->channelsBackend->getScannedChannels($source);
-        $existingChannels = DvrChannel::pluck('mapped_channel_number', 'guide_number');
+        $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
-        $scannedChannels->map(function($channel) use ($existingChannels) {
-            $channel->mappedChannelNum =
-                $existingChannels->get($channel->GuideNumber) ?? $channel->GuideNumber;
-        });
+        $scannedChannels =
+            $scannedChannels->filter(function ($channel, $key) use ($existingChannels) {
+                return $existingChannels->get($key)->channel_enabled ?? true;
+            })->transform(function($channel, $key) use ($existingChannels) {
+                $channel->mappedChannelNum =
+                    $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
+                return $channel;
+            })->values()->sortBy('mappedChannelNum');
 
         return view('channels.playlist.full', [
             'scannedChannels' => $scannedChannels,

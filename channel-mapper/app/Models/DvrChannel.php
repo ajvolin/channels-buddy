@@ -19,5 +19,6 @@ class DvrChannel extends Model
         'dvr_lineup_id',
         'guide_number',
         'mapped_channel_number',
+        'channel_enabled'
     ];
 }

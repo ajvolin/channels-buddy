@@ -26,7 +26,8 @@ ADD ./channel-mapper /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
-RUN composer install    
+RUN mv /usr/src/app/.env.channels /usr/src/app/.env
+RUN composer install
 RUN php artisan key:generate
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
