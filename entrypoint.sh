@@ -1,5 +1,6 @@
 #!/bin/sh
 
+[ -f /channel_mapper/.env ] || { cp /usr/src/app/.env.channels /channel_mapper/.env; ln -s /channel_mapper/.env /usr/src/app/.env; php artisan key:generate; }
 [ -f /channel_mapper/database.sqlite ] || { touch /channel_mapper/database.sqlite; chmod -R 777 /channel_mapper; ln -s /channel_mapper/database.sqlite /usr/src/app/database/database.sqlite; }
 [ -e /channel_mapper/storage ] || { mv /usr/src/app/storage /channel_mapper/; ln -s /channel_mapper/storage /usr/src/app/storage; }
 

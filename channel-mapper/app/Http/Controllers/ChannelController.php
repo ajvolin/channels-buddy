@@ -39,11 +39,12 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $channels = $this->channelsBackend->getScannedChannels($source);
+        $allChannels = $this->channelsBackend->getScannedChannels('ANY');
+        $sourceChannels = $this->channelsBackend->getScannedChannels($source);
 
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
-        $channels->transform(function ($channel, $key) use ($existingChannels) {
+        $sourceChannels->transform(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
             $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
@@ -51,9 +52,10 @@ class ChannelController extends Controller
 
         return view('channels.map',
             [
-                'channels' => $channels,
                 'source' => $source,
                 'sources' => $this->channelsBackend->getDevices(),
+                'allChannels' => $allChannels,
+                'sourceChannels' => $sourceChannels,
                 'channelsBackendUrl' => $this->channelsBackend->getBaseUrl(),
             ]
         );

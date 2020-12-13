@@ -58,6 +58,7 @@ class ChannelsBackendService
 
         $deviceChannels->transform(function ($channel, $key) use ($guideChannels) {
             $channel->CallSign = $guideChannels->get($key)->CallSign ?? $channel->GuideName;
+            $channel->Name = $guideChannels->get($key)->Name ?? $channel->GuideName;
             return $channel;
         });
 
