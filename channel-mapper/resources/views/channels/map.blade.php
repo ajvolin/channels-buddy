@@ -1,7 +1,26 @@
 @extends('layouts.main')
 
 @section('content')
+    <style>
+        #channel-select-list-container {
+            display: none;
+        }
+        .channel-remap-search {
+            min-height: 350px;
+            max-height: 350px;
+            min-width: 320px;
+            max-width: 320px;
+            overflow-y: scroll;
+        }
+        .channel-remap-select.row {
+            min-height: 51px;
+        }
+        .channel-remap-select img {
+            max-width: auto;
+            height: 30px;
 
+        }
+    </style>
     <div class="row mb-3">
         <div class="col-xs-8 col-md-10 col-lg-10">
             <h1>{{ $sources->get($source) }}</h1>
@@ -37,30 +56,7 @@
                     </thead>
                     <tbody>
                     @foreach($sourceChannels as $channel)
-                        <tr id="channel-{{ $channel->GuideNumber }}" class="channel-row" data-channel-number="{{ $channel->GuideNumber }}" data-channel-callsign="{{ $channel->CallSign }}" data-channel-guide-name="{{ $channel->GuideName }}" data-channel-name="{{ $channel->Name }}" data-channel-remapped-number="{{ $channel->mapped_channel_number }}" data-channel-station-id="{{ $channel->Station ?? '' }}" data-channel-enabled="{{ $channel->channel_enabled }}" data-channel-search="{{ $channel->GuideNumber }} {{ Str::upper($channel->CallSign) }} {{ Str::upper($channel->GuideName) }} {{ Str::upper($channel->Name) }} {{ $channel->mapped_channel_number }}">
-                            <td style="padding: 10px; max-width: 125px; text-align: left;" class="align-middle px-3">
-                                @if(isset($channel->Logo))
-                                <img src="{{ $channel->Logo }}" style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
-                                @else
-                                <div class="guide-channel-name" style="font-size: 0.9em; padding: 19px 0;">{{ $channel->GuideName }}</div>
-                                @endif
-                                <div class="guide-channel-number" style="font-size: 0.7em;">{{ $channel->GuideNumber }} - {{ $channel->CallSign }}</div>
-                            </td>
-                            <td style="padding: 10px; max-width: 300px;" class="text-center align-middle channel-remap">
-                                <div class="dropdown">
-                                    <input type="text" class="form-control text-center mx-auto" style="max-width: 250px;" name="channel[{{ $channel->GuideNumber }}][mapped]" value="{{ ($channel->GuideNumber != $channel->mapped_channel_number) ? $channel->mapped_channel_number : '' }}" />
-                                    <div class="dropdown-menu" aria-label="Channel search list dropdown">
-                                        
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="padding: 10px;" class="align-middle text-center">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" name="channel[{{ $channel->GuideNumber }}][enabled]" id="{{ md5($source.$channel->GuideNumber) }}" value="1" {{ $channel->channel_enabled ? "checked" : "" }}>
-                                    <label class="custom-control-label" for="{{ md5($source.$channel->GuideNumber) }}">{{ $channel->channel_enabled ? "Enabled" : "Disabled" }}</label>
-                                </div>
-                            </td>
-                        </tr>
+                        @include('channels.remap.table.row')
                     @endforeach
                     </tbody>
                 </table>
@@ -70,15 +66,16 @@
             </div>
         </div>
     </form>
+    @include('channels.remap.dropdown.list')
 <script>
     function searchChannels() {
         var search = $("#search_channels").val();
-        var channel_status = $('input[name="channel_status"]:checked').val();
+        var channelStatus = $('input[name="channel_status"]:checked').val();
         
-        var search_filter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
-        var channel_filter = channel_status !== '' ? '[data-channel-enabled=' + channel_status + ']' : '';
+        var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
+        var channelFilter = channelStatus !== '' ? '[data-channel-enabled=' + channelStatus + ']' : '';
 
-        var filter = [search_filter, channel_filter].filter(Boolean).join("");
+        var filter = [searchFilter, channelFilter].filter(Boolean).join("");
 
         if (filter !== '') {
             $("tr.channel-row").hide()
@@ -89,11 +86,59 @@
             $("tr.channel-row").show();
         }
     }
+
     $('input[type="checkbox"]').on('click', function(e){
         $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
     });
+
     $('#search_channels, input[name="channel_status"]').on('change keyup', function(e){
         searchChannels();
+    });
+
+    $('body').on('click', '.channel-remap-select', function(e){
+        e.preventDefault();
+        $(this).parent().parent().siblings("input").val($(this).data('channel-number'));
+        $(this).parent().parent().siblings("input").trigger("change");
+    });
+
+    $('.channel-remap').on('show.bs.dropdown', function () {
+        var channelSelectList = $("#channel-select-list");
+        var currentRemappedChannelNumber = $(this).parents("tr.channel-row").data('channel-remapped-number') || $(this).parents("tr.channel-row").data('channel-number');
+        
+        $(this).children(".channel-remap-search").append(channelSelectList);
+        $("#channel-select-list a").hide()
+            .filter("[data-channel-number!=" + currentRemappedChannelNumber + "]")
+            .show();
+    });
+
+    $('.map-channel').on('keyup', function(e){
+        var search = $(this).val();
+        var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
+
+        if (searchFilter !== '') {
+            $("#channel-select-list a").hide()
+                .filter(searchFilter)
+                .show();
+        }
+        else {
+            $("#channel-select-list a").show();
+        }
+    });
+
+    $('.map-channel').on('change', function(e){
+        var channelNumber = $(this).val() || $(this).parents().find("tr.channel-row").data('channel-number');
+
+        $(this).siblings(".channel-remap-search")
+            .find(".current-channel-mapping a.active.channel-remap-select")
+            .data('channel-number', channelNumber);
+        
+        $(this).siblings(".channel-remap-search")
+            .find(".current-channel-mapping a.active.channel-remap-select .badge")
+            .text(channelNumber);
+
+        $(this).parents()
+            .find("tr")
+            .data('channel-remapped-number', channelNumber);
     });
 </script>
 @endsection
