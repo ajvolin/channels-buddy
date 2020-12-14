@@ -12,6 +12,8 @@ ln -sf /channel_mapper/storage /usr/src/app/storage
 
 # Initialize .env file if it doesn't exist
 [ -f /channel_mapper/.env ] || { cp /usr/src/app/.env.channels /channel_mapper/.env; chmod 777 /channel_mapper/.env; ln -sf /channel_mapper/.env /usr/src/app/.env; php artisan key:generate; }
+# Ensure .env is symlinked
+ln -sf /channel_mapper/.env /usr/src/app/.env;
 
 # Set permissions on bound volume
 chmod -R 777 /channel_mapper
