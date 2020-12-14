@@ -18,7 +18,6 @@
         .channel-remap-select img {
             max-width: auto;
             height: 30px;
-
         }
     </style>
     <div class="row mb-3">
@@ -45,7 +44,7 @@
     @csrf
         <div class="row">
             <div class="col-xs-8 col-md-10 col-lg-10">
-                <table class="table table-striped table-hover table-responsive" width="100%">
+                <table class="table table-hover table-responsive" width="100%">
                     <caption>List of channels</caption>
                     <thead class="thead-light">
                         <tr>
@@ -114,7 +113,8 @@
 
         $('.map-channel').on('keyup', function(e){
             var search = $(this).val();
-            var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
+            var currentRemappedChannelNumber = $(this).parents("tr.channel-row").data('channel-remapped-number') || $(this).parents("tr.channel-row").data('channel-number');
+            var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"][data-channel-number!="' + currentRemappedChannelNumber + '"]' : '[data-channel-number!="' + currentRemappedChannelNumber + '"]';
 
             if (searchFilter !== '') {
                 $("#channel-select-list a").hide()
