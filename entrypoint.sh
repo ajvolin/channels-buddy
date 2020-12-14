@@ -6,22 +6,22 @@
 
 cd /usr/src/app
 
-sed '/^CHANNELS_SERVER_IP=/{h;s/=.*/='"$CHANNELS_SERVER_IP"'/};${x;/^$/{s//CHANNELS_SERVER_IP='"$CHANNELS_SERVER_IP"'/;H};x}' -i .env
-sed '/^CHANNELS_SERVER_PORT=/{h;s/=.*/='"$CHANNELS_SERVER_PORT"'/};${x;/^$/{s//CHANNELS_SERVER_PORT='"$CHANNELS_SERVER_PORT"'/;H};x}' -i .env
+sed '/^CHANNELS_SERVER_IP=/{h;s/=.*/='"$CHANNELS_SERVER_IP"'/};${x;/^$/{s//CHANNELS_SERVER_IP='"$CHANNELS_SERVER_IP"'/;H};x}' -i /channel_mapper/.env
+sed '/^CHANNELS_SERVER_PORT=/{h;s/=.*/='"$CHANNELS_SERVER_PORT"'/};${x;/^$/{s//CHANNELS_SERVER_PORT='"$CHANNELS_SERVER_PORT"'/;H};x}' -i /channel_mapper/.env
 
 if [[ -z "${CHANNELS_SERVER_IP_FOR_PLAYLIST}" ]]; then
-    sed '/^CHANNELS_SERVER_IP_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_IP"'/};${x;/^$/{s//CHANNELS_SERVER_IP_FOR_PLAYLIST='"$CHANNELS_SERVER_IP"'/;H};x}' -i .env
+    sed '/^CHANNELS_SERVER_IP_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_IP"'/};${x;/^$/{s//CHANNELS_SERVER_IP_FOR_PLAYLIST='"$CHANNELS_SERVER_IP"'/;H};x}' -i /channel_mapper/.env
 else
-    sed '/^CHANNELS_SERVER_IP_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_IP_FOR_PLAYLIST"'/};${x;/^$/{s//CHANNELS_SERVER_IP_FOR_PLAYLIST='"$CHANNELS_SERVER_IP_FOR_PLAYLIST"'/;H};x}' -i .env
+    sed '/^CHANNELS_SERVER_IP_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_IP_FOR_PLAYLIST"'/};${x;/^$/{s//CHANNELS_SERVER_IP_FOR_PLAYLIST='"$CHANNELS_SERVER_IP_FOR_PLAYLIST"'/;H};x}' -i /channel_mapper/.env
 fi
 
 if [[ -z "${CHANNELS_SERVER_PORT_FOR_PLAYLIST}" ]]; then
-    sed '/^CHANNELS_SERVER_PORT_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_PORT"'/};${x;/^$/{s//CHANNELS_SERVER_PORT_FOR_PLAYLIST='"$CHANNELS_SERVER_PORT"'/;H};x}' -i .env
+    sed '/^CHANNELS_SERVER_PORT_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_PORT"'/};${x;/^$/{s//CHANNELS_SERVER_PORT_FOR_PLAYLIST='"$CHANNELS_SERVER_PORT"'/;H};x}' -i /channel_mapper/.env
 else
-    sed '/^CHANNELS_SERVER_PORT_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_PORT_FOR_PLAYLIST"'/};${x;/^$/{s//CHANNELS_SERVER_PORT_FOR_PLAYLIST='"$CHANNELS_SERVER_PORT_FOR_PLAYLIST"'/;H};x}' -i .env
+    sed '/^CHANNELS_SERVER_PORT_FOR_PLAYLIST=/{h;s/=.*/='"$CHANNELS_SERVER_PORT_FOR_PLAYLIST"'/};${x;/^$/{s//CHANNELS_SERVER_PORT_FOR_PLAYLIST='"$CHANNELS_SERVER_PORT_FOR_PLAYLIST"'/;H};x}' -i /channel_mapper/.env
 fi
 
-php artisan migrate;
+php artisan migrate --force
 
 while :
 do

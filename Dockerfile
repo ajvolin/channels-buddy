@@ -17,12 +17,16 @@ RUN apk update && \
 # Install PHP extensions
 RUN docker-php-ext-install mbstring exif pcntl bcmath gd
 
-# Set working directory
-WORKDIR /usr/src/app
+# Clone github repo
+RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/repo
 
 # Add entrypoint and app code
-ADD entrypoint.sh /usr/src/app/entrypoint.sh
-ADD ./channel-mapper /usr/src/app
+RUN mv /usr/src/repo/channel-mapper /usr/src/app
+#RUN mv /usr/src/repo/php.ini-channels $PHP_INI_DIR/php.ini
+RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
+
+# Set working directory
+WORKDIR /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
