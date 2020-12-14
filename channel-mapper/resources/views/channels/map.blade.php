@@ -68,77 +68,79 @@
     </form>
     @include('channels.remap.dropdown.list')
 <script>
-    function searchChannels() {
-        var search = $("#search_channels").val();
-        var channelStatus = $('input[name="channel_status"]:checked').val();
-        
-        var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
-        var channelFilter = channelStatus !== '' ? '[data-channel-enabled=' + channelStatus + ']' : '';
+    $(document).ready(function(){
+        function searchChannels() {
+            var search = $("#search_channels").val();
+            var channelStatus = $('input[name="channel_status"]:checked').val();
+            
+            var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
+            var channelFilter = channelStatus !== '' ? '[data-channel-enabled=' + channelStatus + ']' : '';
 
-        var filter = [searchFilter, channelFilter].filter(Boolean).join("");
+            var filter = [searchFilter, channelFilter].filter(Boolean).join("");
 
-        if (filter !== '') {
-            $("tr.channel-row").hide()
-                .filter(filter)
-                .show();
+            if (filter !== '') {
+                $("tr.channel-row").hide()
+                    .filter(filter)
+                    .show();
+            }
+            else {
+                $("tr.channel-row").show();
+            }
         }
-        else {
-            $("tr.channel-row").show();
-        }
-    }
 
-    $('input[type="checkbox"]').on('click', function(e){
-        $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
-    });
+        $('input[type="checkbox"]').on('click', function(e){
+            $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
+        });
 
-    $('#search_channels, input[name="channel_status"]').on('change keyup', function(e){
-        searchChannels();
-    });
+        $('#search_channels, input[name="channel_status"]').on('change keyup', function(e){
+            searchChannels();
+        });
 
-    $('body').on('click', '.channel-remap-select', function(e){
-        e.preventDefault();
-        $(this).parent().parent().siblings("input").val($(this).data('channel-number'));
-        $(this).parent().parent().siblings("input").trigger("change");
-    });
+        $('body').on('click', '.channel-remap-select', function(e){
+            e.preventDefault();
+            $(this).parent().parent().siblings("input").val($(this).data('channel-number'));
+            $(this).parent().parent().siblings("input").trigger("change");
+        });
 
-    $('.channel-remap').on('show.bs.dropdown', function () {
-        var channelSelectList = $("#channel-select-list");
-        var currentRemappedChannelNumber = $(this).parents("tr.channel-row").data('channel-remapped-number') || $(this).parents("tr.channel-row").data('channel-number');
-        
-        $(this).children(".channel-remap-search").append(channelSelectList);
-        $("#channel-select-list a").hide()
-            .filter("[data-channel-number!=" + currentRemappedChannelNumber + "]")
-            .show();
-    });
-
-    $('.map-channel').on('keyup', function(e){
-        var search = $(this).val();
-        var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
-
-        if (searchFilter !== '') {
+        $('.channel-remap').on('show.bs.dropdown', function () {
+            var channelSelectList = $("#channel-select-list");
+            var currentRemappedChannelNumber = $(this).parents("tr.channel-row").data('channel-remapped-number') || $(this).parents("tr.channel-row").data('channel-number');
+            
+            $(this).children(".channel-remap-search").append(channelSelectList);
             $("#channel-select-list a").hide()
-                .filter(searchFilter)
+                .filter("[data-channel-number!=" + currentRemappedChannelNumber + "]")
                 .show();
-        }
-        else {
-            $("#channel-select-list a").show();
-        }
-    });
+        });
 
-    $('.map-channel').on('change', function(e){
-        var channelNumber = $(this).val() || $(this).parents().find("tr.channel-row").data('channel-number');
+        $('.map-channel').on('keyup', function(e){
+            var search = $(this).val();
+            var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
 
-        $(this).siblings(".channel-remap-search")
-            .find(".current-channel-mapping a.active.channel-remap-select")
-            .data('channel-number', channelNumber);
-        
-        $(this).siblings(".channel-remap-search")
-            .find(".current-channel-mapping a.active.channel-remap-select .badge")
-            .text(channelNumber);
+            if (searchFilter !== '') {
+                $("#channel-select-list a").hide()
+                    .filter(searchFilter)
+                    .show();
+            }
+            else {
+                $("#channel-select-list a").show();
+            }
+        });
 
-        $(this).parents()
-            .find("tr")
-            .data('channel-remapped-number', channelNumber);
+        $('.map-channel').on('change', function(e){
+            var channelNumber = $(this).val() || $(this).parents().find("tr.channel-row").data('channel-number');
+
+            $(this).siblings(".channel-remap-search")
+                .find(".current-channel-mapping a.active.channel-remap-select")
+                .data('channel-number', channelNumber);
+            
+            $(this).siblings(".channel-remap-search")
+                .find(".current-channel-mapping a.active.channel-remap-select .badge")
+                .text(channelNumber);
+
+            $(this).parents()
+                .find("tr")
+                .data('channel-remapped-number', channelNumber);
+        });
     });
 </script>
 @endsection

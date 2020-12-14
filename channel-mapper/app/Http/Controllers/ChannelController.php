@@ -39,8 +39,8 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $allChannels = $this->channelsBackend->getScannedChannels('ANY');
-        $sourceChannels = $this->channelsBackend->getScannedChannels($source);
+        $allChannels = $this->channelsBackend->getGuideChannels();
+        $sourceChannels = $this->channelsBackend->getEnabledChannels($source);
 
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
@@ -94,7 +94,7 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $scannedChannels = $this->channelsBackend->getScannedChannels($source);
+        $scannedChannels = $this->channelsBackend->getEnabledChannels($source);
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
         $scannedChannels =

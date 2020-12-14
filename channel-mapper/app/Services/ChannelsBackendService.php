@@ -44,7 +44,7 @@ class ChannelsBackendService
         return $this->playlistBaseUrl;
     }
 
-    public function getScannedChannels($source)
+    public function getEnabledChannels($source)
     {
         $deviceChannelsStream = $this->httpClient->get(sprintf('/devices/%s/channels?ScanResult=true', $source));
         $deviceChannelsJson = $deviceChannelsStream->getBody()->getContents();
@@ -68,6 +68,15 @@ class ChannelsBackendService
             );
 
         return $deviceChannels;
+    }
+
+    public function getGuideChannels()
+    {
+        $stream = $this->httpClient->get('/dvr/guide/channels');
+        $json = $stream->getBody()->getContents();
+        $channels = collect(json_decode($json))->sortBy('Number');
+
+        return $channels;
     }
 
     public function getGuideData($device, $startTimestamp, $duration)

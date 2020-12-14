@@ -22,7 +22,7 @@ RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/repo
 
 # Add entrypoint and app code
 RUN mv /usr/src/repo/channel-mapper /usr/src/app
-#RUN mv /usr/src/repo/php.ini-channels $PHP_INI_DIR/php.ini
+RUN mv /usr/src/repo/php.ini-channels $PHP_INI_DIR/php.ini
 RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
 
 # Set working directory
