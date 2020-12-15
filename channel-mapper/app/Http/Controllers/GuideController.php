@@ -166,7 +166,7 @@ class GuideController extends Controller
                         }
 
                         if (isset($airing->Source) && isset($airing->ProgramID)) {
-                            $program->addEpisodeNum(new Tv\Elements\EpisodeNum($airing->ProgramID, "dd_progid"));
+                            $program->addEpisodeNum(new Tv\Elements\EpisodeNum($airing->ProgramID, $airing->Source));
                         }
 
                         if (isset($airing->Tags) && !is_null($airing->Tags)) {

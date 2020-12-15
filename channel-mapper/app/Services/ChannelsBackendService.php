@@ -46,26 +46,23 @@ class ChannelsBackendService
 
     public function getEnabledChannels($source)
     {
-        $deviceChannelsStream = $this->httpClient->get(sprintf('/devices/%s/channels?ScanResult=true', $source));
+        $guideChannels = $this->getGuideChannels();
+        $enabledChannels = $this->getDeviceChannels($source)->filter(function ($channel, $key) {
+                return (property_exists($channel, 'Hidden') && $channel->Hidden == 1) ? false : true;
+            })->transform(function ($channel, $key) use ($guideChannels) {
+                    $channel->CallSign = $guideChannels->get($key)->CallSign ?? $channel->GuideName;
+                    $channel->Name = $guideChannels->get($key)->Name ?? $channel->GuideName;
+                    return $channel;
+            });
+
+        return $enabledChannels;
+    }
+
+    public function getDeviceChannels($source)
+    {
+        $deviceChannelsStream = $this->httpClient->get(sprintf('/devices/%s/channels', $source));
         $deviceChannelsJson = $deviceChannelsStream->getBody()->getContents();
-        $deviceChannels = collect(json_decode($deviceChannelsJson))->filter(function ($channel, $key) {
-            return (property_exists($channel, 'Hidden') && $channel->Hidden == 1) ? false : true;
-        })->keyBy('GuideNumber');
-
-        $guideChannelsStream = $this->httpClient->get(sprintf('/devices/%s/guide?time=1&duration=1', $source));
-        $guideChannelsJson = $guideChannelsStream->getBody()->getContents();
-        $guideChannels = collect(json_decode($guideChannelsJson))->pluck('Channel')->keyBy("Number");
-
-        $deviceChannels->transform(function ($channel, $key) use ($guideChannels) {
-            $channel->CallSign = $guideChannels->get($key)->CallSign ?? $channel->GuideName;
-            $channel->Name = $guideChannels->get($key)->Name ?? $channel->GuideName;
-            return $channel;
-        });
-
-        unset($deviceChannelsStream, $deviceChannelsJson,
-                $guideChannelsStream, $guideChannelsJson,
-                $guideChannels
-            );
+        $deviceChannels = collect(json_decode($deviceChannelsJson))->keyBy('GuideNumber')->sortBy("GuideNumber");
 
         return $deviceChannels;
     }
@@ -89,7 +86,7 @@ class ChannelsBackendService
 
     public function isValidDevice($device)
     {
-        return ($this->getDevices(true)->has($device) !== false);
+        return ($this->getDevices()->has($device) !== false);
     }
 
     public function getDevices($allowAny = true)

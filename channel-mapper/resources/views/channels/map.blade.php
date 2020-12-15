@@ -68,12 +68,12 @@
     @include('channels.remap.dropdown.list')
 <script>
     $(document).ready(function(){
-        function searchChannels() {
+        var searchChannels = function() {
             var search = $("#search_channels").val();
             var channelStatus = $('input[name="channel_status"]:checked').val();
             
             var searchFilter = search !== '' ? '[data-channel-search*="' + search.toUpperCase() + '"]' : '';
-            var channelFilter = channelStatus !== '' ? '[data-channel-enabled=' + channelStatus + ']' : '';
+            var channelFilter = channelStatus !== '' ? '[data-channel-enabled="' + channelStatus + '"]' : '';
 
             var filter = [searchFilter, channelFilter].filter(Boolean).join("");
 
@@ -85,10 +85,11 @@
             else {
                 $("tr.channel-row").show();
             }
-        }
+        };
 
         $('input[type="checkbox"]').on('click', function(e){
             $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
+            $(this).parents("tr.channel-row").attr('data-channel-enabled', $(this).prop("checked") ? "1" : "0");
         });
 
         $('#search_channels, input[name="channel_status"]').on('change keyup', function(e){
