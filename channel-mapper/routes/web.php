@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\GuideController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,6 @@ Route::post('/channels/{source}/map', [ChannelController::class, 'map'])
 Route::get('/channels/{source}/playlist', [ChannelController::class, 'playlist'])
     ->name('sourcePlaylist');
 
-Route::get('/channels/{source}/xmltv', [ChannelController::class, 'xmltv'])
+Route::get('/guide/{source}', [GuideController::class, 'xmltv'])
     ->name('sourceXmlTv');
 
