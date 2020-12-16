@@ -63,6 +63,8 @@ WORKDIR /usr/src/app
 RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
 
+# Register app entry point
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
+# Register healthcheck
 HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-ping
