@@ -5,3 +5,6 @@ memory_limit = 1024M
 display_errors = On
 post_max_size = 512M
 upload_max_filesize = 512M
+
+[Date]
+date.timezone="UTC"
