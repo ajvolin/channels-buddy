@@ -9,7 +9,7 @@ Run the container, substituting your Channels DVR server IP address and port.
 
     docker run -d \
       --restart unless-stopped \
-      -p 8087:8087 \
+      -p 8087:80 \
       --name channel-mapper \
       -v channel_mapper:/channel_mapper \
       -e CHANNELS_SERVER_IP=[Your Channels DVR server IP address or hostname] \
@@ -17,4 +17,4 @@ Run the container, substituting your Channels DVR server IP address and port.
       ajvolin/channel-mapper
 
 You can map channels, and get the M3U and EPG links for your sources at:
-    http://127.0.0.1:8087
+    http://127.0.0.1:80
