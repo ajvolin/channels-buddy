@@ -62,6 +62,7 @@ WORKDIR /usr/src/app
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
+RUN composer clearcache
 
 EXPOSE 80
 
