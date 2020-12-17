@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Set umask for files
+umask 0000
+
 # Ensure database file exists
 touch /channel_mapper/database.sqlite
 # Symlink database to app database folder
@@ -41,10 +44,3 @@ fi
 php artisan migrate --force
 
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-
-# while :
-# do
-#     echo "Channels server: $CHANNELS_SERVER_IP:$CHANNELS_SERVER_PORT"
-#     echo "Starting application"
-#     php artisan serve --host=0.0.0.0 --port=80
-# done

@@ -45,13 +45,13 @@ RUN rm -rf /var/cache/apk/*
 # Clone github repo
 RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/repo
 
-# Add config files, entrypoint, and app code
+# Add app code, config files, and entrypoint
+RUN mv /usr/src/repo/channel-mapper /usr/src/app
 RUN mv /usr/src/repo/nginx.conf /etc/nginx/nginx.conf
 RUN mv /usr/src/repo/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
 RUN mv /usr/src/repo/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
-RUN mv /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p /etc/supervisor/conf.d/ && mv /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
-RUN mv /usr/src/repo/channel-mapper /usr/src/app
 
 # Remove repo folder
 RUN rm -rf /usr/src/repo
@@ -63,8 +63,21 @@ WORKDIR /usr/src/app
 RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
 
+# Add www user
+RUN adduser -D -g 'www' www
+
+# Modify permissions
+RUN chown www:www -R /usr/src/app && \
+    chowchown www:www -R /run && \
+    chown www:www -R /var/lib/nginx && \
+    chown www:www -R /var/log/nginx
+
+USER www
+
+EXPOSE 80
+
 # Register app entry point
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
 # Register healthcheck
-HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-ping
+HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping
