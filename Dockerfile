@@ -64,20 +64,17 @@ WORKDIR /usr/src/app
 RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
 
-# Add www user
-RUN adduser -D -g 'app' app
-
 # Modify permissions
-RUN chown app:app -R /usr/src/app && \
-    chown app:app -R /var/run && \
-    chown app:app -R /var/lib/nginx && \
-    chown app:app -R /var/log/nginx && \
-    chown app:app -R /channel_mapper
+RUN chown nobody.nobody -R /usr/src/app && \
+    chown nobody.nobody -R /var/run && \
+    chown nobody.nobody -R /var/lib/nginx && \
+    chown nobody.nobody -R /var/log/nginx && \
+    chown nobody.nobody -R /channel_mapper
 
 EXPOSE 8087
 
 # Switch to non-privileged user
-USER app
+USER nobody
 
 # Register app entry point
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

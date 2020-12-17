@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Set umask
+umask 000
+
 # Ensure database file exists
 touch /channel_mapper/database.sqlite
 # Symlink database to app database folder
