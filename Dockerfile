@@ -68,7 +68,7 @@ RUN adduser -D -g 'www' www
 
 # Modify permissions
 RUN chown www:www -R /usr/src/app && \
-    chowchown www:www -R /run && \
+    chown www:www -R /run && \
     chown www:www -R /var/lib/nginx && \
     chown www:www -R /var/log/nginx
 
