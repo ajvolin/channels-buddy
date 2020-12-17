@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use XmlTv\Tv;
 use XmlTv\XmlTv;
 
-class GuideController extends Controller
+class GuideController2 extends Controller
 {
     protected $channelsBackend;
 
