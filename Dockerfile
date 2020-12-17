@@ -52,6 +52,7 @@ RUN mv /usr/src/repo/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
 RUN mv /usr/src/repo/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
 RUN mkdir -p /etc/supervisor/conf.d/ && mv /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
+RUN mkdir /channel_mapper
 
 # Remove repo folder
 RUN rm -rf /usr/src/repo
@@ -64,20 +65,22 @@ RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
 
 # Add www user
-RUN adduser -D -g 'www' www
+RUN adduser -D -g 'app' app
 
 # Modify permissions
-RUN chown www:www -R /usr/src/app && \
-    chown www:www -R /run && \
-    chown www:www -R /var/lib/nginx && \
-    chown www:www -R /var/log/nginx
+RUN chown app:app -R /usr/src/app && \
+    chown app:app -R /var/run && \
+    chown app:app -R /var/lib/nginx && \
+    chown app:app -R /var/log/nginx && \
+    chown app:app -R /channel_mapper
 
-USER www
+EXPOSE 8087
 
-EXPOSE 80
+# Switch to non-privileged user
+USER app
 
 # Register app entry point
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
 # Register healthcheck
-HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping
+HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8087/fpm-ping

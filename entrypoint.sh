@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Set umask for files
-umask 0000
-
 # Ensure database file exists
 touch /channel_mapper/database.sqlite
 # Symlink database to app database folder
@@ -43,4 +40,5 @@ fi
 # Run database migrations
 php artisan migrate --force
 
+# Start supervisord
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
