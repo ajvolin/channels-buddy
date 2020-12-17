@@ -52,7 +52,6 @@ RUN mv /usr/src/repo/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
 RUN mv /usr/src/repo/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
 RUN mkdir -p /etc/supervisor/conf.d/ && mv /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
-RUN mkdir /channel_mapper
 
 # Remove repo folder
 RUN rm -rf /usr/src/repo
@@ -64,20 +63,10 @@ WORKDIR /usr/src/app
 RUN chmod o+x /usr/src/app/entrypoint.sh
 RUN composer install
 
-# Modify permissions
-RUN chown nobody.nobody -R /usr/src/app && \
-    chown nobody.nobody -R /var/run && \
-    chown nobody.nobody -R /var/lib/nginx && \
-    chown nobody.nobody -R /var/log/nginx && \
-    chown nobody.nobody -R /channel_mapper
-
-EXPOSE 8087
-
-# Switch to non-privileged user
-USER nobody
+EXPOSE 80
 
 # Register app entry point
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
 # Register healthcheck
-HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8087/fpm-ping
+HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping
