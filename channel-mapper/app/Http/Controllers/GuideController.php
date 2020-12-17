@@ -105,7 +105,7 @@ class GuideController extends Controller
 
                 if (count($data->Airings) > 0) {
                     foreach ($data->Airings as $airing) {
-                        $airingId = $channelId.$airing->Time;
+                        $airingId = $channelId . $airing->Time;
 
                         if (!in_array($airingId, $processedAirings)) {
 
@@ -228,6 +228,11 @@ class GuideController extends Controller
                                     $program->addRating(new Tv\Elements\Rating($rating->code, $rating->body));
                                 }
                             }
+
+                            if (isset($airing->Raw->program) && isset($airing->Raw->program->qualityRating) && !is_null($airing->Raw->program->qualityRating)) {
+                                $program->addStarRating(new Tv\Elements\StarRating($airing->Raw->program->qualityRating->value, $airing->Raw->program->qualityRating->ratingsBody));
+                            }
+
                             $tv->addProgramme($program);
                         }
                     }
