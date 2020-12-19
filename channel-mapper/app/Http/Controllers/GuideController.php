@@ -7,6 +7,7 @@ use App\Services\ChannelsBackendService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Exception;
+use Str;
 use Illuminate\Http\Request;
 use XmlTv\Tv;
 use XmlTv\XmlTv;
@@ -52,8 +53,8 @@ class GuideController extends Controller
 
         $guideIntervals = CarbonInterval::seconds($guideChunkSize)
             ->toPeriod(
-                Carbon::now()->startOfDay(),
-                Carbon::now()->startOfDay()->addSeconds($guideDuration)
+                Carbon::now()->startOfHour(),
+                Carbon::now()->startOfDay()->addSeconds($guideDuration)->endOfDay()
             );
 
         $emptyProgramIntervals = CarbonInterval::minutes(60)
@@ -80,7 +81,7 @@ class GuideController extends Controller
 
             foreach ($guideData as $data) {
                 $channelNumber = $existingChannels->search($data->Channel->Number) ?? $data->Channel->Number;
-                $channelId = $data->Channel->CallSign ?? $data->Channel->Name ?? $channelNumber;
+                $channelId = Str::kebab(strtolower($data->Channel->CallSign ?? $data->Channel->Name ?? $channelNumber));
 
                 if (!in_array($channelId, $processedChannels)) {
                     $processedChannels[] = $channelId;
@@ -108,33 +109,72 @@ class GuideController extends Controller
                         $airingId = $channelId . $airing->Time;
 
                         if (!in_array($airingId, $processedAirings)) {
+                            $startTime = Carbon::createFromTimestamp($airing->Time);
+                            $endTime = $startTime->copy()->addSeconds($airing->Duration)->format('YmdHis O');
 
-                            $startTime = Carbon::parse($airing->Raw->startTime)->format('YmdHis O');
-                            $endTime = Carbon::parse($airing->Raw->endTime)->format('YmdHis O');
+                            $startTime = $startTime->format('YmdHis O');
 
                             $program = new Tv\Programme($channelId, $startTime, $endTime);
 
-                            $program->length = new Tv\Elements\Length($airing->Raw->duration, Tv\Elements\Length\Unit::MINUTES);
+                            $program->length = new Tv\Elements\Length(
+                                $airing->Duration,
+                                Tv\Elements\Length\Unit::SECONDS
+                            );
 
                             if (isset($airing->Title)) {
-                                $program->addTitle(new Tv\Elements\Title($airing->Title, $airing->Raw->program->titleLang ?? "en"));
+                                $program->addTitle(new Tv\Elements\Title(
+                                    $airing->Title,
+                                    $airing->Raw->program->titleLang ?? "")
+                                );
                             }
+
                             if (isset($airing->EpisodeTitle)) {
-                                $program->addSubTitle(new Tv\Elements\SubTitle($airing->EpisodeTitle, $airing->Raw->program->titleLang ?? "en"));
+                                $program->addSubTitle(new Tv\Elements\SubTitle(
+                                    $airing->EpisodeTitle,
+                                    $airing->Raw->program->titleLang ?? "")
+                                );
                             } elseif (isset($airing->EventTitle)) {
-                                $program->addSubTitle(new Tv\Elements\SubTitle($airing->EventTitle, $airing->Raw->program->titleLang ?? "en"));
+                                $program->addSubTitle(new Tv\Elements\SubTitle(
+                                    $airing->EventTitle,
+                                    $airing->Raw->program->titleLang ?? "")
+                                );
                             }
-                            if (isset($airing->Raw->program)) {
-                                $program->addDescription(new Tv\Elements\Desc($airing->Raw->program->longDescription ?? $airing->Raw->program->shortDescription ?? "", $airing->Raw->program->descriptionLang ?? "en"));
 
-                                $program->addIcon(new Tv\Elements\Icon($airing->Raw->program->preferredImage->uri, $airing->Raw->program->preferredImage->width, $airing->Raw->program->preferredImage->height));
+                            $program->addDescription(new Tv\Elements\Desc(
+                                $airing->Raw->program->longDescription ??
+                                $airing->Raw->program->shortDescription ??
+                                $airing->Summary ?? "",
+                                $airing->Raw->program->descriptionLang ?? "")
+                            );
 
-                                if (isset($airing->Raw->program->seasonNum) && isset($airing->Raw->program->episodeNum)) {
-                                    $episodeNumOnScreen = $airing->Raw->program->seasonNum . sprintf("%02d", $airing->Raw->program->episodeNum);
-                                    $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumOnScreen, 'onscreen'));
-                                    $episodeNumXmltvNs = ($airing->Raw->program->seasonNum - 1) . "." . ($airing->Raw->program->episodeNum - 1) . ".";
-                                    $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumXmltvNs, 'xmltv_ns'));
-                                }
+                            if (isset($airing->Raw->program->preferredImage->uri) || isset($airing->Image)) {
+                                $program->addIcon(new Tv\Elements\Icon(
+                                    $airing->Raw->program->preferredImage->uri ?? $airing->Image,
+                                    $airing->Raw->program->preferredImage->width ?? "",
+                                    $airing->Raw->program->preferredImage->height ?? "")
+                                );
+                            }
+
+                            if (isset($airing->Source) && isset($airing->SeriesID)) {
+                                $program->addSeriesId(new Tv\Elements\SeriesId($airing->SeriesID, $airing->Source));
+                            }
+
+                            if (isset($airing->Source) && isset($airing->ProgramID)) {
+                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($airing->ProgramID, $airing->Source));
+                            }
+
+                            if (isset($airing->SeasonNumber)
+                                && isset($airing->EpisodeNumber)
+                                && is_numeric($airing->SeasonNumber)
+                                && is_numeric($airing->EpisodeNumber)
+                                && ($airing->SeasonNumber > 0 || $airing->EpisodeNumber > 0)
+                            ) {
+                                $episodeNumOnScreen = $airing->SeasonNumber . sprintf("%02d", $airing->EpisodeNumber);
+                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumOnScreen, 'onscreen'));
+                                $sN = $airing->SeasonNumber - 1;
+                                $eN = $airing->EpisodeNumber - 1;
+                                $episodeNumXmltvNs = ($sN >= 0 ? $sN : "") . "." . ($eN >= 0 ? $eN : "") . ".";
+                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumXmltvNs, 'xmltv_ns'));
                             }
 
                             $credits = new Tv\Elements\Credits();
@@ -151,10 +191,17 @@ class GuideController extends Controller
                             $program->addCredits($credits);
 
                             if (isset($airing->OriginalDate)) {
-                                if (isset($airing->Raw->program) && isset($airing->Raw->program->entityType) && $airing->Raw->program->entityType == "Movie") {
-                                    $program->date = new Tv\Elements\Date(Carbon::parse($airing->OriginalDate)->format('Y'));
+                                if (isset($airing->Categories)
+                                    && is_array($airing->Categories)
+                                    && in_array("Movie", $airing->Categories)
+                                ) {
+                                    $program->date = new Tv\Elements\Date(
+                                        Carbon::parse($airing->OriginalDate)->format('Y')
+                                    );
                                 } else {
-                                    $program->date = new Tv\Elements\Date(Carbon::parse($airing->OriginalDate)->format('Ymd'));
+                                    $program->date = new Tv\Elements\Date(
+                                        Carbon::parse($airing->OriginalDate)->format('Ymd')
+                                    );
                                 }
                             }
 
@@ -170,22 +217,25 @@ class GuideController extends Controller
                                 }
                             }
 
-                            if (isset($airing->Source) && isset($airing->ProgramID)) {
-                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($airing->ProgramID, $airing->Source));
-                            }
-
-                            if (isset($airing->Tags) && !is_null($airing->Tags)) {
+                            if (isset($airing->Tags) && is_array($airing->Tags)) {
                                 if (in_array("Live", $airing->Tags)) {
                                     $program->live = new Tv\Elements\LiveProgramme();
                                 }
 
                                 if (in_array("New", $airing->Tags)) {
                                     $program->new = new Tv\Elements\NewProgramme();
-
-                                    $program->date = new Tv\Elements\Date(Carbon::parse($airing->Raw->startTime)->format('Ymd'));
+                                    $program->date = new Tv\Elements\Date(
+                                        Carbon::createFromTimestamp($airing->Time)->format('Ymd')
+                                    );
                                 } elseif (isset($airing->OriginalDate)) {
-                                    if (isset($airing->Raw->program) && isset($airing->Raw->program->entityType) && $airing->Raw->program->entityType != "Movie") {
-                                        $program->previouslyShown = new Tv\Elements\PreviouslyShown(Carbon::parse($airing->OriginalDate)->format('Ymd'));
+                                    if ((isset($airing->Categories)
+                                            && is_array($airing->Categories)
+                                            && !in_array("Movie", $airing->Categories))
+                                            || is_null($airing->Categories)
+                                    ) {
+                                        $program->previouslyShown = new Tv\Elements\PreviouslyShown(
+                                            Carbon::parse($airing->OriginalDate)->format('Ymd')
+                                        );
                                     }
                                 }
 
@@ -217,8 +267,15 @@ class GuideController extends Controller
 
                                 if (isset($airing->OriginalDate)) {
                                     $originalDate = Carbon::parse($airing->OriginalDate)->endOfDay();
-                                    if (isset($airing->Raw->program) && isset($airing->Raw->program->entityType) && $airing->Raw->program->entityType != "Movie" && $originalDate->isPast()) {
-                                        $program->previouslyShown = new Tv\Elements\PreviouslyShown($originalDate->format('Ymd'));
+                                    if (((isset($airing->Categories)
+                                            && is_array($airing->Categories)
+                                            && !in_array("Movie", $airing->Categories)
+                                        ) || is_null($airing->Categories))
+                                        && $originalDate->isPast()
+                                    ) {
+                                        $program->previouslyShown = new Tv\Elements\PreviouslyShown(
+                                            $originalDate->format('Ymd')
+                                        );
                                     }
                                 }
                             }
@@ -243,7 +300,7 @@ class GuideController extends Controller
                         foreach ($emptyProgramIntervals as $date) {
                             $program = new Tv\Programme($channelId, $date->copy()->format('YmdHis O'), $date->copy()->endOfHour()->format('YmdHis O'));
 
-                            $program->length = new Tv\Elements\Length("60", Tv\Elements\Length\Unit::MINUTES);
+                            $program->length = new Tv\Elements\Length("3600", Tv\Elements\Length\Unit::SECONDS);
 
                             $program->addTitle(new Tv\Elements\Title($data->Channel->Title ?? $data->Channel->Name ?? "To be announced"));
                             $program->addDescription(new Tv\Elements\Desc($data->Channel->Description ?? "To be announced"));
