@@ -142,10 +142,57 @@
             var currentRemappedChannelNumber = $(this).parent().attr('data-channel-remapped-number') ||
                 $(this).parent().attr('data-channel-number');
 
-            $(this).children(".channel-remap-search").append(channelSelectList);
-            $("#channel-select-list a").hide()
+            var currentChannelRemapSearch = $(this).children(".channel-remap-search");
+            currentChannelRemapSearch.append(channelSelectList);
+            channelSelectList.hide()
                 .filter("[data-channel-number!=" + currentRemappedChannelNumber + "]")
                 .show();
+
+            var currenChannelSelectListMatch = currentChannelRemapSearch.find(".channel-select-list-match");
+            currenChannelSelectListMatch.empty();
+
+            var currentChannelCallSign = $(this).parent().attr('data-channel-callsign');
+            var currentChannelGuideName = $(this).parent().attr('data-channel-guide-name');
+            var currentChannelName = $(this).parent().attr('data-channel-name');
+            var currentChannelStationId = $(this).parent().attr('data-channel-station-id');
+
+            var currentChannelCallSignFilter = currentChannelCallSign !== '' ?
+                    '[data-channel-callsign="' + currentChannelCallSign + '"],'+
+                    '[data-channel-guide-name="' + currentChannelCallSign + '"],'+
+                    '[data-channel-name="' + currentChannelCallSign + '"]' :
+                '';
+            var currentChannelGuideNameFilter = currentChannelGuideName !== '' ?
+                    '[data-channel-callsign*="' + currentChannelGuideName + '"],'+
+                    '[data-channel-guide-name*="' + currentChannelGuideName + '"],'+
+                    '[data-channel-name*="' + currentChannelGuideName + '"]' :
+                '';
+            var currentChannelNameFilter = currentChannelName !== '' ?
+                    '[data-channel-callsign*="' + currentChannelName + '"],'+
+                    '[data-channel-guide-name*="' + currentChannelName + '"],'+
+                    '[data-channel-name*="' + currentChannelName + '"]' :
+                '';
+            var currentChannelStationIdFilter = currentChannelStationId !== '' ?
+                    '[data-channel-station-id="' + currentChannelStationId + '"]' :
+                '';
+
+            var channelMatches = [
+                currentChannelCallSignFilter,
+                currentChannelGuideNameFilter,
+                currentChannelNameFilter,
+                currentChannelStationIdFilter
+            ].filter(Boolean).join(",");
+
+            currenChannelSelectListMatch.append(
+                channelSelectList.find(channelMatches)
+                    .not(".channel-remap-select[data-channel-number=" + currentRemappedChannelNumber + "]")
+                    .clone()
+                    .show()
+                    .addClass("bg-light")
+            );
+
+            if (currenChannelSelectListMatch.children().length > 0) {
+                currenChannelSelectListMatch.append('<div role="separator" class="dropdown-divider"></div>');
+            }
         });
 
         $('.map-channel').on('keyup', function(e) {

@@ -17,6 +17,7 @@
                                         @include('channels.remap.dropdown.channel', ['active' => true])
                                     </div>
                                     <div role="separator" class="dropdown-divider"></div>
+                                    <div class="channel-select-list-match"></div>
                                 </div>
                             </td>
                             <td style="padding: 10px;" class="align-middle text-center">

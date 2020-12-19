@@ -1,4 +1,4 @@
-        <a href="#" class="dropdown-item channel-remap-select{{ $active ? ' active' : '' }}" data-channel-number="{{ $channel->GuideNumber ?? $channel->Number }}" data-channel-callsign="{{ $channel->CallSign ?? '' }}" data-channel-guide-name="{{ $channel->GuideName ?? '' }}" data-channel-name="{{ $channel->Name ?? '' }}" data-channel-station-id="{{ $channel->Station ?? '' }}" role="button">
+        <a href="#" class="dropdown-item channel-remap-select{{ $active ? ' active' : '' }}" data-channel-number="{{ $channel->GuideNumber ?? $channel->Number }}" data-channel-callsign="{{ $channel->CallSign ?? $channel->Name }}" data-channel-guide-name="{{ $channel->GuideName ?? $channel->Name }}" data-channel-name="{{ $channel->Name ?? '' }}" data-channel-station-id="{{ $channel->Station ?? '' }}" role="button">
             <div class="row no-gutters align-middle" style="line-height: 1.1em;">
                 <div class="mr-2 align-self-center col-2">
                     <span class="badge badge-{{ $active ? 'light' : 'primary' }}" style="min-width: 4em; display: inline-block; margin-right: 1em;">{{ $channel->GuideNumber ?? $channel->Number }}</span>
