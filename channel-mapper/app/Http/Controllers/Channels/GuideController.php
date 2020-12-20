@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Channels;
 
+use App\Http\Controllers\Controller;
 use App\Models\DvrChannel;
 use App\Services\ChannelsBackendService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Exception;
-use Str;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use XmlTv\Tv;
 use XmlTv\XmlTv;
@@ -298,18 +299,43 @@ class GuideController extends Controller
                         $processedEmptyGuideChannels[] = $channelId;
 
                         foreach ($emptyProgramIntervals as $date) {
-                            $program = new Tv\Programme($channelId, $date->copy()->format('YmdHis O'), $date->copy()->endOfHour()->format('YmdHis O'));
+                            $program = new Tv\Programme($channelId,
+                                $date->copy()->format('YmdHis O'),
+                                $date->copy()->endOfHour()->format('YmdHis O')
+                            );
 
                             $program->length = new Tv\Elements\Length("3600", Tv\Elements\Length\Unit::SECONDS);
 
-                            $program->addTitle(new Tv\Elements\Title($data->Channel->Title ?? $data->Channel->Name ?? "To be announced"));
+                            $title = $data->Channel->Title
+                            ?? $data->Channel->Name
+                            ?? "To be announced";
+                            $program->addTitle(new Tv\Elements\Title($title));
+                            $program->addSubTitle(new Tv\Elements\SubTitle(
+                                "{$title} hour long block from {$date->copy()->format('g:i a')} 
+                                to {$date->copy()->endOfHour()->format('g:i a')} on 
+                                {$date->copy()->format('M d, Y')}.")
+                            );
                             $program->addDescription(new Tv\Elements\Desc($data->Channel->Description ?? "To be announced"));
                             if (isset($data->Channel->Art)) {
                                 $program->addIcon(new Tv\Elements\Icon($data->Channel->Art));
                             }
 
-                            $program->video = new Tv\Elements\Video('yes', '', '', 'HDTV');
-                            $program->audio = new Tv\Elements\Audio('yes', 'stereo');
+                            $seriesId = md5($channelId);
+                            $programId = $seriesId . "." . $date->copy()->timestamp;
+                            $seasonNumber = $date->copy()->format("Y");
+                            $episodeNumber = $date->copy()->format("mdH");
+                            $episodeNumOnScreen = $seasonNumber . sprintf("%02d", $episodeNumber);
+                            $episodeNumXmltvNs = $seasonNumber - 1 . "." . $episodeNumber - 1 . ".";
+
+                            $program->addSeriesId(new Tv\Elements\SeriesId($seriesId, "custom"));
+                            $program->addEpisodeNum(new Tv\Elements\EpisodeNum($programId, "custom"));
+                            $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumOnScreen, 'onscreen'));
+                            $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumXmltvNs, 'xmltv_ns'));
+
+                            $program->date = new Tv\Elements\Date(
+                                $date->copy()->format('Ymd')
+                            );
+
                             $tv->addProgramme($program);
                         }
                     }

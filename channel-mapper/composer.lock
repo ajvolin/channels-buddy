@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2638e542ba1792b8b95ed4afc3a5cdcd",
+    "content-hash": "099c4e63eb67d6414e7ce139c48c2d09",
     "packages": [
         {
             "name": "ajvolin/xmltv",

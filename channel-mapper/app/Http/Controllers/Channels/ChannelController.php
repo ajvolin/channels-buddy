@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Channels;
 
+use App\Http\Controllers\Controller;
 use App\Models\DvrChannel;
 use App\Services\ChannelsBackendService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -50,7 +50,7 @@ class ChannelController extends Controller
             return $channel;
         });
 
-        return view('channels.map',
+        return view('channels.remap.map',
             [
                 'source' => $source,
                 'sources' => $this->channelsBackend->getDevices(),
@@ -94,11 +94,11 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $scannedChannels = $this->channelsBackend->getEnabledChannels($source);
+        $channels = $this->channelsBackend->getEnabledChannels($source);
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
-        $scannedChannels =
-            $scannedChannels->filter(function ($channel, $key) use ($existingChannels) {
+        $channels =
+            $channels->filter(function ($channel, $key) use ($existingChannels) {
                 return $existingChannels->get($key)->channel_enabled ?? true;
             })->transform(function($channel, $key) use ($existingChannels) {
                 $channel->mappedChannelNum =
@@ -107,7 +107,7 @@ class ChannelController extends Controller
             })->values()->sortBy('mappedChannelNum');
 
         return response(view('channels.playlist.full', [
-            'scannedChannels' => $scannedChannels,
+            'channels' => $channels,
             'channelsBackendUrl' => $this->channelsBackend->getPlaylistBaseUrl(),
             'source' => $source,
         ]))->header('Content-Type', 'application/x-mpegurl');

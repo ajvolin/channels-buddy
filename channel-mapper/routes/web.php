@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\ChannelController;
-use App\Http\Controllers\GuideController;
+use App\Http\Controllers\Channels\ChannelController;
+use App\Http\Controllers\Channels\GuideController;
+use App\Http\Controllers\Pluto\ChannelController as PlutoChannelController;
+use App\Http\Controllers\Pluto\GuideController as PlutoGuideController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +28,17 @@ Route::post('/channels/{source}/map', [ChannelController::class, 'map'])
 Route::get('/channels/{source}/playlist', [ChannelController::class, 'playlist'])
     ->name('sourcePlaylist');
 
-Route::get('/guide/{source}', [GuideController::class, 'xmltv'])
+Route::get('/channels/{source}/guide', [GuideController::class, 'xmltv'])
     ->name('sourceXmlTv');
 
+Route::get('/pluto', [PlutoChannelController::class, 'list'])
+    ->name('getPlutoMapUI');
+
+Route::post('/pluto/map', [PlutoChannelController::class, 'map'])
+    ->name('applyPlutoChannelMap');
+
+Route::get('/pluto/playlist', [PlutoChannelController::class, 'playlist'])
+    ->name('plutoPlaylist');
+
+Route::get('/pluto/guide', [PlutoGuideController::class, 'xmltv'])
+    ->name('plutoXmlTv');

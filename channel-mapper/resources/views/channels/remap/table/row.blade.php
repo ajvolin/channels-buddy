@@ -12,7 +12,7 @@
                             </td>
                             <td style="padding: 10px; max-width: 300px;" class="align-middle channel-remap">
                                 <input type="text" class="form-control text-center mx-auto map-channel" style="max-width: 250px;" name="channel[{{ $channel->GuideNumber }}][mapped]" value="{{ ($channel->GuideNumber != $channel->mapped_channel_number) ? $channel->mapped_channel_number : '' }}" data-toggle="dropdown" />
-                                <div x-placement="bottom-end" class="dropdown-menu dropdown-menu-right channel-remap-search">
+                                <div class="dropdown-menu dropdown-menu-right channel-remap-search">
                                     <div class="current-channel-mapping">
                                         @include('channels.remap.dropdown.channel', ['active' => true])
                                     </div>
