@@ -21,7 +21,7 @@
     <div class="col-xs-4 col-md-2 col-lg-2">
     </div>
 </div>
-<form action="{{ route('applyPlutoChannelMap') }}" method="POST">
+<form action="{{ route('applyPlutoChannelMap') }}" method="POST" id="channelMapForm">
     @csrf
     <div class="row">
         <div class="col-xs-8 col-md-10 col-lg-10">
@@ -42,6 +42,11 @@
             </table>
         </div>
         <div class="col-xs-4 col-md-2 col-lg-2 align-left">
+            <div class="form-group">
+                <label for="channel_start_number">Starting Channel Number</label>
+                <input type="text" class="form-control text-center mx-auto" id="channel_start_number" name="channel_start_number" value="{{ $channelStartNumber ?? '' }}" />
+                <small>Enter a starting number to automatically re-number the channels</small>
+            </div>
             <input type="submit" value="Save Channel Map" class="btn btn-primary" />
         </div>
     </div>
@@ -103,6 +108,27 @@
             $(this).parent()
                 .parent()
                 .attr('data-channel-remapped-number', channelNumber);
+        });
+
+        $('#channel_start_number').on('change', function(e) {
+            var channelNumber = $(this).val();
+
+            if (channelNumber !== '') {
+                $(".map-channel").each(function(i, e) {
+                    $(e).val(channelNumber);
+                    channelNumber++;
+                });
+            } else {
+                $(".map-channel").val('');
+            }
+
+            $(".map-channel").trigger('change');
+        });
+
+        $("#channelMapForm input[type='submit']").on('click', function(e){
+            e.preventDefault();
+            $('#channel_start_number').trigger("change");
+            $("#channelMapForm").submit();
         });
     });
 </script>

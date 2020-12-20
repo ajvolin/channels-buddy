@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use Illuminate\Support\Collection;
 
 class PlutoBackendService
 {
@@ -17,23 +18,23 @@ class PlutoBackendService
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }
 
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return $this->baseUrl;
     }
 
-    public function getChannels()
+    public function getChannels(): Collection
     {
         $stream = $this->httpClient->get('/v2/channels');
         $json = $stream->getBody()->getContents();
         $channels = collect(json_decode($json))->filter(function($channel){
             return $channel->isStitched && !preg_match('/^announcement|^privacy-policy/', $channel->slug);
-        });
+        })->sortBy('number')->keyBy('slug');
 
         return $channels;
     }
  
-    public function getGuideData($startTimestamp, $duration)
+    public function getGuideData($startTimestamp, $duration): Collection
     {
         $startTimestamp = Carbon::createFromTimestamp($startTimestamp);
         $startTime = urlencode($startTimestamp->format('Y-m-d H:i:s.vO'));
@@ -44,7 +45,7 @@ class PlutoBackendService
         $json = $stream->getBody()->getContents();
         $guide = collect(json_decode($json))->filter(function($channel){
             return $channel->isStitched && !preg_match('/^announcement|^privacy-policy/', $channel->slug);
-        });
+        })->sortBy('number')->keyBy('slug');
         
         return $guide;
     }

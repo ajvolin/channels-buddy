@@ -19,6 +19,16 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ $channelsBackendUrl }}">Channels DVR Server</a>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Pluto
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ route('getPlutoMapUI') }}">Channel Management</a>
+                    <a class="dropdown-item" href="{{ route('plutoPlaylist') }}">Pluto M3U Playlist</a>
+                    <a class="dropdown-item" href="{{ route('plutoXmlTv') }}">Pluto M3U XMLTV Guide</a>
+                </div>
+            </li>
             @if(isset($sources))
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

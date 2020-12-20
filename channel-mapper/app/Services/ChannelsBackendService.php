@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Collection;
+use stdClass;
 
 class ChannelsBackendService
 {
@@ -34,17 +36,17 @@ class ChannelsBackendService
 
     }
 
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
         return $this->baseUrl;
     }
 
-    public function getPlaylistBaseUrl()
+    public function getPlaylistBaseUrl(): string
     {
         return $this->playlistBaseUrl;
     }
 
-    public function getEnabledChannels($source)
+    public function getEnabledChannels($source): Collection
     {
         $guideChannels = $this->getGuideChannels();
         $enabledChannels = $this->getDeviceChannels($source)->filter(function ($channel, $key) {
@@ -58,7 +60,7 @@ class ChannelsBackendService
         return $enabledChannels;
     }
 
-    public function getDeviceChannels($source)
+    public function getDeviceChannels($source): Collection
     {
         $deviceChannelsStream = $this->httpClient->get(sprintf('/devices/%s/channels', $source));
         $deviceChannelsJson = $deviceChannelsStream->getBody()->getContents();
@@ -67,7 +69,7 @@ class ChannelsBackendService
         return $deviceChannels;
     }
 
-    public function getGuideChannels()
+    public function getGuideChannels(): Collection
     {
         $stream = $this->httpClient->get('/dvr/guide/channels');
         $json = $stream->getBody()->getContents();
@@ -84,12 +86,12 @@ class ChannelsBackendService
         return json_decode($json);
     }
 
-    public function isValidDevice($device)
+    public function isValidDevice($device): bool
     {
         return ($this->getDevices()->has($device) !== false);
     }
 
-    public function getDevices($allowAny = true)
+    public function getDevices($allowAny = true): Collection
     {
         $stream = $this->httpClient->get(sprintf('/devices'));
         $json = $stream->getBody()->getContents();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class DvrChannel
+ * Class PlutoChannel
  * @package App\Models
  *
  */
