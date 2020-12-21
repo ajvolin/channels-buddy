@@ -30,7 +30,7 @@
                 <thead class="thead-light">
                     <tr>
                         <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">Pluto Channel</th>
-                        <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Mapped Channel Number</th>
+                        <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Channel Number</th>
                         <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
                     </tr>
                 </thead>
@@ -48,6 +48,7 @@
                 <small>Enter a starting number to automatically re-number the channels</small>
             </div>
             <input type="submit" value="Save Channel Map" class="btn btn-primary" />
+            <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
         </div>
     </div>
 </form>
@@ -92,6 +93,28 @@
             }
         };
 
+        var validateChannelNotDuplicated = function (el) {
+            var channelNumber = el.val();
+
+            if (channelNumber !== '' &&
+                    $('input.map-channel[value="'+channelNumber+'"]').not(el).length > 0 &&
+                    !el.hasClass("is-invalid")
+                ) {
+                el.addClass("is-invalid");
+                $("body").trigger("change");
+                return false;
+            } else if (channelNumber !== '' &&
+                    $('input.map-channel[value="'+channelNumber+'"]').not(el).length == 0 &&
+                    el.hasClass("is-invalid")) {
+                el.removeClass("is-invalid");
+                $("body").trigger("change");
+                return true;
+            } else if (channelNumber === '') {
+                $("body").trigger("change");
+                return true;
+            }
+        }
+
         $('input[type="checkbox"].channel-status-checkbox').on('click', function(e) {
             $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
             $(this).parent().parent().parent().attr('data-channel-enabled', $(this).prop("checked") ? "1" : "0");
@@ -101,11 +124,20 @@
             searchChannels();
         });
 
-        $('.map-channel').on('change', function(e) {
-            var channelNumber = $(this).val() ||
-                $(this).parent().parent().attr('data-channel-number');
+        $('.map-channel').on('focus keyup', function(e) {
+            var el = $(this);
+            validateChannelNotDuplicated(el);
+        });
 
-            $(this).parent()
+        $('.map-channel').on('change', function(e) {
+            var el = $(this);
+
+            var channelNumber = el.val() ||
+                el.parent().parent().attr('data-channel-number');
+
+            el.attr('value', el.val());
+
+            el.parent()
                 .parent()
                 .attr('data-channel-remapped-number', channelNumber);
         });
@@ -123,6 +155,16 @@
             }
 
             $(".map-channel").trigger('change');
+        });
+
+        $("body").on('change', function(e) {
+            if ($("input.map-channel.is-invalid").length > 0) {
+                $("#channelMapForm input[type='submit']").prop('disabled', true);
+                $("#duplicateChannelErrorMsg").show();
+            } else {
+                $("#channelMapForm input[type='submit']").prop('disabled', false);
+                $("#duplicateChannelErrorMsg").hide();
+            }
         });
 
         $("#channelMapForm input[type='submit']").on('click', function(e){
