@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\APIModels\Channel;
+use App\APIModels\Channels;
 use App\Contracts\BackendService;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -26,7 +27,7 @@ class PlutoBackendService implements BackendService
         return $this->baseUrl;
     }
 
-    public function getChannels(): Collection
+    public function getChannels(): Channels
     {
         $stream = $this->httpClient->get('/v2/channels');
         $json = $stream->getBody()->getContents();
@@ -71,9 +72,9 @@ class PlutoBackendService implements BackendService
                 "category" => $channel->category,
                 "streamUrl" => $streamUrl
             ]);
-        })->sortBy('number')->keyBy('id');
+        })->sortBy('number');
 
-        return $channels;
+        return new Channels($channels->toArray());
     }
  
     public function getGuideData($startTimestamp = null, $duration = null): Collection

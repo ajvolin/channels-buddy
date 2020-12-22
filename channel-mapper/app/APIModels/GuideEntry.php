@@ -2,7 +2,8 @@
 
 namespace App\APIModels;
 
-use App\Exceptions\GuideEntryPropertyDoesNotExist;
+use App\APIModels\Airing;
+use App\APIModels\Channel;
 
 /**
  * Class GuideEntry
@@ -13,43 +14,61 @@ use App\Exceptions\GuideEntryPropertyDoesNotExist;
 class GuideEntry
 {
     /**
-     * @var string
+     * @var Channel
      */
-    public $id;
+    public Channel $channel;
 
     /**
-     * Guide constructor.
-     *
-     * @param array $attributes Initialize the guide entry with the provided attributes.
+     * @var Airing[]
      */
-    public function __construct(array $attributes)
+    public array $airings = [];
+
+    /**
+     * GuideEntry constructor.
+     *
+     */
+    public function __construct(Channel $channel = null)
     {
-        foreach ($attributes as $attribute => $value) {
-            if (property_exists($this, $attribute)) {
-                $this->{$attribute} = $value;
-            } else {
-                throw new GuideEntryPropertyDoesNotExist("GuideEntry property {$attribute} does not exist.");
-            }
+        if (!is_null($channel)) {
+            $this->channel = $channel;
         }
     }
 
     /**
-     * Get the guide entry ID.
+     * Get the guide channel.
      *
-     * @return string
+     * @return Channel
      */
-    public function getId(): string
+    public function getChannel(): Channel
     {
-        return $this->id;
+        return $this->channel;
     }
 
     /**
-     * Set the guide entry ID.
+     * Set the guide channel.
      *
-     * @param string $id
+     * @param Channel $channel
      */
-    public function setId(string $id)
+    public function setChannel(Channel $channel): void
     {
-        $this->id = $id;
-    }    
+        $this->channel = $channel;
+    }
+
+    /**
+     * @param Airing $airing
+     */
+    public function addAiring(Airing $airing): void
+    {
+        array_push($this->airings, $airing);
+    }
+
+    /**
+     * Returns the airings as an array
+     * 
+     * @return Airing[]
+     */
+    public function getAirings(): array
+    {
+        return $this->airings;
+    }
 }

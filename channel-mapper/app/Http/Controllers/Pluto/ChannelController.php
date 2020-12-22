@@ -21,7 +21,7 @@ class ChannelController extends Controller
 
     public function list(Request $request)
     {
-        $channels = $this->plutoBackend->getChannels();
+        $channels = collect($this->plutoBackend->getChannels()->channels)->keyBy('id');
 
         $existingChannels = PlutoChannel::all()->keyBy("channel_id");
 
@@ -71,7 +71,7 @@ class ChannelController extends Controller
         }
 
         $playlist = Cache::remember('pluto_m3u', 1800, function () {
-            $channels = $this->plutoBackend->getChannels();
+            $channels = collect($this->plutoBackend->getChannels()->channels)->keyBy('id');
             $existingChannels = PlutoChannel::all()->keyBy("channel_id");
 
             $channels =

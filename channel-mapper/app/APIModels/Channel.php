@@ -20,12 +20,17 @@ class Channel
     /**
      * @var string
      */
+    public string $name;
+
+    /**
+     * @var string
+     */
     public ?string $number;
 
     /**
      * @var string
      */
-    public string $name;
+    public ?string $callSign;
 
     /**
      * @var string
@@ -57,7 +62,7 @@ class Channel
      *
      * @param array $attributes Initialize the channel with the provided attributes.
      */
-    public function __construct(array $attributes)
+    public function __construct(array $attributes = [])
     {
         foreach ($attributes as $attribute => $value) {
             if (property_exists($this, $attribute)) {
@@ -83,29 +88,9 @@ class Channel
      *
      * @param string $id
      */
-    public function setId(string $id)
+    public function setId(string $id): void
     {
         $this->id = $id;
-    }
-    
-    /**
-     * Get the channel number.
-     *
-     * @return string
-     */
-    public function getNumber(): ?string
-    {
-        return $this->number;
-    }
-
-    /**
-     * Set the channel number.
-     *
-     * @param string $number
-     */
-    public function setNumber(string $number)
-    {
-        $this->number = $number;
     }
 
     /**
@@ -123,9 +108,49 @@ class Channel
      *
      * @param string $name
      */
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
+    }
+    
+    /**
+     * Get the channel number.
+     *
+     * @return string
+     */
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
+
+    /**
+     * Set the channel number.
+     *
+     * @param string $number
+     */
+    public function setNumber(?string $number): void
+    {
+        $this->number = $number;
+    }
+
+    /**
+     * Get the channel call sign.
+     *
+     * @return string
+     */
+    public function getCallSign(): ?string
+    {
+        return $this->callSign;
+    }
+
+    /**
+     * Set the channel call sign.
+     *
+     * @param string $callSign
+     */
+    public function CallSign(?string $callSign): void
+    {
+        $this->callSign = $callSign;
     }
 
     /**
@@ -143,7 +168,7 @@ class Channel
      *
      * @param string $description
      */
-    public function setDescription(string $description)
+    public function setDescription(?string $description): void
     {
         $this->description = $description;
     }
@@ -163,7 +188,7 @@ class Channel
      *
      * @param string $logo
      */
-    public function setLogo(string $logo)
+    public function setLogo(?string $logo): void
     {
         $this->logo = $logo;
     }
@@ -183,7 +208,7 @@ class Channel
      *
      * @param string $channelArt
      */
-    public function setChannelArt(string $channelArt)
+    public function setChannelArt(?string $channelArt): void
     {
         $this->channelArt = $channelArt;
     }
@@ -203,7 +228,7 @@ class Channel
      *
      * @param string $category
      */
-    public function setCategory(string $category)
+    public function setCategory(?string $category): void
     {
         $this->category = $category;
     }
@@ -224,7 +249,7 @@ class Channel
      *
      * @param string $streamUrl
      */
-    public function setStreamUrl(string $streamUrl)
+    public function setStreamUrl(string $streamUrl): void
     {
         $this->streamUrl = $streamUrl;
     }

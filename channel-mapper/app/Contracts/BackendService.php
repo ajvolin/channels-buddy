@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\APIModels\Channels;
+use App\APIModels\Guide;
 use Illuminate\Support\Collection;
 
 interface BackendService
@@ -11,12 +13,12 @@ interface BackendService
      *
      * @return Collection
      */
-    public function getChannels(): Collection;
+    public function getChannels(): Channels;
 
     /**
      * Return guide data.
      *
      * @return Collection
      */
-    public function getGuideData($startTimestamp = null, $duration = null): Collection;
+    public function getGuideData($startTimestamp = null, $duration = null): Guide;
 }

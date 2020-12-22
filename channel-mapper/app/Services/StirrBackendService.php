@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
+use App\APIModels\Airing;
 use App\APIModels\Channel;
+use App\APIModels\Channels;
+use App\APIModels\Guide;
+use App\APIModels\GuideEntry;
 use App\Contracts\BackendService;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Intervention\Image\Facades\Image;
 
 class StirrBackendService implements BackendService
 {
@@ -29,8 +33,9 @@ class StirrBackendService implements BackendService
         return $this->baseUrl;
     }
 
-    public function getChannels(): Collection
-    {   
+    public function getChannels(): Channels
+    {
+        Cache::forget('stirr_channels');
         $channels = Cache::remember('stirr_channels', 43200, function() {
             $channelList = collect([]);
             $stationLocations = ['national'];
@@ -75,14 +80,21 @@ class StirrBackendService implements BackendService
                             $channels = json_decode($channelsJson);
                             foreach($channels as $channel) {
                                 if (!str_starts_with($channel->channel->title, 'zzz')) {
+                                    if (isset($locationChannel->icon->src)) {
+                                        $logo = str_replace("180/center/90", "640/center/100",
+                                            strtok($locationChannel->icon->src, '?'));
+                                    } else {
+                                        $logo = null;
+                                    }
+
                                     $channelList->put($locationChannel->id,
                                         new Channel([
                                             'id'            => $locationChannel->id,
                                             'name'          => $channel->channel->title,
+                                            'number'        => null,
                                             'description'   => $channel->channel->description,
-                                            'logo'          => strtok(
-                                                    $locationChannel->icon->src ?? '', '?'
-                                                ) ?: null,
+                                            'logo'          => $logo,
+                                            'channelArt'    => null,
                                             'category'      => $channel->channel->item->category,
                                             'streamUrl'     => $channel->channel->item->link
                                         ])
@@ -96,13 +108,13 @@ class StirrBackendService implements BackendService
             return $channelList;
         });
 
-        return $channels;
+        return new Channels($channels->values()->toArray());
     }
 
-    public function getGuideData(): Collection
+    public function getGuideData($startTimestamp = null, $duration = null): Guide
     {
-        $guide = collect([]);
-        $channels = $this->getChannels();
+        $guide = new Guide;
+        $channels = $this->getChannels()->channels;
 
         foreach ($channels as $channel) {
             try {
@@ -112,28 +124,53 @@ class StirrBackendService implements BackendService
                 $json = $stream->getBody()->getContents();
                 $guideData = collect(json_decode($json)->programme);
 
-                $guideEntry = [
-                    'channel' => $channel,
-                    'airings' => []
-                ];
+                $guideEntry = new GuideEntry($channel);
                 
                 foreach ($guideData as $entry) {
                     $startTime = Carbon::parse($entry->start);
-                    $endTime = Carbon::parse($entry->stop);
-                    $duration = $startTime->copy()->diffInSeconds($endTime);
-                    $startTime = $startTime->format('YmdHis O');
-                    $endTime = $endTime->format('YmdHis O');
+                    $stopTime = Carbon::parse($entry->stop);
+                    $length = $startTime->copy()->diffInSeconds($stopTime);
+                    $airingId = $channel->id . $startTime->copy()->timestamp;
+                    $seriesId = md5($entry->title->value);
+                    $programId = $seriesId.".".md5($entry->desc->value);
+                    $isLive = filter_var($entry->{'sinclair:isLiveProgram'}, FILTER_VALIDATE_BOOLEAN);
 
-                    array_push($guideEntry['airings'], [
-                        'title'         => $entry->title->value,
-                        'description'   => $entry->desc->value,
-                        'startTime'     => $startTime,
-                        'endTime'       => $endTime,
-                        'duration'      => $duration
+                    $airing = new Airing([
+                        'id'                    => $airingId,
+                        'channelId'             => $channel->id,
+                        'source'                => "stirr",
+                        'title'                 => $entry->title->value,
+                        'titleLanguage'         => substr($entry->title->lang, 0, 2),
+                        'description'           => $entry->desc->value,
+                        'descriptionLanguage'   => substr($entry->desc->lang, 0, 2),
+                        'startTime'             => $startTime,
+                        'stopTime'              => $stopTime,
+                        'length'                => $length,
+                        'programId'             => $programId,
+                        'seriesId'              => $seriesId
                     ]);
+                    
+                    if (isset($entry->category)) {
+                        foreach ($entry->category as $category) {
+                            if(str_starts_with($category->value, "HD")) {
+                                $airing->setIsHdtv(true);
+                            }
+                            if($category->value == 'Live') {
+                                $airing->setIsLive(true);
+                            }
+                            if($category->value == 'New') {
+                                $airing->setIsNew(true);
+                            }
+                            if($category->value == 'CC') {
+                                $airing->setHasClosedCaptioning(true);
+                            }
+                        }
+                    }
+
+                    $guideEntry->addAiring($airing);
                 }
                 
-                $guide->push($channel->id, $guideEntry);
+                $guide->addGuideEntry($guideEntry);
             } catch (RequestException $e) {}
         }
         
