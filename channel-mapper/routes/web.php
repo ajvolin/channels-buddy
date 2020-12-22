@@ -17,10 +17,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/test', function(){
-     dd((new App\Services\StirrBackendService)->getGuideData(null, null));
-});
-
 Route::get('/', [ChannelController::class, 'index']);
 
 Route::get('/channels/{source}', [ChannelController::class, 'list'])

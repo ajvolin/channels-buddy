@@ -18,5 +18,5 @@ interface BackendService
      *
      * @return Collection
      */
-    public function getGuideData($startTimestamp, $duration): Collection;
+    public function getGuideData($startTimestamp = null, $duration = null): Collection;
 }

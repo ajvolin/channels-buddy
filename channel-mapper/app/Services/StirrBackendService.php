@@ -99,40 +99,42 @@ class StirrBackendService implements BackendService
         return $channels;
     }
 
-    public function getGuideData($startTimestamp, $duration): Collection
+    public function getGuideData(): Collection
     {
         $guide = collect([]);
         $channels = $this->getChannels();
 
         foreach ($channels as $channel) {
-            $stream = $this->httpClient->get(
-                sprintf('program/stirr/ott/%s', $channel->id)
-            );
-            $json = $stream->getBody()->getContents();
-            $guideData = collect(json_decode($json)->programme);
+            try {
+                $stream = $this->httpClient->get(
+                    sprintf('program/stirr/ott/%s', $channel->id)
+                );
+                $json = $stream->getBody()->getContents();
+                $guideData = collect(json_decode($json)->programme);
 
-            $guideEntry = [
-                'channel' => $channel,
-                'airings' => []
-            ];
-            
-            foreach ($guideData as $entry) {
-                $startTime = Carbon::parse($entry->start);
-                $endTime = Carbon::parse($entry->stop);
-                $duration = $startTime->copy()->diffInSeconds($endTime);
-                $startTime = $startTime->format('YmdHis O');
-                $endTime = $endTime->format('YmdHis O');
+                $guideEntry = [
+                    'channel' => $channel,
+                    'airings' => []
+                ];
+                
+                foreach ($guideData as $entry) {
+                    $startTime = Carbon::parse($entry->start);
+                    $endTime = Carbon::parse($entry->stop);
+                    $duration = $startTime->copy()->diffInSeconds($endTime);
+                    $startTime = $startTime->format('YmdHis O');
+                    $endTime = $endTime->format('YmdHis O');
 
-                array_push($guideEntry['airings'], [
-                    'title'         => $entry->title->value,
-                    'description'   => $entry->desc->value,
-                    'startTime'     => $startTime,
-                    'endTime'       => $endTime,
-                    'duration'      => $duration
-                ]);
-            }
-
-            $guide->push($channel->id, $guideEntry);
+                    array_push($guideEntry['airings'], [
+                        'title'         => $entry->title->value,
+                        'description'   => $entry->desc->value,
+                        'startTime'     => $startTime,
+                        'endTime'       => $endTime,
+                        'duration'      => $duration
+                    ]);
+                }
+                
+                $guide->push($channel->id, $guideEntry);
+            } catch (RequestException $e) {}
         }
         
         return $guide;

@@ -76,7 +76,7 @@ class PlutoBackendService implements BackendService
         return $channels;
     }
  
-    public function getGuideData($startTimestamp, $duration): Collection
+    public function getGuideData($startTimestamp = null, $duration = null): Collection
     {
         $startTimestamp = Carbon::createFromTimestamp($startTimestamp);
         $startTime = urlencode($startTimestamp->format('Y-m-d H:i:s.vO'));
