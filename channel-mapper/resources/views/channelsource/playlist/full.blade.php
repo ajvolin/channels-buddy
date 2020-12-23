@@ -1,5 +1,5 @@
 #EXTM3U
 
 @foreach($channels as $channel)
-@include('pluto.playlist.channel')
+@include('channelsource.playlist.channel')
 @endforeach

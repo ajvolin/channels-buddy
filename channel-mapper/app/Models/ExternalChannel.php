@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class PlutoChannel
+ * Class ExternalChannel
  * @package App\Models
  *
  */
 
-class PlutoChannel extends Model
+class ExternalChannel extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'source',
         'channel_id',
         'channel_number',
         'channel_enabled'

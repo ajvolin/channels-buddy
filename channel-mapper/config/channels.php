@@ -5,6 +5,21 @@ const MAX_BACKEND_CHUNK_SIZE = 86400;
 
 return [
 
+    'channelSources' => [
+        'pluto' => [
+            'displayName' => 'Pluto TV',
+            'backendService' => \App\Services\PlutoBackendService::class,
+            'guideChunkSize' => 21600,
+            'guideDuration' => 86400,
+        ],
+        'stirr' => [
+            'displayName'  => 'Stirr TV',
+            'backendService' => \App\Services\StirrBackendService::class,
+            'guideChunkSize' => null,
+            'guideDuration' => null,
+        ]
+    ],
+
     // maximum number of seconds tptal of guide data that can be requested
     'guideDuration' => min(
         env('CHANNELS_GUIDE_DURATION', MAX_GUIDE_DURATION),

@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePlutoChannelsTable extends Migration
+class CreateExternalChannelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,8 @@ class CreatePlutoChannelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('pluto_channels', function (Blueprint $table) {
+        Schema::create('external_channels', function (Blueprint $table) {
+            $table->string('source', 100);
             $table->string('channel_id', 100)->unique();
             $table->string('channel_number', 16);
             $table->boolean('channel_enabled')->nullable()->default(true);
@@ -29,6 +30,6 @@ class CreatePlutoChannelsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pluto_channels');
+        Schema::dropIfExists('external_channels');
     }
 }

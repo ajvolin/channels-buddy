@@ -1,29 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Pluto;
+namespace App\Http\Controllers\ChannelSource;
 
+use App\Contracts\BackendService;
 use App\Http\Controllers\Controller;
-use App\Models\PlutoChannel;
+use App\Models\ExternalChannel;
 use App\Models\Setting;
 use App\Services\ChannelsBackendService;
-use App\Services\PlutoBackendService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class ChannelController extends Controller
 {
-    protected $plutoBackend;
+    protected $backend;
 
-    public function __construct()
+    public function __construct(BackendService $backend)
     {
-        $this->plutoBackend = new PlutoBackendService();
+        $this->backend = $backend;
     }
 
-    public function list(Request $request)
+    public function list(Request $request, $source)
     {
-        $channels = collect($this->plutoBackend->getChannels()->channels)->keyBy('id');
+        $channels = collect($this->backend->getChannels()->channels)->keyBy('id');
 
-        $existingChannels = PlutoChannel::all()->keyBy("channel_id");
+        $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
         $channels->transform(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
@@ -31,48 +31,51 @@ class ChannelController extends Controller
             return $channel;
         });
 
-        return view('pluto.channels.map',
+        return view('channelsource.channels.map',
             [
                 'channels' => $channels,
                 'channelsBackendUrl' => (new ChannelsBackendService)->getBaseUrl(),
-                'channelStartNumber' => Setting::getSetting('pluto.channel_start_number')
+                'channelStartNumber' => Setting::getSetting("{$source}_channelsource.channel_start_number"),
+                'channelSource' => $source,
+                'channelSources' => collect(config('channels.channelSources'))
             ]
         );
     }
 
-    public function map(Request $request)
+    public function map(Request $request, $source)
     {
-        $channels = collect($request->channel)->transform(function ($channel, $key) {
+        $channels = collect($request->channel)->transform(function ($channel, $key) use ($source) {
             return [
+                'source' => $source,
                 'channel_id' => $key,
                 'channel_number' => $channel['mapped'] ?? $channel['number'],
                 'channel_enabled' => $channel['enabled'] ?? 0
             ];
         })->values()->toArray();
 
-        PlutoChannel::upsert(
+        ExternalChannel::upsert(
             $channels,
             [ 'channel_id' ],
-            [ 'channel_number', 'channel_enabled' ],
+            [ 'source', 'channel_number', 'channel_enabled' ],
         );
 
-        Setting::updateSetting('pluto.channel_start_number', $request->channel_start_number);
+        Setting::updateSetting("{$source}_channelsource.channel_start_number", $request->channel_start_number);
 
-        Cache::forget('pluto_m3u');
+        Cache::forget("{$source}_channelsource_m3u");
 
-        return redirect(route('getPlutoMapUI'));
+        return redirect(route('getChannelSourceMapUI', ['channelSource' => $source]));
 
     }
 
-    public function playlist(Request $request)
+    public function playlist(Request $request, $source)
     {
         if ($request->has("fresh")) {
-            Cache::forget('pluto_m3u');
+            Cache::forget("{$source}_channelsource_m3u");
         }
 
-        $playlist = Cache::remember('pluto_m3u', 1800, function () {
-            $channels = collect($this->plutoBackend->getChannels()->channels)->keyBy('id');
-            $existingChannels = PlutoChannel::all()->keyBy("channel_id");
+        $playlist = Cache::remember("{$source}_channelsource_m3u", 1800, function () use ($source) {
+            $channels = collect($this->backend->getChannels()->channels)->keyBy('id');
+            $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
             $channels =
                 $channels->filter(function ($channel, $key) use ($existingChannels) {
@@ -83,7 +86,7 @@ class ChannelController extends Controller
                     return $channel;
                 })->values()->sortBy('mappedChannelNum');
                 
-            return view('pluto.playlist.full', [
+            return view('channelsource.playlist.full', [
                 'channels' => $channels
             ])->render();
         });

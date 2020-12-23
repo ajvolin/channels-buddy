@@ -21,12 +21,18 @@
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Pluto
+                    TV Sources
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{{ route('getPlutoMapUI') }}">Channel Management</a>
-                    <a class="dropdown-item" href="{{ route('plutoPlaylist') }}">Pluto M3U Playlist</a>
-                    <a class="dropdown-item" href="{{ route('plutoXmlTv') }}">Pluto M3U XMLTV Guide</a>
+                    @foreach(config('channels.channelSources') as $key => $value)
+                    <h6 class="dropdown-header">{{ $value['displayName'] }}</h6>
+                    <a class="dropdown-item{{ $channelSource == $key ? ' active' : '' }}" href="{{ route('getChannelSourceMapUI', ['channelSource' => $key]) }}">Channel Management</a>
+                    <a class="dropdown-item" href="{{ route('channelSourcePlaylist', ['channelSource' => $key]) }}">M3U Playlist</a>
+                    <a class="dropdown-item" href="{{ route('channelSourceXmlTv', ['channelSource' => $key]) }}">M3U XMLTV Guide</a>
+                    @if(!$loop->last)
+                    <div class="dropdown-divider"></div>
+                    @endif
+                    @endforeach
                 </div>
             </li>
             @if(isset($sources))

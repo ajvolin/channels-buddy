@@ -3,7 +3,7 @@
 @section('content')
 <div class="row mb-3">
     <div class="col-xs-8 col-md-10 col-lg-10">
-        <h1>Pluto TV</h1>
+        <h1>{{ $channelSources[$channelSource]['displayName'] }}</h1>
         <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
         <div class="custom-control custom-radio custom-control-inline">
             <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />
@@ -21,7 +21,7 @@
     <div class="col-xs-4 col-md-2 col-lg-2">
     </div>
 </div>
-<form action="{{ route('applyPlutoChannelMap') }}" method="POST" id="channelMapForm">
+<form action="{{ route('applyChannelSourceChannelMap', ['channelSource' => $channelSource]) }}" method="POST" id="channelMapForm">
     @csrf
     <div class="row">
         <div class="col-xs-8 col-md-10 col-lg-10">
@@ -29,14 +29,14 @@
                 <caption>List of channels</caption>
                 <thead class="thead-light">
                     <tr>
-                        <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">Pluto Channel</th>
+                        <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">Source Channel</th>
                         <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Channel Number</th>
                         <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($channels as $channel)
-                    @include('pluto.channels.table.row')
+                    @include('channelsource.channels.table.row')
                     @endforeach
                 </tbody>
             </table>

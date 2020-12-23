@@ -185,52 +185,52 @@ class Airing
     /**
      * @var boolean
      */
-    public ?bool $isMovie;
+    public ?bool $isMovie = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isLive;
+    public ?bool $isLive = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isNew;
+    public ?bool $isNew = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isPremiere;
+    public ?bool $isPremiere = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isPreviouslyShown;
+    public ?bool $isPreviouslyShown = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isHdtv;
+    public ?bool $isHdtv = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isDolbyDigital;
+    public ?bool $isDolbyDigital = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isDolby;
+    public ?bool $isDolby = null;
 
     /**
      * @var boolean
      */
-    public ?bool $isStereo;
+    public ?bool $isStereo = null;
 
     /**
      * @var boolean
      */
-    public ?bool $hasClosedCaptioning;
+    public ?bool $hasClosedCaptioning = null;
 
 
     /**

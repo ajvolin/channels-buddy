@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Cache;
-use Intervention\Image\Facades\Image;
 
 class StirrBackendService implements BackendService
 {
@@ -35,8 +34,7 @@ class StirrBackendService implements BackendService
 
     public function getChannels(): Channels
     {
-        Cache::forget('stirr_channels');
-        $channels = Cache::remember('stirr_channels', 43200, function() {
+        $channels = Cache::remember('stirr_channels', 3600, function() {
             $channelList = collect([]);
             $stationLocations = ['national'];
 
@@ -81,10 +79,21 @@ class StirrBackendService implements BackendService
                             foreach($channels as $channel) {
                                 if (!str_starts_with($channel->channel->title, 'zzz')) {
                                     if (isset($locationChannel->icon->src)) {
-                                        $logo = str_replace("180/center/90", "640/center/100",
-                                            strtok($locationChannel->icon->src, '?'));
+                                        $logo = str_replace(
+                                            "180/center/90",
+                                            "512/center/100",
+                                            strtok(
+                                                $locationChannel->icon->src, '?'
+                                            )
+                                        );
+                                        $channelArt = str_replace(
+                                            "512/center/100",
+                                            "1024/center/100",
+                                            $logo
+                                        );
                                     } else {
                                         $logo = null;
+                                        $channelArt = null;
                                     }
 
                                     $channelList->put($locationChannel->id,
@@ -94,7 +103,7 @@ class StirrBackendService implements BackendService
                                             'number'        => null,
                                             'description'   => $channel->channel->description,
                                             'logo'          => $logo,
-                                            'channelArt'    => null,
+                                            'channelArt'    => $channelArt,
                                             'category'      => $channel->channel->item->category,
                                             'streamUrl'     => $channel->channel->item->link
                                         ])
@@ -133,7 +142,9 @@ class StirrBackendService implements BackendService
                     $airingId = $channel->id . $startTime->copy()->timestamp;
                     $seriesId = md5($entry->title->value);
                     $programId = $seriesId.".".md5($entry->desc->value);
-                    $isLive = filter_var($entry->{'sinclair:isLiveProgram'}, FILTER_VALIDATE_BOOLEAN);
+                    $isLive = filter_var($entry->{'sinclair:isLiveProgram'},
+                        FILTER_VALIDATE_BOOLEAN
+                    );
 
                     $airing = new Airing([
                         'id'                    => $airingId,
@@ -147,7 +158,8 @@ class StirrBackendService implements BackendService
                         'stopTime'              => $stopTime,
                         'length'                => $length,
                         'programId'             => $programId,
-                        'seriesId'              => $seriesId
+                        'seriesId'              => $seriesId,
+                        'isLive'                => $isLive
                     ]);
                     
                     if (isset($entry->category)) {
@@ -161,6 +173,9 @@ class StirrBackendService implements BackendService
                             if($category->value == 'New') {
                                 $airing->setIsNew(true);
                             }
+                            if($category->value == 'Stereo') {
+                                $airing->setIsStereo(true);
+                            }
                             if($category->value == 'CC') {
                                 $airing->setHasClosedCaptioning(true);
                             }
@@ -173,7 +188,6 @@ class StirrBackendService implements BackendService
                 $guide->addGuideEntry($guideEntry);
             } catch (RequestException $e) {}
         }
-        
         return $guide;
     }
 }

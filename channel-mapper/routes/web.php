@@ -2,10 +2,8 @@
 
 use App\Http\Controllers\Channels\ChannelController;
 use App\Http\Controllers\Channels\GuideController;
-use App\Http\Controllers\Pluto\ChannelController as PlutoChannelController;
-use App\Http\Controllers\Pluto\GuideController as PlutoGuideController;
-use App\Services\PlutoBackendService;
-use App\Services\StirrBackendService;
+use App\Http\Controllers\ChannelSource\ChannelController as ChannelSourceChannelController;
+use App\Http\Controllers\ChannelSource\GuideController as ChannelSourceGuideController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,10 +16,6 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-// Route::get('/test', function(){
-//     return dd((new StirrBackendService)->getChannels()->channels);
-// });
 
 Route::get('/', [ChannelController::class, 'index']);
 
@@ -37,14 +31,14 @@ Route::get('/channels/{source}/playlist', [ChannelController::class, 'playlist']
 Route::get('/channels/{source}/guide', [GuideController::class, 'xmltv'])
     ->name('sourceXmlTv');
 
-Route::get('/pluto', [PlutoChannelController::class, 'list'])
-    ->name('getPlutoMapUI');
+Route::get('/source/{channelSource}', [ChannelSourceChannelController::class, 'list'])
+    ->name('getChannelSourceMapUI');
 
-Route::post('/pluto/map', [PlutoChannelController::class, 'map'])
-    ->name('applyPlutoChannelMap');
+Route::post('/source/{channelSource}/map', [ChannelSourceChannelController::class, 'map'])
+    ->name('applyChannelSourceChannelMap');
 
-Route::get('/pluto/playlist', [PlutoChannelController::class, 'playlist'])
-    ->name('plutoPlaylist');
+Route::get('/source/{channelSource}/playlist', [ChannelSourceChannelController::class, 'playlist'])
+    ->name('channelSourcePlaylist');
 
-Route::get('/pluto/guide', [PlutoGuideController::class, 'xmltv'])
-    ->name('plutoXmlTv');
+Route::get('/source/{channelSource}/guide', [ChannelSourceGuideController::class, 'xmltv'])
+    ->name('channelSourceXmlTv');
