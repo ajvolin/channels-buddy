@@ -1,4 +1,4 @@
-                        <tr id="channel-{{ $channel->id }}" class="channel-row" data-channel-number="{{ $channel->number }}" data-channel-name="{{ strtoupper($channel->name) }}" data-channel-remapped-number="{{ $channel->mapped_channel_number }}" data-channel-station-id="{{ $channel->id }}" data-channel-enabled="{{ $channel->channel_enabled }}">
+                        <tr id="channel-{{ $channel->id }}" class="channel-row" data-channel-number="{{ $channel->number }}" data-channel-callsign="{{ $channel->callSign }}" data-channel-name="{{ strtoupper($channel->name) }}" data-channel-remapped-number="{{ $channel->mapped_channel_number }}" data-channel-station-id="{{ $channel->id }}" data-channel-enabled="{{ $channel->channel_enabled }}">
                             <td style="padding: 10px; max-width: 125px; text-align: left;" class="align-middle px-3">
                                 @if(isset($channel->logo))
                                 <img src="{{ $channel->logo }}" style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
@@ -6,7 +6,9 @@
                                 <div class="guide-channel-name" style="font-size: 0.9em; padding: 19px 0;">{{ $channel->id }}</div>
                                 @endif
                                 <div class="guide-channel-number">
+                                    @if($channel->number)
                                     <span class="badge badge-light" style="min-width: 4em; display: inline-block; margin-right: 1em;">{{ $channel->number }}</span>
+                                    @endif
                                     <span style="font-size: 0.7em;">{{ $channel->name }}</span>
                                 </div>
                             </td>

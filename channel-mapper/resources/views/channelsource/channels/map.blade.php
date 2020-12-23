@@ -72,6 +72,10 @@
                 '[data-channel-remapped-number*="' + search + '"]' :
                 '', channelEnabledFilter
             ].filter(Boolean).join("");
+            var searchChannelCallSign = [search !== '' ?
+                '[data-channel-callsign*="' + search + '"]' :
+                '', channelEnabledFilter
+            ].filter(Boolean).join("");
             var searchChannelStationId = [search !== '' ?
                 '[data-channel-station-id="' + search.toLowerCase() + '"]' :
                 '', channelEnabledFilter
@@ -81,6 +85,7 @@
                 searchChannelNumber,
                 searchChannelName,
                 searchChannelRemappedNumber,
+                searchChannelCallSign,
                 searchChannelStationId
             ].filter(Boolean).join(",");
 

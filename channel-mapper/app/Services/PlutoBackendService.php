@@ -12,6 +12,7 @@ use App\Contracts\BackendService;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 
 class PlutoBackendService implements BackendService
 {
@@ -46,21 +47,8 @@ class PlutoBackendService implements BackendService
                 '/^announcement|^privacy-policy/',
                 $channel->slug
             );
-        })->transform(function($channel, $key) {
-            $description = $this->getCleanDescription($channel->summary);
-            $channelArt = $this->getChannelArt($channel->featuredImage->path);
-            $streamUrl = $this->getStreamUrl($channel->stitched->urls[0]->url);
-            
-            return new Channel([
-                "id" => $channel->slug,
-                "number" => $channel->number,
-                "name" => $channel->name,
-                "description" => $description,
-                "logo" => $channel->colorLogoPNG->path ?? null,
-                "channelArt" => $channelArt,
-                "category" => $channel->category,
-                "streamUrl" => $streamUrl
-            ]);
+        })->transform(function($channel) {
+            return $this->generateChannel($channel);
         })->sortBy('number');
 
         return new Channels($channels->toArray());
@@ -92,20 +80,9 @@ class PlutoBackendService implements BackendService
         })->sortBy('number')->keyBy('slug');
 
         foreach ($guideData as $channel) {
-            $description = $this->getCleanDescription($channel->summary);
-            $channelArt = $this->getChannelArt($channel->featuredImage->path);
-            $streamUrl = $this->getStreamUrl($channel->stitched->urls[0]->url);
-            
-            $guideEntry = new GuideEntry(new Channel([
-                'id'        => $channel->slug,
-                'name'      => $channel->name,
-                'number'    => $channel->number,
-                "description" => $description,
-                "logo" => $channel->colorLogoPNG->path ?? null,
-                "channelArt" => $channelArt,
-                "category" => $channel->category,
-                "streamUrl" => $streamUrl
-            ]));
+            $guideEntry = new GuideEntry(
+                $this->generateChannel($channel)
+            );
 
             foreach ($channel->timelines as $channelAiring) {
                 $startTime = Carbon::parse($channelAiring->start);
@@ -192,6 +169,25 @@ class PlutoBackendService implements BackendService
         }
         
         return $guide;
+    }
+
+    private function generateChannel(stdClass $channel): Channel
+    {
+        $description = $this->getCleanDescription($channel->summary);
+        $channelArt = $this->getChannelArt($channel->featuredImage->path);
+        $streamUrl = $this->getStreamUrl($channel->stitched->urls[0]->url);
+        
+        return new Channel([
+            "id"            => $channel->slug,
+            "name"          => $channel->name,
+            "number"        => $channel->number,
+            "callSign"      => $channel->hash,
+            "description"   => $description,
+            "logo"          => $channel->colorLogoPNG->path ?? null,
+            "channelArt"    => $channelArt,
+            "category"      => $channel->category,
+            "streamUrl"     => $streamUrl
+        ]);
     }
 
     private function getCleanDescription(string $description): string

@@ -18,7 +18,6 @@ return [
             'guideChunkSize' => null,
             'guideDuration' => null,
             'stationLineups'  => [
-                'new-york',
                 'national'
             ]
         ]
