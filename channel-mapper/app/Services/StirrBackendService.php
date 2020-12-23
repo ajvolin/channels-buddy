@@ -43,7 +43,7 @@ class StirrBackendService implements BackendService
             $statesList = collect(
                 json_decode($statesListJson)->page
             )->filter(function($state){
-                return str_starts_with($state->pageComponentUuid, 'nearyou-');
+                return substr($state->pageComponentUuid, 0, 8 ) == 'nearyou-';
             });
             
             foreach($statesList as $state) {
@@ -77,7 +77,7 @@ class StirrBackendService implements BackendService
                             $channelsJson = $channelsStream->getBody()->getContents();
                             $channels = json_decode($channelsJson);
                             foreach($channels as $channel) {
-                                if (!str_starts_with($channel->channel->title, 'zzz')) {
+                                if (substr($channel->channel->title, 0, 3) != 'zzz') {
                                     if (isset($locationChannel->icon->src)) {
                                         $logo = str_replace(
                                             "180/center/90",
@@ -164,7 +164,7 @@ class StirrBackendService implements BackendService
                     
                     if (isset($entry->category)) {
                         foreach ($entry->category as $category) {
-                            if(str_starts_with($category->value, "HD")) {
+                            if(substr($channel->channel->title, 0, 2) == 'HD') {
                                 $airing->setIsHdtv(true);
                             }
                             if($category->value == 'Live') {

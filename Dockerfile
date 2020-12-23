@@ -3,28 +3,28 @@ LABEL maintainer="Adam Volin <ajvolin@gmail.com>"
 
 # Update apk and add dependencies
 RUN apk add --update --no-cache \
-                        php8 \
-                        php8-bcmath \
-                        php8-bz2 \
-                        php8-ctype \
-                        php8-curl \
-                        php8-dom \
-                        php8-exif \
-                        php8-fileinfo \
-                        php8-fpm \
-                        php8-gd \
-                        php8-iconv \    
-                        php8-json \
-                        php8-mbstring \
-                        php8-openssl \
-                        php8-pcntl \
-                        php8-pdo \
-                        php8-pdo_sqlite \
-                        php8-session \
-                        php8-sqlite3 \
-                        php8-tokenizer \
-                        php8-xml \
-                        php8-xmlwriter \
+                        php7 \
+                        php7-bcmath \
+                        php7-bz2 \
+                        php7-ctype \
+                        php7-curl \
+                        php7-dom \
+                        php7-exif \
+                        php7-fileinfo \
+                        php7-fpm \
+                        php7-gd \
+                        php7-iconv \    
+                        php7-json \
+                        php7-mbstring \
+                        php7-openssl \
+                        php7-pcntl \
+                        php7-pdo \
+                        php7-pdo_sqlite \
+                        php7-session \
+                        php7-sqlite3 \
+                        php7-tokenizer \
+                        php7-xml \
+                        php7-xmlwriter \
                         composer \
                         curl \
                         git \
@@ -48,8 +48,8 @@ RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/repo
 # Add app code, config files, and entrypoint
 RUN mv /usr/src/repo/channel-mapper /usr/src/app
 RUN mv /usr/src/repo/nginx.conf /etc/nginx/nginx.conf
-RUN mv /usr/src/repo/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
-RUN mv /usr/src/repo/php.ini-channels /etc/php8/conf.d/php-channels-settings.ini
+RUN mv /usr/src/repo/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
+RUN mv /usr/src/repo/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
 RUN mkdir -p /etc/supervisor/conf.d/ && mv /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mv /usr/src/repo/entrypoint.sh /usr/src/app/entrypoint.sh
 
@@ -61,7 +61,7 @@ WORKDIR /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
-RUN composer install
+RUN composer update
 RUN composer clearcache
 
 EXPOSE 80
