@@ -22,7 +22,8 @@ class StirrBackendService implements BackendService
     public function __construct()
     {
         $this->baseUrl = 'https://ott-gateway-stirr.sinclairstoryline.com/api/rest/v3/';
-        $this->baseStationUrl = 'https://ott-stationselection.sinclairstoryline.com/stationSelectionByAllStates';
+        $this->baseStationUrl = 'https://ott-stationselection.sinclairstoryline.com/stationAutoSelection';
+        // $this->baseStationUrl = 'https://ott-stationselection.sinclairstoryline.com/stationSelectionByAllStates';
 
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }
@@ -34,56 +35,70 @@ class StirrBackendService implements BackendService
 
     public function getChannels(): Channels
     {
-        $channels = Cache::remember('stirr_channels', 3600, function() {
+        Cache::forget('stirr_channels');
+        $channels = Cache::remember('stirr_channels', 1, function() {
             $channelList = collect([]);
-            $stationLocations = ['national'];
+            $stationLineups =
+                config(
+                    'channels.channelSources.stirr.stationLineups', 
+                    ['national']
+                );
 
-            $statesListStream = $this->httpClient->get($this->baseStationUrl);
-            $statesListJson = $statesListStream->getBody()->getContents();
-            $statesList = collect(
-                json_decode($statesListJson)->page
-            )->filter(function($state){
-                return substr($state->pageComponentUuid, 0, 8 ) == 'nearyou-';
-            });
-            
-            foreach($statesList as $state) {
-                $stateStationsStream = $this->httpClient->get($state->content);
-                $stateStationsJson = $stateStationsStream->getBody()->getContents();
-                $stateStations = collect(
-                    json_decode($stateStationsJson)->rss->channel->pagecomponent->component
-                )->filter(function ($station) use ($stationLocations) {
-                    return !in_array($station->item->{'media:content'}->{'sinclair:action_value'}, $stationLocations);
-                });
+            $lineupAutoSelectStream = $this->httpClient->get($this->baseStationUrl);
+            $lineupAutoSelectJson = $lineupAutoSelectStream->getBody()->getContents();
+            $lineupAutoSelectList = json_decode($lineupAutoSelectJson)->page;
 
-                foreach ($stateStations as $station) {
-                    array_push($stationLocations,
-                        $station->item->{'media:content'}->{'sinclair:action_value'}
-                    );
+            foreach ($lineupAutoSelectList as $lineups) {
+                foreach ($lineups
+                    ->button
+                    ->{'media:content'}
+                    ->{'sinclair:action_config'}
+                    ->station as $lineup) {
+                            
+                    if(!in_array($lineup, $stationLineups)) {
+                        array_push($stationLineups, $lineup);
+                    }
                 }
             }
+            
+            // foreach($statesList as $state) {
+            //     $stateStationsStream = $this->httpClient->get($state->content);
+            //     $stateStationsJson = $stateStationsStream->getBody()->getContents();
+            //     $stateStations = collect(
+            //         json_decode($stateStationsJson)->rss->channel->pagecomponent->component
+            //     )->filter(function ($station) use ($stationLocations) {
+            //         return !in_array($station->item->{'media:content'}->{'sinclair:action_value'}, $stationLocations);
+            //     });
 
-            foreach ($stationLocations as $location) {
-                $locationChannelsStream = $this->httpClient->get(
-                    sprintf('channels/stirr?station=%s', $location)
+            //     foreach ($stateStations as $station) {
+            //         array_push($stationLocations,
+            //             $station->item->{'media:content'}->{'sinclair:action_value'}
+            //         );
+            //     }
+            // }
+
+            foreach ($stationLineups as $lineup) {
+                $lineupChannelsStream = $this->httpClient->get(
+                    sprintf('channels/stirr?station=%s', $lineup)
                 );
-                $locationChannelsJson = $locationChannelsStream->getBody()->getContents();
-                $locationChannels = json_decode($locationChannelsJson);
-                foreach ($locationChannels->channel as $locationChannel) {
-                    if (!$channelList->has($locationChannel->id)) {
+                $lineupChannelsJson = $lineupChannelsStream->getBody()->getContents();
+                $lineupChannels = json_decode($lineupChannelsJson);
+                foreach ($lineupChannels->channel as $lineupChannel) {
+                    if (!$channelList->has($lineupChannel->id)) {
                         try {
                             $channelsStream = $this->httpClient->get(
-                                sprintf('status/%s', $locationChannel->id)
+                                sprintf('status/%s', $lineupChannel->id)
                             );
                             $channelsJson = $channelsStream->getBody()->getContents();
                             $channels = json_decode($channelsJson);
                             foreach($channels as $channel) {
                                 if (substr($channel->channel->title, 0, 3) != 'zzz') {
-                                    if (isset($locationChannel->icon->src)) {
+                                    if (isset($lineupChannel->icon->src)) {
                                         $logo = str_replace(
                                             "180/center/90",
                                             "512/center/100",
                                             strtok(
-                                                $locationChannel->icon->src, '?'
+                                                $lineupChannel->icon->src, '?'
                                             )
                                         );
                                         $channelArt = str_replace(
@@ -96,9 +111,9 @@ class StirrBackendService implements BackendService
                                         $channelArt = null;
                                     }
 
-                                    $channelList->put($locationChannel->id,
+                                    $channelList->put($lineupChannel->id,
                                         new Channel([
-                                            'id'            => $locationChannel->id,
+                                            'id'            => $lineupChannel->id,
                                             'name'          => $channel->channel->title,
                                             'number'        => null,
                                             'description'   => $channel->channel->description,

@@ -17,6 +17,10 @@ return [
             'backendService' => \App\Services\StirrBackendService::class,
             'guideChunkSize' => null,
             'guideDuration' => null,
+            'stationLineups'  => [
+                'new-york',
+                'national'
+            ]
         ]
     ],
 
