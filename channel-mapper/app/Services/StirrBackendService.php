@@ -164,7 +164,7 @@ class StirrBackendService implements BackendService
                     
                     if (isset($entry->category)) {
                         foreach ($entry->category as $category) {
-                            if(substr($channel->channel->title, 0, 2) == 'HD') {
+                            if(substr($category->value, 0, 2) == 'HD') {
                                 $airing->setIsHdtv(true);
                             }
                             if($category->value == 'Live') {
