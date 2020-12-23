@@ -26,7 +26,7 @@
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     @foreach(config('channels.channelSources') as $key => $value)
                     <h6 class="dropdown-header">{{ $value['displayName'] }}</h6>
-                    <a class="dropdown-item{{ $channelSource == $key ? ' active' : '' }}" href="{{ route('getChannelSourceMapUI', ['channelSource' => $key]) }}">Channel Management</a>
+                    <a class="dropdown-item{{ isset($channelSource) && $channelSource == $key ? ' active' : '' }}" href="{{ route('getChannelSourceMapUI', ['channelSource' => $key]) }}">Channel Management</a>
                     <a class="dropdown-item" href="{{ route('channelSourcePlaylist', ['channelSource' => $key]) }}">M3U Playlist</a>
                     <a class="dropdown-item" href="{{ route('channelSourceXmlTv', ['channelSource' => $key]) }}">M3U XMLTV Guide</a>
                     @if(!$loop->last)
