@@ -21,9 +21,10 @@ class StirrBackendService implements BackendService
 
     public function __construct()
     {
-        $this->baseUrl = 'https://ott-gateway-stirr.sinclairstoryline.com/api/rest/v3/';
-        $this->baseStationUrl = 'https://ott-stationselection.sinclairstoryline.com/stationAutoSelection';
-        // $this->baseStationUrl = 'https://ott-stationselection.sinclairstoryline.com/stationSelectionByAllStates';
+        $this->baseUrl =
+            'https://ott-gateway-stirr.sinclairstoryline.com/api/rest/v3/';
+        $this->baseStationUrl =
+            'https://ott-stationselection.sinclairstoryline.com/stationAutoSelection';
 
         $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
     }

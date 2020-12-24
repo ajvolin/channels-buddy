@@ -17,7 +17,7 @@ class CreateExternalChannelsTable extends Migration
         Schema::create('external_channels', function (Blueprint $table) {
             $table->string('source', 100);
             $table->string('channel_id', 100)->unique();
-            $table->string('channel_number', 16);
+            $table->string('channel_number', 16)->nullable();
             $table->boolean('channel_enabled')->nullable()->default(true);
             $table->timestamps();
         });

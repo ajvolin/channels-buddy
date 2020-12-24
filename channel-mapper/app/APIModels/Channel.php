@@ -25,12 +25,27 @@ class Channel
     /**
      * @var string
      */
+    public ?string $guideName;
+
+    /**
+     * @var string
+     */
     public ?string $number;
 
     /**
      * @var string
      */
     public ?string $callSign;
+
+    /**
+     * @var string
+     */
+    public ?string $stationId;
+
+    /**
+     * @var string
+     */
+    public ?string $title;
 
     /**
      * @var string
@@ -51,6 +66,16 @@ class Channel
      * @var string
      */
     public ?string $category;
+
+    /**
+     * @var string
+     */
+    public ?string $videoCodec;
+
+    /**
+     * @var string
+     */
+    public ?string $audioCodec;
 
     /**
      * @var string
@@ -112,6 +137,26 @@ class Channel
     {
         $this->name = $name;
     }
+
+    /**
+     * Get the channel guide name.
+     *
+     * @return string
+     */
+    public function getGuideName(): ?string
+    {
+        return $this->guideName;
+    }
+
+    /**
+     * Set the channel guide name.
+     *
+     * @param string $guideName
+     */
+    public function setGuideName(?string $guideName): void
+    {
+        $this->guideName = $guideName;
+    }
     
     /**
      * Get the channel number.
@@ -148,9 +193,49 @@ class Channel
      *
      * @param string $callSign
      */
-    public function CallSign(?string $callSign): void
+    public function setCallSign(?string $callSign): void
     {
         $this->callSign = $callSign;
+    }
+
+    /**
+     * Get the channel station ID.
+     *
+     * @return string
+     */
+    public function getStationId(): ?string
+    {
+        return $this->stationId;
+    }
+
+    /**
+     * Set the channel station ID.
+     *
+     * @param string $stationId
+     */
+    public function setStationId(?string $stationId): void
+    {
+        $this->stationId = $stationId;
+    }
+
+    /**
+     * Get the channel title.
+     *
+     * @return string
+     */
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set the channel title.
+     *
+     * @param string $title
+     */
+    public function setTitle(?string $title): void
+    {
+        $this->title = $title;
     }
 
     /**
@@ -231,6 +316,46 @@ class Channel
     public function setCategory(?string $category): void
     {
         $this->category = $category;
+    }
+
+    /**
+     * Get the channel video codec.
+     *
+     * @return string
+     */
+    public function getVideoCodec(): ?string
+    {
+        return $this->videoCodec;
+    }
+
+    /**
+     * Set the channel video codec.
+     *
+     * @param string $videoCodec
+     */
+    public function setVideoCodec(?string $videoCodec): void
+    {
+        $this->videoCodec = $videoCodec;
+    }
+
+    /**
+     * Get the channel audio codec.
+     *
+     * @return string
+     */
+    public function getAudioCodec(): ?string
+    {
+        return $this->audioCodec;
+    }
+
+    /**
+     * Set the channel audio codec.
+     *
+     * @param string $audioCodec
+     */
+    public function setAudioCodec(?string $audioCodec): void
+    {
+        $this->audioCodec = $audioCodec;
     }
 
 

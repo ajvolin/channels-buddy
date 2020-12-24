@@ -12,9 +12,9 @@ class ChannelController extends Controller
 {
     protected $channelsBackend;
 
-    public function __construct()
+    public function __construct(ChannelsBackendService $channelsBackend)
     {
-        $this->channelsBackend = new ChannelsBackendService();
+        $this->channelsBackend = $channelsBackend;
     }
 
     public function index()
@@ -39,14 +39,23 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $allChannels = $this->channelsBackend->getGuideChannels();
-        $sourceChannels = $this->channelsBackend->getEnabledChannels($source);
+        $allChannels = collect(
+                $this->channelsBackend->getGuideChannels()->channels
+            )->values()
+            ->keyBy('number');
+        $sourceChannels = collect(
+                $this->channelsBackend->getChannels($source)->channels
+            )->values()
+            ->keyBy('number');
 
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
         $sourceChannels->transform(function ($channel, $key) use ($existingChannels) {
-            $channel->mapped_channel_number = $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
-            $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
+            $channel->mapped_channel_number = 
+                $existingChannels->get($key)->mapped_channel_number ??
+                    $channel->number;
+            $channel->channel_enabled =
+                $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
         });
 
@@ -94,7 +103,10 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $channels = $this->channelsBackend->getEnabledChannels($source);
+        $channels = collect(
+            $this->channelsBackend->getChannels($source)->channels
+        )->values()
+        ->keyBy('number');
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
         $channels =
@@ -102,11 +114,12 @@ class ChannelController extends Controller
                 return $existingChannels->get($key)->channel_enabled ?? true;
             })->transform(function($channel, $key) use ($existingChannels) {
                 $channel->mappedChannelNum =
-                    $existingChannels->get($key)->mapped_channel_number ?? $channel->GuideNumber;
+                    $existingChannels->get($key)->mapped_channel_number ??
+                        $channel->number;
                 return $channel;
             })->values()->sortBy('mappedChannelNum');
 
-        return response(view('channels.playlist.full', [
+        return response(view('playlist.full', [
             'channels' => $channels,
             'channelsBackendUrl' => $this->channelsBackend->getPlaylistBaseUrl(),
             'source' => $source,

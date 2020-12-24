@@ -82,11 +82,11 @@ class ChannelController extends Controller
                     return $existingChannels->get($key)->channel_enabled ?? false;
                 })->transform(function($channel, $key) use ($existingChannels) {
                     $channel->mappedChannelNum =
-                        $existingChannels->get($key)->channel_number ?? $channel->number;
+                        $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
                     return $channel;
                 })->values()->sortBy('mappedChannelNum');
                 
-            return view('channelsource.playlist.full', [
+            return view('playlist.full', [
                 'channels' => $channels
             ])->render();
         });

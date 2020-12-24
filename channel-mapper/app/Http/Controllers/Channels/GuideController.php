@@ -2,25 +2,34 @@
 
 namespace App\Http\Controllers\Channels;
 
+use App\APIModels\Guide;
 use App\Http\Controllers\Controller;
 use App\Models\DvrChannel;
 use App\Services\ChannelsBackendService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Exception;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use XmlTv\Tv;
+use XmlTv\Tv\Elements\Language;
+use XmlTv\Tv\Elements\OrigLanguage;
+use XmlTv\Tv\Elements\Url;
 use XmlTv\XmlTv;
 
 class GuideController extends Controller
 {
-    protected $channelsBackend;
+    protected ChannelsBackendService $channelsBackend;
+    protected Collection $existingChannels;
+    protected Tv $tv;
+    protected array $processedChannels = [];
+    protected array $processedAirings = [];
 
-    public function __construct()
+    public function __construct(ChannelsBackendService $channelsBackend)
     {
-        $this->channelsBackend = new ChannelsBackendService();
+        $this->channelsBackend = $channelsBackend;
+        $this->tv = new Tv();
     }
 
     public function xmltv(Request $request)
@@ -55,304 +64,359 @@ class GuideController extends Controller
             Cache::forget("{$source}_{$duration}_epg");
         }
 
-        $xml = Cache::remember("{$source}_{$duration}_epg", $guideChunkSize, function () use ($source, $guideChunkSize, $guideDuration) {
+        $xml = Cache::remember("{$source}_{$duration}_epg", $guideChunkSize,
+            function () use ($source, $guideChunkSize, $guideDuration) {
             ini_set('memory_limit', '-1');
 
+            $this->existingChannels =
+                DvrChannel::pluck('guide_number', 'mapped_channel_number');
+            
             $guideIntervals = CarbonInterval::seconds($guideChunkSize)
-                ->toPeriod(
-                    Carbon::now()->startOfHour(),
-                    Carbon::now()->startOfDay()->addSeconds($guideDuration)->endOfDay()
-                );
-
-            $emptyProgramIntervals = CarbonInterval::minutes(60)
-                ->toPeriod(
-                    Carbon::now()->startOfHour(),
-                    Carbon::now()->startOfDay()->addSeconds($guideDuration)->endOfDay()
-                );
-
-            $existingChannels = DvrChannel::pluck('guide_number', 'mapped_channel_number');
-
-            // Instantiate new Tv object
-            $tv = new Tv();
-
-            // Keep track of channels that have already been added to avoid duplicates
-            $processedChannels = [];
-            $processedEmptyGuideChannels = [];
-
-            // Keep track of guide entries that have already been added to minimize file size
-            $processedAirings = [];
+            ->toPeriod(
+                Carbon::now(),
+                Carbon::now()->addSeconds($guideDuration)
+            );
 
             foreach ($guideIntervals as $guideInterval) {
                 $guideData = $this->channelsBackend
-                    ->getGuideData($source, $guideInterval->timestamp, $guideChunkSize);
+                ->getGuideData(
+                    $source,
+                    $guideInterval->timestamp,
+                    $guideChunkSize
+                );
+                
+                $this->parseGuide($guideData);
 
-                foreach ($guideData as $data) {
-                    $channelNumber = $existingChannels->search($data->Channel->Number) ?? $data->Channel->Number;
-                    $channelId = Str::kebab(strtolower($data->Channel->CallSign ?? $data->Channel->Name ?? $channelNumber));
-
-                    if (!in_array($channelId, $processedChannels)) {
-                        $processedChannels[] = $channelId;
-
-                        $channel = new Tv\Channel($channelId);
-                        if (isset($data->Channel->CallSign)) {
-                            $channel->addDisplayName(new Tv\Elements\DisplayName($data->Channel->CallSign));
-                        }
-                        if (isset($data->Channel->Name)) {
-                            $channel->addDisplayName(new Tv\Elements\DisplayName($data->Channel->Name));
-                        }
-                        if (isset($data->Channel->Title)) {
-                            $channel->addDisplayName(new Tv\Elements\DisplayName($data->Channel->Title));
-                        }
-                        $channel->addDisplayName(new Tv\Elements\DisplayName($channelNumber));
-
-                        if (isset($data->Channel->Image)) {
-                            $channel->addIcon(new Tv\Elements\Icon($data->Channel->Image));
-                        }
-                        $tv->addChannel($channel);
-                    }
-
-                    if (count($data->Airings) > 0) {
-                        foreach ($data->Airings as $airing) {
-                            $airingId = $channelId . $airing->Time;
-
-                            if (!in_array($airingId, $processedAirings)) {
-                                $startTime = Carbon::createFromTimestamp($airing->Time);
-                                $endTime = $startTime->copy()->addSeconds($airing->Duration)->format('YmdHis O');
-
-                                $startTime = $startTime->format('YmdHis O');
-
-                                $program = new Tv\Programme($channelId, $startTime, $endTime);
-
-                                $program->length = new Tv\Elements\Length(
-                                    $airing->Duration,
-                                    Tv\Elements\Length\Unit::SECONDS
-                                );
-
-                                if (isset($airing->Title)) {
-                                    $program->addTitle(new Tv\Elements\Title(
-                                        $airing->Title,
-                                        $airing->Raw->program->titleLang ?? "")
-                                    );
-                                }
-
-                                if (isset($airing->EpisodeTitle)) {
-                                    $program->addSubTitle(new Tv\Elements\SubTitle(
-                                        $airing->EpisodeTitle,
-                                        $airing->Raw->program->titleLang ?? "")
-                                    );
-                                } elseif (isset($airing->EventTitle)) {
-                                    $program->addSubTitle(new Tv\Elements\SubTitle(
-                                        $airing->EventTitle,
-                                        $airing->Raw->program->titleLang ?? "")
-                                    );
-                                }
-
-                                $program->addDescription(new Tv\Elements\Desc(
-                                    $airing->Raw->program->longDescription ??
-                                    $airing->Raw->program->shortDescription ??
-                                    $airing->Summary ?? "",
-                                    $airing->Raw->program->descriptionLang ?? "")
-                                );
-
-                                if (isset($airing->Raw->program->preferredImage->uri) || isset($airing->Image)) {
-                                    $program->addIcon(new Tv\Elements\Icon(
-                                        $airing->Raw->program->preferredImage->uri ?? $airing->Image,
-                                        $airing->Raw->program->preferredImage->width ?? "",
-                                        $airing->Raw->program->preferredImage->height ?? "")
-                                    );
-                                }
-
-                                if (isset($airing->Source) && isset($airing->SeriesID)) {
-                                    $program->addSeriesId(new Tv\Elements\SeriesId($airing->SeriesID, $airing->Source));
-                                }
-
-                                if (isset($airing->Source) && isset($airing->ProgramID)) {
-                                    $program->addEpisodeNum(new Tv\Elements\EpisodeNum($airing->ProgramID, $airing->Source));
-                                }
-
-                                if (isset($airing->SeasonNumber)
-                                    && isset($airing->EpisodeNumber)
-                                    && is_numeric($airing->SeasonNumber)
-                                    && is_numeric($airing->EpisodeNumber)
-                                    && ($airing->SeasonNumber > 0 || $airing->EpisodeNumber > 0)
-                                ) {
-                                    $episodeNumOnScreen = $airing->SeasonNumber . sprintf("%02d", $airing->EpisodeNumber);
-                                    $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumOnScreen, 'onscreen'));
-                                    $sN = $airing->SeasonNumber - 1;
-                                    $eN = $airing->EpisodeNumber - 1;
-                                    $episodeNumXmltvNs = ($sN >= 0 ? $sN : "") . "." . ($eN >= 0 ? $eN : "") . ".";
-                                    $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumXmltvNs, 'xmltv_ns'));
-                                }
-
-                                $credits = new Tv\Elements\Credits();
-                                if (isset($airing->Directors) && !is_null($airing->Directors)) {
-                                    foreach ($airing->Directors as $director) {
-                                        $credits->director[] = new Tv\Elements\Credits\Director($director);
-                                    }
-                                }
-                                if (isset($airing->Cast) && !is_null($airing->Cast)) {
-                                    foreach ($airing->Cast as $cast) {
-                                        $credits->actor[] = new Tv\Elements\Credits\Actor($cast);
-                                    }
-                                }
-                                $program->addCredits($credits);
-
-                                if (isset($airing->OriginalDate)) {
-                                    if (isset($airing->Categories)
-                                        && is_array($airing->Categories)
-                                        && in_array("Movie", $airing->Categories)
-                                    ) {
-                                        $program->date = new Tv\Elements\Date(
-                                            Carbon::parse($airing->OriginalDate)->format('Y')
-                                        );
-                                    } else {
-                                        $program->date = new Tv\Elements\Date(
-                                            Carbon::parse($airing->OriginalDate)->format('Ymd')
-                                        );
-                                    }
-                                }
-
-                                if (isset($airing->Genres) && !is_null($airing->Genres)) {
-                                    foreach ($airing->Genres as $cat) {
-                                        $program->addCategory(new Tv\Elements\Category($cat));
-                                    }
-                                }
-
-                                if (isset($airing->Categories) && !is_null($airing->Categories)) {
-                                    foreach ($airing->Categories as $cat) {
-                                        $program->addCategory(new Tv\Elements\Category($cat));
-                                    }
-                                }
-
-                                if (isset($airing->Tags) && is_array($airing->Tags)) {
-                                    if (in_array("Live", $airing->Tags)) {
-                                        $program->live = new Tv\Elements\LiveProgramme();
-                                    }
-
-                                    if (in_array("New", $airing->Tags)) {
-                                        $program->new = new Tv\Elements\NewProgramme();
-                                        $program->date = new Tv\Elements\Date(
-                                            Carbon::createFromTimestamp($airing->Time)->format('Ymd')
-                                        );
-                                    } elseif (isset($airing->OriginalDate)) {
-                                        if ((isset($airing->Categories)
-                                                && is_array($airing->Categories)
-                                                && !in_array("Movie", $airing->Categories))
-                                                || is_null($airing->Categories)
-                                        ) {
-                                            $program->previouslyShown = new Tv\Elements\PreviouslyShown(
-                                                Carbon::parse($airing->OriginalDate)->format('Ymd')
-                                            );
-                                        }
-                                    }
-
-                                    if (in_array("Season Premiere", $airing->Tags)) {
-                                        $program->premiere = new Tv\Elements\Premiere('Season Premiere');
-                                    }
-
-                                    if (in_array("HDTV", $airing->Tags)) {
-                                        $program->video = new Tv\Elements\Video('yes', '', '', 'HDTV');
-                                    } else {
-                                        $program->video = new Tv\Elements\Video('yes', '', '4:3', 'SDTV');
-                                    }
-
-                                    if (in_array("DD 5.1", $airing->Tags)) {
-                                        $program->audio = new Tv\Elements\Audio('yes', 'dolby digital');
-                                    } elseif (in_array("Dolby", $airing->Tags)) {
-                                        $program->audio = new Tv\Elements\Audio('yes', 'dolby');
-                                    } else {
-                                        $program->audio = new Tv\Elements\Audio('yes', 'stereo');
-                                    }
-
-                                    if (in_array("CC", $airing->Tags)) {
-                                        $subtitles = new Tv\Elements\Subtitles(Tv\Elements\Subtitles\Type::TELETEXT);
-                                        $program->addSubtitles($subtitles);
-                                    }
-                                } else {
-                                    $program->video = new Tv\Elements\Video('yes', '', '', '');
-                                    $program->audio = new Tv\Elements\Audio('yes', 'stereo');
-
-                                    if (isset($airing->OriginalDate)) {
-                                        $originalDate = Carbon::parse($airing->OriginalDate)->endOfDay();
-                                        if (((isset($airing->Categories)
-                                                && is_array($airing->Categories)
-                                                && !in_array("Movie", $airing->Categories)
-                                            ) || is_null($airing->Categories))
-                                            && $originalDate->isPast()
-                                        ) {
-                                            $program->previouslyShown = new Tv\Elements\PreviouslyShown(
-                                                $originalDate->format('Ymd')
-                                            );
-                                        }
-                                    }
-                                }
-
-                                if (isset($airing->Raw->ratings) && !is_null($airing->Raw->ratings)) {
-                                    foreach ($airing->Raw->ratings as $rating) {
-                                        $program->addRating(new Tv\Elements\Rating($rating->code, $rating->body));
-                                    }
-                                }
-
-                                if (isset($airing->Raw->program) && isset($airing->Raw->program->qualityRating) && !is_null($airing->Raw->program->qualityRating)) {
-                                    $program->addStarRating(new Tv\Elements\StarRating($airing->Raw->program->qualityRating->value, $airing->Raw->program->qualityRating->ratingsBody));
-                                }
-
-                                $tv->addProgramme($program);
-                            }
-                        }
-                    } else {
-                        if (!in_array($channelId, $processedEmptyGuideChannels)) {
-                            $processedEmptyGuideChannels[] = $channelId;
-
-                            foreach ($emptyProgramIntervals as $date) {
-                                $program = new Tv\Programme($channelId,
-                                    $date->copy()->format('YmdHis O'),
-                                    $date->copy()->endOfHour()->format('YmdHis O')
-                                );
-
-                                $program->length = new Tv\Elements\Length("3600", Tv\Elements\Length\Unit::SECONDS);
-
-                                $title = $data->Channel->Title
-                                ?? $data->Channel->Name
-                                ?? "To be announced";
-                                $program->addTitle(new Tv\Elements\Title($title));
-                                $program->addSubTitle(new Tv\Elements\SubTitle(
-                                    "{$title} hour long block from {$date->copy()->format('g:i a')} 
-                                    to {$date->copy()->endOfHour()->format('g:i a')} on 
-                                    {$date->copy()->format('M d, Y')}.")
-                                );
-                                $program->addDescription(new Tv\Elements\Desc($data->Channel->Description ?? "To be announced"));
-                                if (isset($data->Channel->Art)) {
-                                    $program->addIcon(new Tv\Elements\Icon($data->Channel->Art));
-                                }
-
-                                $seriesId = md5($channelId);
-                                $programId = $seriesId . "." . $date->copy()->timestamp;
-                                $seasonNumber = $date->copy()->format("Y");
-                                $episodeNumber = $date->copy()->format("mdH");
-                                $episodeNumOnScreen = $seasonNumber . sprintf("%02d", $episodeNumber);
-                                $episodeNumXmltvNs = $seasonNumber - 1 . "." . $episodeNumber - 1 . ".";
-
-                                $program->addSeriesId(new Tv\Elements\SeriesId($seriesId, "custom"));
-                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($programId, "custom"));
-                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumOnScreen, 'onscreen'));
-                                $program->addEpisodeNum(new Tv\Elements\EpisodeNum($episodeNumXmltvNs, 'xmltv_ns'));
-
-                                $program->date = new Tv\Elements\Date(
-                                    $date->copy()->format('Ymd')
-                                );
-
-                                $tv->addProgramme($program);
-                            }
-                        }
-                    }
-                }
                 unset($guideData);
                 gc_collect_cycles();
             }
 
-            return XmlTv::generate($tv, true);
+            return XmlTv::generate($this->tv, true);
         });
+
         return response($xml)->header('Content-Type', 'text/xml');
+    }
+
+    private function parseGuide(Guide $guide)
+    {
+        foreach ($guide->guideEntries as $entry) {
+            
+            
+            if (!in_array($entry->channel->id, $this->processedChannels)) {
+                $this->processedChannels[] = $entry->channel->id;
+                $channel = new Tv\Channel($entry->channel->id);
+                
+                $channelNumber = $this->existingChannels
+                ->search($entry->channel->number) ?? 
+                    $entry->channel->number ?? null;
+
+                if (isset($entry->channel->callSign)) {
+                    $channel->addDisplayName(
+                        new Tv\Elements\DisplayName($entry->channel->callSign)
+                    );
+                }
+
+                if (isset($entry->channel->name)) {
+                    $channel->addDisplayName(
+                        new Tv\Elements\DisplayName($entry->channel->name)
+                    );
+                }
+
+                if (isset($entry->channel->title)) {
+                    $channel->addDisplayName(
+                        new Tv\Elements\DisplayName($entry->channel->title)
+                    );
+                }
+
+                if (!is_null($channelNumber)) {
+                    $channel->addDisplayName(
+                        new Tv\Elements\DisplayName($channelNumber)
+                    );
+                }
+
+                if (isset($entry->channel->logo)) {
+                    $channel->addIcon(
+                        new Tv\Elements\Icon($entry->channel->logo)
+                    );
+                }
+
+                if (isset($entry->channel->streamUrl)) {
+                    $channel->addUrl(
+                        new Url($entry->channel->streamUrl)
+                    );
+                }
+
+                $this->tv->addChannel($channel);
+            }
+
+            foreach ($entry->airings as $airing) {
+                if (!in_array($airing->id, $this->processedAirings)) {
+                    $this->processedAirings[] = $airing->id;
+
+                    $startTime = $airing->startTime->format('YmdHis O');
+                    $stopTime = $airing->stopTime->format('YmdHis O');
+
+                    $program = new Tv\Programme(
+                        $entry->channel->id,
+                        $startTime,
+                        $stopTime
+                    );
+
+                    $program->length = new Tv\Elements\Length(
+                        $airing->length,
+                        Tv\Elements\Length\Unit::SECONDS
+                    );
+
+                    if (isset($entry->channel->streamUrl)) {
+                        $program->addUrl(
+                            new Url($entry->channel->streamUrl)
+                        );
+                    }
+
+                    $program->addTitle(new Tv\Elements\Title($airing->title));
+
+                    if (isset($airing->subTitle)) {
+                        $program->addSubTitle(
+                            new Tv\Elements\SubTitle($airing->subTitle,
+                                $airing->titleLanguage ?? ''
+                            )
+                        );
+                    }
+
+                    $program->addDescription(
+                        new Tv\Elements\Desc(
+                            $airing->description,
+                            $airing->descriptionLanguage ?? ''
+                        )
+                    );
+
+                    if (isset($airing->image)) {
+                        $program->addIcon(
+                            new Tv\Elements\Icon($airing->image)
+                        );
+                    }
+
+                    if (isset($airing->seriesId)) {
+                        $program->addSeriesId(
+                            new Tv\Elements\SeriesId(
+                                $airing->seriesId,
+                                $airing->source ?? 'unknown'
+                            )
+                        );
+                    }
+
+                    if (isset($airing->programId)) {
+                        $program->addEpisodeNum(
+                            new Tv\Elements\EpisodeNum(
+                                $airing->programId,
+                                $airing->source ?? 'unknown'
+                            )
+                        );
+                    }
+
+                    if (!$airing->isMovie && isset($airing->episodeNumber)) {
+                        $program->addEpisodeNum(
+                            new Tv\Elements\EpisodeNum(
+                                ($airing->seasonNumber ?? "")
+                                    . $airing->episodeNumber,
+                                'onscreen'
+                            )
+                        );
+
+                        if (isset($airing->seasonNumber)
+                            && is_numeric($airing->seasonNumber)
+                            && is_numeric($airing->episodeNumber)
+                            && ($airing->seasonNumber > 0
+                                || $airing->episodeNumber > 0)
+                        ) {
+                            $sN = $airing->seasonNumber - 1;
+                            $eN = $airing->episodeNumber - 1;
+
+                            $program->addEpisodeNum(
+                                new Tv\Elements\EpisodeNum(
+                                    ($sN >= 0 ? $sN : "") . "."
+                                    . ($eN >= 0 ? $eN : "") . ".",
+                                    'xmltv_ns'
+                                )
+                            );
+                        }
+                    }
+
+                    if (isset($airing->originalReleaseDate)) {
+                        $program->addEpisodeNum(
+                            new Tv\Elements\EpisodeNum(
+                                $airing->originalReleaseDate
+                                    ->copy()->format('Y-m-d'),
+                                $airing->source ?? 'original-date'
+                            )
+                        );
+
+                        if ($airing->isMovie) {
+                            $program->date = new Tv\Elements\Date(
+                                $airing->originalReleaseDate
+                                    ->copy()
+                                    ->format('Y')
+                            );
+                        } else {
+                            $program->date = new Tv\Elements\Date(
+                                $airing->originalReleaseDate
+                                    ->copy()
+                                    ->format('Ymd')
+                            );
+                        }
+                    }  
+
+                    if (!empty($airing->actors) ||
+                        !empty($airing->adapters) ||
+                        !empty($airing->commentators) ||
+                        !empty($airing->composers) ||
+                        !empty($airing->directors) ||
+                        !empty($airing->editors) ||
+                        !empty($airing->guests) ||
+                        !empty($airing->presenters) ||
+                        !empty($airing->producers) ||
+                        !empty($airing->writers)) {
+                        
+                        $credits = new Tv\Elements\Credits();
+
+                        foreach ($airing->actors as $actor) {
+                            $credits->actor[] =
+                                new Tv\Elements\Credits\Actor($actor);
+                        }
+                        
+                        foreach ($airing->adapters as $adapter) {
+                            $credits->adapter[] =
+                                new Tv\Elements\Credits\Adapter($adapter);
+                        }
+                        
+                        foreach ($airing->commentators as $commentator) {
+                            $credits->commentator[] =
+                                new Tv\Elements\Credits\Commentator($commentator);
+                        }
+
+                        foreach ($airing->composers as $composer) {
+                            $credits->composer[] =
+                                new Tv\Elements\Credits\Composer($composer);
+                        }
+
+                        foreach ($airing->directors as $director) {
+                            $credits->director[] =
+                                new Tv\Elements\Credits\Director($director);
+                        }
+
+                        foreach ($airing->editors as $editor) {
+                            $credits->editor[] =
+                                new Tv\Elements\Credits\Editor($editor);
+                        }
+
+                        foreach ($airing->guests as $guest) {
+                            $credits->guest[] =
+                                new Tv\Elements\Credits\Guest($guest);
+                        }
+
+                        foreach ($airing->presenters as $presenter) {
+                            $credits->presenter[] =
+                                new Tv\Elements\Credits\Presenter($presenter);
+                        }
+
+                        foreach ($airing->producers as $producer) {
+                            $credits->producer[] =
+                                new Tv\Elements\Credits\Producer($producer);
+                        }
+
+                        foreach ($airing->writers as $writer) {
+                            $credits->writer[] =
+                                new Tv\Elements\Credits\Writer($writer);
+                        }
+
+                        $program->addCredits($credits);
+                    }
+
+                    foreach($airing->categories as $category) {
+                        $program->addCategory(
+                            new Tv\Elements\Category($category)
+                        );
+                    }
+
+                    if (!$airing->isMovie && 
+                        $airing->isPreviouslyShown) {
+                        $program->previouslyShown = new Tv\Elements\PreviouslyShown(
+                            $airing->firstAiredDate->format('Ymd') ?? ''
+                        );
+                    } elseif (!$airing->isMovie && $airing->isNew) {
+                        $program->new = new Tv\Elements\NewProgramme();
+                    }
+
+                    if ($airing->isLive) {
+                        $program->live = new Tv\Elements\LiveProgramme();
+                    }
+
+                    if ($airing->isPremiere) {
+                        $program->premiere = 
+                            new Tv\Elements\Premiere('Season Premiere');
+                    }
+
+                    if ($airing->isHdtv) {
+                        $program->video =
+                            new Tv\Elements\Video('yes', '', '', 'HDTV');
+                    } else {
+                        $program->video =
+                            new Tv\Elements\Video('yes');
+                    }
+
+                    if ($airing->isDolbyDigital) {
+                        $program->audio =
+                            new Tv\Elements\Audio('yes', 'dolby digital');
+                    } elseif ($airing->isDolby) {
+                        $program->audio =
+                            new Tv\Elements\Audio('yes', 'dolby');
+                    } elseif ($airing->isStereo) {
+                        $program->audio =
+                            new Tv\Elements\Audio('yes', 'stereo');
+                    } else {
+                        $program->audio = new Tv\Elements\Audio('yes');
+                    }
+
+                    if ($airing->hasClosedCaptioning) {
+                        $program->addSubtitles(
+                            new Tv\Elements\Subtitles(
+                                Tv\Elements\Subtitles\Type::TELETEXT
+                            )
+                        );
+                    }
+
+                    if (isset($airing->airingLanguage)) {
+                        $program->language = 
+                            new Language($airing->airingLanguage);
+                    }
+
+                    if (isset($airing->airingOriginalLanguage)) {
+                        $program->origLanguage = 
+                            new OrigLanguage($airing->airingOriginalLanguage);
+                    }
+
+                    foreach ($airing->ratings as $rating) {
+                        $program->addRating(
+                            new Tv\Elements\Rating(
+                                $rating->rating,
+                                $rating->system ?? ''
+                            )
+                        );
+                    }
+
+                    foreach ($airing->reviews as $review) {
+                        $program->addStarRating(
+                            new Tv\Elements\StarRating(
+                                $review->review,
+                                $review->system ?? ''
+                            )
+                        );
+                    }
+
+                    $this->tv->addProgramme($program);
+                }
+            }
+        }
+        unset($guide);
     }
 }

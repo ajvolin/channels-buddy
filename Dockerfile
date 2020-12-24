@@ -30,8 +30,6 @@ RUN apk add --update --no-cache \
                         git \
                         libxml2-dev \
                         libpng-dev \
-                        nodejs-current \
-                        npm \
                         nginx \
                         oniguruma-dev \
                         supervisor \
@@ -61,7 +59,7 @@ WORKDIR /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
-RUN composer update
+RUN composer install
 RUN composer clearcache
 
 EXPOSE 80
