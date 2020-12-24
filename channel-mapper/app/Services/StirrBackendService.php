@@ -97,13 +97,13 @@ class StirrBackendService implements BackendService
                                 $channelList->put($lineupChannel->id,
                                     new Channel([
                                         'id'            => $lineupChannel->id,
-                                        'name'          => $channel->channel->title,
+                                        'name'          => trim($channel->channel->title),
                                         'number'        => null,
-                                        'callSign'      => $lineupChannel->{'display-name'},
-                                        'description'   => $channel->channel->description,
+                                        'callSign'      => trim($lineupChannel->{'display-name'}),
+                                        'description'   => trim($channel->channel->description),
                                         'logo'          => $logo,
                                         'channelArt'    => $channelArt,
-                                        'category'      => $channel->channel->item->category,
+                                        'category'      => trim($channel->channel->item->category),
                                         'streamUrl'     => $channel->channel->item->link
                                     ])
                                 );
