@@ -86,9 +86,9 @@ class GuideController extends Controller
                 $this->processedChannels[] = $entry->channel->id;
                 $channel = new Tv\Channel($entry->channel->id);
 
-                if (isset($entry->channel->callSign)) {
+                if (isset($entry->channel->title)) {
                     $channel->addDisplayName(
-                        new Tv\Elements\DisplayName($entry->channel->callSign)
+                        new Tv\Elements\DisplayName($entry->channel->title)
                     );
                 }
 
@@ -98,9 +98,9 @@ class GuideController extends Controller
                     );
                 }
 
-                if (isset($entry->channel->title)) {
+                if (isset($entry->channel->callSign)) {
                     $channel->addDisplayName(
-                        new Tv\Elements\DisplayName($entry->channel->title)
+                        new Tv\Elements\DisplayName($entry->channel->callSign)
                     );
                 }
 
