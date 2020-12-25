@@ -41,7 +41,7 @@ RUN apk add --update --no-cache \
 RUN rm -rf /var/cache/apk/*
 
 # Clone github repo
-RUN git clone https://github.com/ajvolin/channels-dvr-mapper /usr/src/app
+RUN git clone https://github.com/ajvolin/channels-buddy /usr/src/app
 
 # Install config files
 RUN cp /usr/src/repo/nginx.conf /etc/nginx/nginx.conf
