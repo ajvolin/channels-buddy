@@ -471,8 +471,16 @@ class ChannelsBackendService
             $channel->setChannelArt($srcChannel->Art);
         }
 
-        if (isset($srcChannel->Title)) {
-            $channel->setTitle($srcChannel->Title);
+        if (isset($srcChannel->Title)
+            || isset($srcChannel->CallSign)
+            || isset($srcChannel->Name)
+            || isset($srcChannel->GuideName)) {
+            $channel->setTitle(
+                $srcChannel->Title ??
+                $srcChannel->CallSign ??
+                $srcChannel->Name ??
+                $srcChannel->GuideName
+            );
         }
 
         if (isset($srcChannel->Description)) {

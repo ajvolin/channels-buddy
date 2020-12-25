@@ -181,6 +181,7 @@ class PlutoBackendService implements BackendService
             "id"            => $channel->slug,
             "name"          => $channel->name,
             "number"        => $channel->number,
+            "title"         => $channel->name,
             "callSign"      => $channel->hash,
             "description"   => $description,
             "logo"          => $channel->colorLogoPNG->path ?? null,

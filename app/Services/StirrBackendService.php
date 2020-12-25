@@ -99,6 +99,7 @@ class StirrBackendService implements BackendService
                                         'id'            => $lineupChannel->id,
                                         'name'          => trim($channel->channel->title),
                                         'number'        => null,
+                                        'title'         => trim($channel->channel->title),
                                         'callSign'      => trim($lineupChannel->{'display-name'}),
                                         'description'   => trim($channel->channel->description),
                                         'logo'          => $logo,

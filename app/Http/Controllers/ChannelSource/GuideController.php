@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Cache;
 use XmlTv\Tv;
 use XmlTv\Tv\Elements\Language;
 use XmlTv\Tv\Elements\OrigLanguage;
-use XmlTv\Tv\Elements\Url;
 use XmlTv\XmlTv;
 
 class GuideController extends Controller
@@ -92,13 +91,19 @@ class GuideController extends Controller
                     );
                 }
 
-                if (isset($entry->channel->name)) {
+                if (isset($entry->channel->name) &&
+                    $entry->channel->name !=
+                        ($entry->channel->title ?? "")) {
                     $channel->addDisplayName(
                         new Tv\Elements\DisplayName($entry->channel->name)
                     );
                 }
 
-                if (isset($entry->channel->callSign)) {
+                if (isset($entry->channel->callSign) &&
+                    $entry->channel->callSign !=
+                        ($entry->channel->title ?? "") &&
+                    $entry->channel->callSign != 
+                        ($entry->channel->name ?? "")) {
                     $channel->addDisplayName(
                         new Tv\Elements\DisplayName($entry->channel->callSign)
                     );
@@ -115,13 +120,6 @@ class GuideController extends Controller
                         new Tv\Elements\Icon($entry->channel->logo)
                     );
                 }
-
-                if (isset($entry->channel->streamUrl)) {
-                    $channel->addUrl(
-                        new Url($entry->channel->streamUrl)
-                    );
-                }
-
 
                 $this->tv->addChannel($channel);
             }
@@ -143,12 +141,6 @@ class GuideController extends Controller
                         $airing->length,
                         Tv\Elements\Length\Unit::SECONDS
                     );
-
-                    if (isset($entry->channel->streamUrl)) {
-                        $program->addUrl(
-                            new Url($entry->channel->streamUrl)
-                        );
-                    }
 
                     $program->addTitle(new Tv\Elements\Title($airing->title));
 
@@ -194,20 +186,25 @@ class GuideController extends Controller
                     if (!$airing->isMovie && isset($airing->episodeNumber)) {
                         $program->addEpisodeNum(
                             new Tv\Elements\EpisodeNum(
-                                ($airing->seasonNumber ?? "")
-                                    . $airing->episodeNumber,
+                                sprintf("%sE%02d",
+                                    isset($airing->seasonNumber)
+                                        ? "S{$airing->seasonNumber}" : "",
+                                        $airing->episodeNumber),
                                 'onscreen'
                             )
                         );
 
-                        if (isset($airing->seasonNumber)
-                            && is_numeric($airing->seasonNumber)
-                            && is_numeric($airing->episodeNumber)
-                            && ($airing->seasonNumber > 0
-                                || $airing->episodeNumber > 0)
-                        ) {
-                            $sN = $airing->seasonNumber - 1;
+                        if (is_numeric($airing->episodeNumber)
+                            && $airing->episodeNumber > 0) {
                             $eN = $airing->episodeNumber - 1;
+
+                            if (isset($airing->seasonNumber)
+                                && is_numeric($airing->seasonNumber)
+                                && $airing->seasonNumber > 0) {
+                                $sN = $airing->seasonNumber - 1;
+                            } else {
+                                $sN = -1;
+                            }
 
                             $program->addEpisodeNum(
                                 new Tv\Elements\EpisodeNum(
@@ -224,7 +221,7 @@ class GuideController extends Controller
                             new Tv\Elements\EpisodeNum(
                                 $airing->originalReleaseDate
                                     ->copy()->format('Y-m-d'),
-                                $airing->source ?? 'original-date'
+                                'original-date'
                             )
                         );
 
