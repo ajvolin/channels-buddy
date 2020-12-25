@@ -17,4 +17,4 @@ Run the container, substituting your Channels DVR server IP address and port.
       ajvolin/channels-buddy
 
 You can map channels, and get the M3U and EPG links for your sources at:
-    http://127.0.0.1:80
+    http://127.0.0.1:8087

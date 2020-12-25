@@ -44,10 +44,10 @@ RUN rm -rf /var/cache/apk/*
 RUN git clone https://github.com/ajvolin/channels-buddy /usr/src/app
 
 # Install config files
-RUN cp /usr/src/repo/nginx.conf /etc/nginx/nginx.conf
-RUN cp /usr/src/repo/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
-RUN cp /usr/src/repo/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
-RUN mkdir -p /etc/supervisor/conf.d/ && cp /usr/src/repo/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN cp /usr/src/app/nginx.conf /etc/nginx/nginx.conf
+RUN cp /usr/src/app/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
+RUN cp /usr/src/app/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
+RUN mkdir -p /etc/supervisor/conf.d/ && cp /usr/src/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Set working directory
 WORKDIR /usr/src/app
