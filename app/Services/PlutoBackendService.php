@@ -65,6 +65,14 @@ class PlutoBackendService implements BackendService
  
     public function getGuideData($startTimestamp = null, $duration = null): Guide
     {
+        if (is_null($startTimestamp)) {
+            $startTimestamp = Carbon::now()->timestamp;
+        }
+
+        if (is_null($duration)) {
+            $duration = config("channels.channelSources.pluto.guideChunkSize");
+        }
+        
         $guideEntries = LazyCollection::make(function() use ($startTimestamp, $duration) {
             $startTimestamp = Carbon::createFromTimestamp($startTimestamp);
             $startTime = urlencode(

@@ -34,7 +34,7 @@ class GuideController extends BaseGuideController
             use ($guideChunkSize, $guideDuration) {
             if (is_null($guideChunkSize) && is_null($guideDuration)) {
                 $guideData = $this->backend
-                        ->getGuideData(null, null);
+                        ->getGuideData();
     
                 $this->parseGuide($guideData, $handle);
             } else {

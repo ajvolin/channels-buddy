@@ -44,18 +44,17 @@ RUN rm -rf /var/cache/apk/*
 RUN git clone https://github.com/ajvolin/channels-buddy /usr/src/app
 
 # Install config files
-RUN cp /usr/src/app/nginx.conf /etc/nginx/nginx.conf
-RUN cp /usr/src/app/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
-RUN cp /usr/src/app/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
-RUN mkdir -p /etc/supervisor/conf.d/ && cp /usr/src/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN ln -sf /usr/src/app/nginx.conf /etc/nginx/nginx.conf
+RUN ln -sf /usr/src/app/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
+RUN ln -sf /usr/src/app/php.ini-channels /etc/php7/conf.d/php-channels-settings.ini
+RUN mkdir -p /etc/supervisor/conf.d/ && ln -sf /usr/src/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Set working directory
 WORKDIR /usr/src/app
 
 # Run setup commands
 RUN chmod o+x /usr/src/app/entrypoint.sh
-RUN composer install
-RUN composer clearcache
+RUN composer install --no-dev --no-cache --no-interaction --optimize-autoloader --quiet --profile
 
 EXPOSE 80
 

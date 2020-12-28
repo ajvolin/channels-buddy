@@ -146,7 +146,7 @@ class StirrBackendService implements BackendService
         return new Channels($channels);
     }
 
-    public function getGuideData($startTimestamp = null, $duration = null): Guide
+    public function getGuideData(): Guide
     {
         $guideEntries = LazyCollection::make(function() {
             $channels = $this->getChannels()->channels;

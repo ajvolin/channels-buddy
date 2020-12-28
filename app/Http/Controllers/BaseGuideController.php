@@ -389,7 +389,7 @@ abstract class BaseGuideController extends Controller
     {
         $doc = new DOMDocument();
         $this->buildXmlTvElement($doc, $element->xmlSerialize());
-        return $doc->saveHTML();
+        return $doc->saveXML($doc->firstChild);
     }
 
     /**
