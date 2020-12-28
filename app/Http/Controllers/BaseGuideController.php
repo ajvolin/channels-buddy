@@ -169,32 +169,32 @@ abstract class BaseGuideController extends Controller
                         }
 
                         if (!$airing->isMovie && isset($airing->episodeNumber)) {
-                            $program->addEpisodeNum(
-                                new Tv\Elements\EpisodeNum(
-                                    sprintf("%sE%02d",
-                                        isset($airing->seasonNumber)
-                                            ? "S{$airing->seasonNumber}" : "",
-                                            $airing->episodeNumber),
-                                    'onscreen'
-                                )
-                            );
-
                             if (is_numeric($airing->episodeNumber)
                                 && $airing->episodeNumber > 0) {
-                                $eN = $airing->episodeNumber - 1;
+                                $eN = $airing->episodeNumber;
 
                                 if (isset($airing->seasonNumber)
                                     && is_numeric($airing->seasonNumber)
                                     && $airing->seasonNumber > 0) {
-                                    $sN = $airing->seasonNumber - 1;
+                                    $sN = $airing->seasonNumber;
                                 } else {
                                     $sN = -1;
                                 }
 
                                 $program->addEpisodeNum(
                                     new Tv\Elements\EpisodeNum(
-                                        ($sN >= 0 ? $sN : "") . "."
-                                        . ($eN >= 0 ? $eN : "") . ".",
+                                        sprintf("%sE%02d",
+                                            ($sN >= 0)
+                                                ? "S{$sN}" : "",
+                                                $eN),
+                                        'onscreen'
+                                    )
+                                );
+
+                                $program->addEpisodeNum(
+                                    new Tv\Elements\EpisodeNum(
+                                        ($sN > 0 ? $sN - 1 : "") . "."
+                                        . ($eN - 1) . ".",
                                         'xmltv_ns'
                                     )
                                 );
