@@ -17,7 +17,6 @@ class GuideController extends BaseGuideController
 
     public function __construct(ChannelsBackendService $backend)
     {
-        parent::__construct();
         $this->backend = $backend;
         $this->existingChannels =
             DvrChannel::where('channel_enabled', 1)

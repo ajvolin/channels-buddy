@@ -16,7 +16,6 @@ class GuideController extends BaseGuideController
 
     public function __construct(BackendService $backend, $channelSource)
     {
-        parent::__construct();
         $this->backend = $backend;
         $this->source = $channelSource;
         $this->existingChannels =
