@@ -61,7 +61,7 @@ class ChannelsBackendService implements BackendService
         return $this->playlistBaseUrl;
     }
 
-    public function getChannels($source = "ANY"): Channels
+    public function getChannels(?string $source = 'ANY'): Channels
     {
         $guideChannels =
             $this->getGuideChannels()
@@ -103,19 +103,23 @@ class ChannelsBackendService implements BackendService
         return new Channels($channels);
     }
 
-    public function getGuideData($device = "ANY", $startTimestamp = null, $duration = null): Guide
+    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $source = 'ANY'): Guide
     {
         if (is_null($startTimestamp)) {
             $startTimestamp = Carbon::now()->timestamp;
         }
 
         if (is_null($duration)) {
-            config('channels.backendChunkSize');
+            $duration = config('channels.backendChunkSize');
+        }
+
+        if (is_null($source)) {
+            $source = 'ANY';
         }
 
         $stream = $this->httpClient->get(
             sprintf('/devices/%s/guide?time=%d&duration=%d',
-                $device,
+                $source,
                 $startTimestamp,
                 $duration
             )

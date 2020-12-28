@@ -41,7 +41,7 @@ class PlutoBackendService implements BackendService
         return $this->baseUrl;
     }
 
-    public function getChannels(): Channels
+    public function getChannels(?string $source = null): Channels
     {
         $stream = $this->httpClient->get('/v2/channels');
         $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
@@ -62,8 +62,13 @@ class PlutoBackendService implements BackendService
 
         return new Channels($channels);
     }
+
+    public function getGuideChannels(): Channels
+    {
+        return $this->getChannels();
+    }
  
-    public function getGuideData($startTimestamp = null, $duration = null): Guide
+    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $source = null): Guide
     {
         if (is_null($startTimestamp)) {
             $startTimestamp = Carbon::now()->timestamp;

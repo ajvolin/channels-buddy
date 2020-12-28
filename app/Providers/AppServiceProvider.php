@@ -16,10 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(BackendService::class, function(){
+        $this->app->bind(BackendService::class, function() {
+            $source = explode(':', $this->app->make('router')->input('channelSource'))[0];
 
-            $source = $this->app->make('router')->input('channelSource');
-            
             if (isset($this->app['config']['channels']['channelSources'][$source])) {
                 return new $this->app['config']['channels']['channelSources'][$source]['backendService'];
             }
@@ -28,10 +27,23 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        
         $this->app->when(GuideController::class)
-          ->needs('$channelSource')
-          ->give(function($app) {
-                return $app->make('router')->input('channelSource');
+            ->needs('$channelSource')
+            ->give(function($app) {
+                  return explode(':', $app->make('router')->input('channelSource'))[0];
+              });
+
+        $this->app->when(GuideController::class)
+            ->needs('$subSource')
+            ->give(function($app) {
+                return explode(':', $app->make('router')->input('channelSource'))[1] ?? null;
+            });
+        
+        $this->app->when(GuideController::class)
+            ->needs('$device')
+            ->give(function($app) {
+                return explode(':', $app->make('router')->input('channelSource'))[2] ?? null;
             });
     }
 

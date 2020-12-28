@@ -4,6 +4,7 @@ use App\Http\Controllers\Channels\ChannelController;
 use App\Http\Controllers\Channels\GuideController;
 use App\Http\Controllers\ChannelSource\ChannelController as ChannelSourceChannelController;
 use App\Http\Controllers\ChannelSource\GuideController as ChannelSourceGuideController;
+use App\Http\Controllers\LogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [ChannelController::class, 'index']);
+
+Route::get('/log', [LogController::class, 'log'])->name('log');
 
 Route::get('/channels/{source}', [ChannelController::class, 'list'])
     ->name('getChannelMapUI');

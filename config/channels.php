@@ -10,7 +10,7 @@ return [
             'displayName' => 'Pluto TV',
             'backendService' => \App\Services\PlutoBackendService::class,
             'guideChunkSize' => 21600,
-            'guideDuration' => 86400,
+            'guideDuration' => 86400
         ],
         'stirr' => [
             'displayName'  => 'Stirr TV',

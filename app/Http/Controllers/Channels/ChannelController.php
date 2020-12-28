@@ -24,7 +24,6 @@ class ChannelController extends Controller
         if($sources->count() > 0) {
             return view('layouts.main', [
                 'sources' => $sources,
-                'channelsBackendUrl' => $this->channelsBackend->getBaseUrl(),
             ]);
         }
         else {

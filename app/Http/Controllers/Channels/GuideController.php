@@ -64,9 +64,9 @@ class GuideController extends BaseGuideController
             foreach ($guideIntervals as $guideInterval) {
                 $guideData = $this->backend
                 ->getGuideData(
-                    $source,
                     $guideInterval->timestamp,
-                    $guideChunkSize
+                    $guideChunkSize,
+                    $source
                 );
                 
                 $this->parseGuide($guideData, $handle);
