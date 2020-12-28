@@ -21,11 +21,11 @@ class ChannelController extends Controller
 
     public function list(Request $request, $source)
     {
-        $channels = collect($this->backend->getChannels()->channels)->keyBy('id');
+        $channels = $this->backend->getChannels()->channels;
 
         $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
-        $channels->transform(function ($channel, $key) use ($existingChannels) {
+        $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
             $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
@@ -74,13 +74,13 @@ class ChannelController extends Controller
         }
 
         $playlist = Cache::remember("{$source}_channelsource_m3u", 1800, function () use ($source) {
-            $channels = collect($this->backend->getChannels()->channels)->keyBy('id');
+            $channels = $this->backend->getChannels()->channels;
             $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
             $channels =
                 $channels->filter(function ($channel, $key) use ($existingChannels) {
                     return $existingChannels->get($key)->channel_enabled ?? false;
-                })->transform(function($channel, $key) use ($existingChannels) {
+                })->map(function($channel, $key) use ($existingChannels) {
                     $channel->mappedChannelNum =
                         $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
                     return $channel;

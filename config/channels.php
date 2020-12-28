@@ -1,7 +1,7 @@
 <?php
 
 const MAX_GUIDE_DURATION = (16 * 86400);
-const MAX_BACKEND_CHUNK_SIZE = 86400;
+const MAX_BACKEND_CHUNK_SIZE = 86400*16;
 
 return [
 
@@ -23,7 +23,7 @@ return [
         ]
     ],
 
-    // maximum number of seconds tptal of guide data that can be requested
+    // maximum number of seconds total of guide data that can be requested
     'guideDuration' => min(
         env('CHANNELS_GUIDE_DURATION', MAX_GUIDE_DURATION),
         MAX_GUIDE_DURATION,

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "14483842e2ccc8a844e654504b2c0398",
+    "content-hash": "2c2f66955888725987aaf8adfcc4c934",
     "packages": [
         {
             "name": "ajvolin/xmltv",
@@ -1158,6 +1158,57 @@
                 "source": "https://github.com/guzzle/psr7/tree/1.7.0"
             },
             "time": "2020-09-30T07:37:11+00:00"
+        },
+        {
+            "name": "halaxa/json-machine",
+            "version": "0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/halaxa/json-machine.git",
+                "reference": "8fe1865a3976807759a3ed7e8744e4a35559b0fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/halaxa/json-machine/zipball/8fe1865a3976807759a3ed7e8744e4a35559b0fa",
+                "reference": "8fe1865a3976807759a3ed7e8744e4a35559b0fa",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^6",
+                "phpunit/phpunit": "^5.7.27"
+            },
+            "suggest": {
+                "ext-json": "To run JSON Machine out of the box without custom decoders."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "JsonMachine\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Filip Halaxa",
+                    "email": "filip@halaxa.cz"
+                }
+            ],
+            "description": "Efficient, easy-to-use and fast JSON pull parser",
+            "support": {
+                "issues": "https://github.com/halaxa/json-machine/issues",
+                "source": "https://github.com/halaxa/json-machine/tree/0.5.0"
+            },
+            "time": "2020-12-08T15:47:58+00:00"
         },
         {
             "name": "laravel/framework",

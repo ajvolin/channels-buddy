@@ -4,6 +4,7 @@ namespace App\APIModels;
 
 use App\APIModels\Airing;
 use App\APIModels\Channel;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Class GuideEntry
@@ -19,9 +20,11 @@ class GuideEntry
     public Channel $channel;
 
     /**
-     * @var Airing[]
+     * Yields a LazyCollection of Airing objects
+     * 
+     * @var LazyCollection
      */
-    public array $airings = [];
+    public LazyCollection $airings;
 
     /**
      * GuideEntry constructor.
@@ -34,40 +37,40 @@ class GuideEntry
         }
     }
 
-    /**
-     * Get the guide channel.
-     *
-     * @return Channel
-     */
-    public function getChannel(): Channel
-    {
-        return $this->channel;
-    }
+    // /**
+    //  * Get the guide channel.
+    //  *
+    //  * @return Channel
+    //  */
+    // public function getChannel(): Channel
+    // {
+    //     return $this->channel;
+    // }
+
+    // /**
+    //  * Set the guide channel.
+    //  *
+    //  * @param Channel $channel
+    //  */
+    // public function setChannel(Channel $channel): void
+    // {
+    //     $this->channel = $channel;
+    // }
+
+    // /**
+    //  * @param Airing $airing
+    //  */
+    // public function addAirings(Airing $airing): void
+    // {
+    //     array_push($this->airings, $airing);
+    // }
 
     /**
-     * Set the guide channel.
-     *
-     * @param Channel $channel
-     */
-    public function setChannel(Channel $channel): void
-    {
-        $this->channel = $channel;
-    }
-
-    /**
-     * @param Airing $airing
-     */
-    public function addAiring(Airing $airing): void
-    {
-        array_push($this->airings, $airing);
-    }
-
-    /**
-     * Returns the airings as an array
+     * Returns the airings LazyCollection
      * 
-     * @return Airing[]
+     * @return LazyCollection
      */
-    public function getAirings(): array
+    public function getAirings(): LazyCollection
     {
         return $this->airings;
     }

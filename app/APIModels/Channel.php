@@ -83,6 +83,11 @@ class Channel
     public string $streamUrl;
 
     /**
+     * @var string
+     */
+    public ?string $sortValue;
+
+    /**
      * Channel constructor.
      *
      * @param array $attributes Initialize the channel with the provided attributes.
@@ -377,5 +382,25 @@ class Channel
     public function setStreamUrl(string $streamUrl): void
     {
         $this->streamUrl = $streamUrl;
+    }
+
+    /**
+     * Get the channel sort value.
+     *
+     * @return string
+     */
+    public function getSortValue(): ?string
+    {
+        return $this->sortValue;
+    }
+
+    /**
+     * Set the channel sort value.
+     *
+     * @param string $sortValue
+     */
+    public function setSortValue(?string $sortValue): void
+    {
+        $this->sortValue = $sortValue;
     }
 }

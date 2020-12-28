@@ -39,18 +39,12 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $allChannels = collect(
-                $this->channelsBackend->getGuideChannels()->channels
-            )->values()
-            ->keyBy('number');
-        $sourceChannels = collect(
-                $this->channelsBackend->getChannels($source)->channels
-            )->values()
-            ->keyBy('number');
+        $allChannels = $this->channelsBackend->getGuideChannels()->channels;
+        $sourceChannels = $this->channelsBackend->getChannels($source)->channels;
 
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
-        $sourceChannels->transform(function ($channel, $key) use ($existingChannels) {
+        $sourceChannels = $sourceChannels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = 
                 $existingChannels->get($key)->mapped_channel_number ??
                     $channel->number;
@@ -103,16 +97,13 @@ class ChannelController extends Controller
             throw new Exception('Invalid source detected.');
         }
 
-        $channels = collect(
-            $this->channelsBackend->getChannels($source)->channels
-        )->values()
-        ->keyBy('number');
+        $channels = $this->channelsBackend->getChannels($source)->channels;
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
         $channels =
             $channels->filter(function ($channel, $key) use ($existingChannels) {
                 return $existingChannels->get($key)->channel_enabled ?? true;
-            })->transform(function($channel, $key) use ($existingChannels) {
+            })->map(function($channel, $key) use ($existingChannels) {
                 $channel->mappedChannelNum =
                     $existingChannels->get($key)->mapped_channel_number ??
                         $channel->number;
@@ -120,9 +111,7 @@ class ChannelController extends Controller
             })->values()->sortBy('mappedChannelNum');
 
         return response(view('playlist.full', [
-            'channels' => $channels,
-            'channelsBackendUrl' => $this->channelsBackend->getPlaylistBaseUrl(),
-            'source' => $source,
+            'channels' => $channels
         ]))->header('Content-Type', 'application/x-mpegurl');
     }
 }

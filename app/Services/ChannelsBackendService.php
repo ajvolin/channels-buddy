@@ -9,13 +9,17 @@ use App\APIModels\Guide;
 use App\APIModels\GuideEntry;
 use App\APIModels\Rating;
 use App\APIModels\Review;
+use App\Contracts\BackendService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
+use JsonMachine\JsonMachine;
+use JsonMachine\JsonDecoder\ExtJsonDecoder;
 use stdClass;
 
-class ChannelsBackendService
+class ChannelsBackendService implements BackendService
 {
     protected $baseUrl;
     protected $playlistBaseUrl;
@@ -57,45 +61,57 @@ class ChannelsBackendService
         return $this->playlistBaseUrl;
     }
 
-    public function getChannels($source): Channels
+    public function getChannels($source = "ANY"): Channels
     {
-        $guideChannels = collect(
-            $this->getGuideChannels()->channels
-        )->keyBy('number');
+        $guideChannels =
+            $this->getGuideChannels()
+            ->channels
+            ->keyBy('number');
+
         $channels = $this->getDeviceChannels($source)
             ->filter(function ($channel, $key) {
                 return (property_exists($channel, 'Hidden')
                     && $channel->Hidden == 1) ? false : true;
-            })->transform(function ($channel, $key) use ($guideChannels, $source) {
-                    $channel->CallSign = 
-                        $guideChannels->get($key)->callSign ??
-                            $channel->GuideName;
-                    $channel->Name = $guideChannels->get($key)->name ??
+            })->map(function ($channel, $key) use ($guideChannels, $source) {
+                $channel->CallSign = 
+                    $guideChannels->get($key)->callSign ??
                         $channel->GuideName;
-                    $channel->StreamUrl = 
-                        $this->getStreamUrl($source, $channel->GuideNumber);
+                $channel->Name = $guideChannels->get($key)->name ??
+                    $channel->GuideName;
+                $channel->StreamUrl = 
+                    $this->getStreamUrl($source, $channel->GuideNumber);
 
-                    return $this->generateChannel($channel);
-            });
+                return $this->generateChannel($channel);
+            })->keyBy('number');
             
-        return new Channels($channels->toArray());
+        return new Channels($channels);
     }
 
     public function getGuideChannels(): Channels
     {
         $stream = $this->httpClient->get('/dvr/guide/channels');
-        $json = $stream->getBody()->getContents();
-        $channels = collect(json_decode($json))
-        ->transform(function($channel){
-            return $this->generateChannel($channel);
-        })->sortBy('number');
+        $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
+            $stream->getBody()
+        );
 
-        return new Channels($channels->toArray());
+        $channels = LazyCollection::make(JsonMachine::fromStream(
+            $json, '', new ExtJsonDecoder
+        ))->map(function($channel) {
+            return $this->generateChannel($channel);
+        })->keyBy('number');
+
+        return new Channels($channels);
     }
 
-    public function getGuideData($device, $startTimestamp, $duration): Guide
+    public function getGuideData($device = "ANY", $startTimestamp = null, $duration = null): Guide
     {
-        $guide = new Guide;
+        if (is_null($startTimestamp)) {
+            $startTimestamp = Carbon::now()->timestamp;
+        }
+
+        if (is_null($duration)) {
+            config('channels.backendChunkSize');
+        }
 
         $stream = $this->httpClient->get(
             sprintf('/devices/%s/guide?time=%d&duration=%d',
@@ -104,303 +120,57 @@ class ChannelsBackendService
                 $duration
             )
         );
-        $json = $stream->getBody()->getContents();
-        $guideData = collect(json_decode($json));
+        $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
+            $stream->getBody()
+        );
+        $guideData = JsonMachine::fromStream(
+            $json, '', new ExtJsonDecoder
+        );
 
-        $startTimestamp = Carbon::createFromTimestamp($startTimestamp);
+        $emptyProgramIntervalStartTime =
+            Carbon::createFromTimestamp($startTimestamp);
 
         $emptyProgramIntervals = CarbonInterval::minutes(60)
-            ->toPeriod(
-                $startTimestamp,
-                $startTimestamp->copy()->addSeconds($duration)
-            );
-
-        foreach ($guideData as $srcChannel) {                        
-            $channel = $this->generateChannel($srcChannel->Channel);
-            $guideEntry = new GuideEntry($channel);
-
-            if (count($srcChannel->Airings) > 0) {
-                foreach ($srcChannel->Airings as $channelAiring) {
-                    $startTime = Carbon::createFromTimestamp($channelAiring->Time);
-                    $stopTime = $startTime->copy()->addSeconds($channelAiring->Duration);
-                    $length = $channelAiring->Duration;
-                    $airingId = md5(
-                        $channel->id.$channelAiring->Time
-                    );
-                    $isMovie = (isset($channelAiring->Categories)
-                        && is_array($channelAiring->Categories)
-                        && in_array("Movie", $channelAiring->Categories));
-
-                    $airing = new Airing([
-                        'id'                    => $airingId,
-                        'channelId'             => $channel->id,
-                        'title'                 => $channelAiring->Title,
-                        'startTime'             => $startTime,
-                        'stopTime'              => $stopTime,
-                        'length'                => $length,
-                        'isMovie'               => $isMovie
-                    ]);
-
-                    if (isset($channelAiring->Raw->program->titleLang)) {
-                        $airing->setTitleLanguage(
-                            $channelAiring->Raw->program->titleLang
-                        );
-                    }
-
-                    if (isset($channelAiring->EpisodeTitle)) {
-                        $airing->setSubTitle(
-                            $channelAiring->EpisodeTitle
-                        );
-                    } elseif (isset($channelAiring->EventTitle)) {
-                        $airing->setSubTitle(
-                            $channelAiring->EventTitle
-                        );
-                    }
-
-                    if (isset($channelAiring->Raw->long)
-                        || isset($channelAiring->Raw->program->longDescription)
-                        || isset($channelAiring->Raw->program->shortDescription)
-                        || isset($channelAiring->Summary)) {
-                        $airing->setDescription(
-                            $channelAiring->Raw->program->longDescription ??
-                            $channelAiring->Raw->program->shortDescription ??
-                            $channelAiring->Summary
-                        );
-                    }
-
-                    if (isset($channelAiring->Raw->program->descriptionLang)) {
-                        $airing->setDescriptionLanguage(
-                            $channelAiring->Raw->program->descriptionLang
-                        );
-                    }
-
-                    if (isset($channelAiring->Raw->program->preferredImage->uri)
-                        || isset($channelAiring->Image)) {
-                        $airing->setImage(
-                            $channelAiring->Raw->program->preferredImage->uri ??
-                            $channelAiring->Image
-                        );
-                    }
-
-                    if (isset($channelAiring->Source)) {
-                        $airing->setSource(
-                            $channelAiring->Source
-                        );
-                    }
-                    
-                    if (isset($channelAiring->ProgramID)) {
-                        $airing->setProgramId($channelAiring->ProgramID);
-                    }
-
-                    if (!$isMovie && isset($channelAiring->SeriesID)) {
-                        $airing->setSeriesId($channelAiring->SeriesID);
-                    }
-
-                    if (!$isMovie && isset($channelAiring->SeasonNumber)) {
-                        $airing->setSeasonNumber(
-                            $channelAiring->SeasonNumber
-                        );
-                    }
-
-                    if (!$isMovie && isset($channelAiring->EpisodeNumber)) {
-                        $airing->setEpisodeNumber(
-                            $channelAiring->EpisodeNumber
-                        );
-                    }
-
-                    if (isset($channelAiring->Directors)
-                        && !is_null($channelAiring->Directors)) {
-                        foreach ($channelAiring->Directors as $director) {
-                            $airing->addDirector($director);
-                        }
-                    }
-
-                    if (isset($channelAiring->Cast)
-                        && !is_null($channelAiring->Cast)) {
-                        foreach ($channelAiring->Cast as $cast) {
-                            $airing->addActor($cast);
-                        }
-                    }
-
-                    if (isset($channelAiring->OriginalDate)) {
-                        $originalReleaseDate = Carbon::parse(
-                            $channelAiring->OriginalDate
-                        );
-                        $airing->setOriginalReleaseDate(
-                            $originalReleaseDate
-                        );
-                    }
-
-                    if (isset($channelAiring->Genres)
-                        && !is_null($channelAiring->Genres)) {
-                        foreach ($channelAiring->Genres as $cat) {
-                            $airing->addCategory($cat);
-                        }
-                    }
-
-                    if (isset($channelAiring->Categories)
-                        && !is_null($channelAiring->Categories)) {
-                        foreach ($channelAiring->Categories as $cat) {
-                            $airing->addCategory($cat);
-                        }
-                    }
-
-                    if (isset($channelAiring->Tags)
-                        && is_array($channelAiring->Tags)) {
-                        if (in_array("Live", $channelAiring->Tags)) {
-                            $airing->setIsLive(true);
-                        }
-
-                        if (in_array("New", $channelAiring->Tags)) {
-                            $airing->setIsNew(true);
-                        } elseif (isset($originalReleaseDate) && !$isMovie) {
-                            $airing->setIsPreviouslyShown(true);
-                            $airing->setFirstAiredDate(
-                                $originalReleaseDate->copy()
-                            );
-                        }
-
-                        if (in_array("Season Premiere", $channelAiring->Tags)) {
-                            $airing->setIsPremiere(true);
-                        }
-
-                        if (in_array("HDTV", $channelAiring->Tags)) {
-                            $airing->setIsHdtv(true);
-                        }
-
-                        if (in_array("DD 5.1", $channelAiring->Tags)) {
-                            $airing->setIsDolbyDigital(true);
-                        } elseif (in_array("Dolby", $channelAiring->Tags)) {
-                            $airing->setIsDolby(true);
-                        } else {
-                            $airing->setIsStereo(true);
-                        }
-
-                        if (in_array("CC", $channelAiring->Tags)) {
-                            $airing->setHasClosedCaptioning(true);
-                        }
-                    } else {
-                        $airing->setIsStereo(true);
-
-                        if (!$isMovie
-                            && isset($originalReleaseDate)
-                            && $originalReleaseDate
-                                ->copy()
-                                ->endOfDay()
-                                ->isPast()) {
-                            $airing->setIsPreviouslyShown(true);
-                            $airing->setFirstAiredDate(
-                                $originalReleaseDate->copy()
-                            );
-                        }
-                    }
-
-                    if (isset($channelAiring->Raw->ratings)
-                        && !is_null($channelAiring->Raw->ratings)) {
-                        foreach ($channelAiring->Raw->ratings as $rating) {
-                            $airing->addRating(
-                                new Rating(
-                                    $rating->code,
-                                    $rating->body ?? null
-                                )
-                            );
-                        }
-                    }
-
-                    if (isset($channelAiring->Raw->program)
-                        && isset($channelAiring->Raw->program->qualityRating)
-                        && !is_null($channelAiring->Raw->program->qualityRating)) {
-                        $airing->addReview(
-                            new Review(
-                                $channelAiring->Raw->program->qualityRating->value,
-                                $channelAiring->Raw->program->qualityRating->ratingsBody ?? null
-                            )
-                        );
-                    }
-
-                    $guideEntry->addAiring($airing);
-                    unset(
-                        $startTime,
-                        $stopTime,
-                        $length,
-                        $isMovie,
-                        $airingId,
-                        $airing,
-                        $originalReleaseDate,
-                        $channelAiring
-                    );
-                }
-            } else {
-                foreach ($emptyProgramIntervals as $date) {
-                    $airingId = md5(
-                        $channel->id.$date->copy()->timestamp
-                    );
-
-                    $title = $channel->title
-                        ?? $channel->name
-                        ?? "To be announced";
-
-                    $subTitle = sprintf(
-                        "%s hour long block on %s.",
-                        $title,
-                        $date->copy()->format('M d, Y')
-                    );
-
-                    $description = $channel->description
-                        ?? "To be announced";
-
-                    $seriesId = md5($channel->id);
-                    $programId = $seriesId . "." . $date->copy()->timestamp;
-                    $seasonNumber = $date->copy()->format("Y");
-                    $episodeNumber = $date->copy()->format("mdH");
-                    
-                    $airing = new Airing([
-                        'id'                    => $airingId,
-                        'channelId'             => $channel->id,
-                        'startTime'             => $date->copy(),
-                        'stopTime'              => $date->copy()->endOfHour(),
-                        'length'                => 3600,
-                        'title'                 => $title,
-                        'subTitle'              => $subTitle,
-                        'description'           => $description,
-                        'programId'             => $programId,
-                        'seriesId'              => $seriesId,
-                        'seasonNumber'          => $seasonNumber,
-                        'episodeNumber'         => $episodeNumber,
-                        'originalReleaseDate'   => $date->copy(),
-                        'isMovie'               => false
-                    ]);
-                    
-                    $guideEntry->addAiring($airing);
-
-                    unset(
-                        $airingId,
-                        $title,
-                        $subTitle,
-                        $description,
-                        $programId,
-                        $seriesId,
-                        $seasonNumber,
-                        $episodeNumber,
-                        $airing
-                    );
-                }
-            }
-            $guide->addGuideEntry($guideEntry);
-            unset(
-                $channel,
-                $guideEntry
-            );
-        }
-
-        unset(
-            $stream,
-            $json,
-            $guideData,
-            $startTimestamp,
-            $emptyProgramIntervals
+        ->toPeriod(
+                $emptyProgramIntervalStartTime,
+                $emptyProgramIntervalStartTime
+                    ->copy()
+                    ->addSeconds($duration - 1)
         );
-        return $guide;
+
+        $guideEntries = LazyCollection::make(function()
+        use ($guideData, $emptyProgramIntervals) {
+            foreach ($guideData as $srcChannel) {                        
+                $channel = $this->generateChannel($srcChannel->Channel);
+                $guideEntry = new GuideEntry($channel);
+
+                if (count($srcChannel->Airings) > 0) {
+                    $airings = LazyCollection::make(function()
+                    use ($channel, $srcChannel) {
+                        foreach ($srcChannel->Airings as $channelAiring) {
+                            yield $this->generateAiring(
+                                    $channel,
+                                    $channelAiring
+                                );
+                        }
+                    });
+                } else {
+                    $airings = LazyCollection::make(function()
+                    use ($channel, $emptyProgramIntervals) {
+                        foreach ($emptyProgramIntervals as $date) {
+                            yield $this->generateAiringBlockForChannel(
+                                    $channel,
+                                    $date
+                                );
+                        }
+                    });
+                }
+                $guideEntry->airings = $airings;
+                yield $guideEntry;
+            }
+        });
+
+        return new Guide($guideEntries);
     }
 
     public function isValidDevice($device): bool
@@ -421,6 +191,252 @@ class ChannelsBackendService
 
         return $devices;
 
+    }
+
+    private function generateAiring(Channel $channel, stdClass $channelAiring): Airing
+    {
+        $startTime = Carbon::createFromTimestamp($channelAiring->Time);
+        $stopTime = $startTime
+            ->copy()
+            ->addSeconds($channelAiring->Duration);
+        $length = $channelAiring->Duration;
+        $airingId = md5(
+            $channel->id.$channelAiring->Time
+        );
+        $isMovie = (isset($channelAiring->Categories)
+            && is_array($channelAiring->Categories)
+            && in_array("Movie", $channelAiring->Categories));
+
+        $airing = new Airing([
+            'id'                    => $airingId,
+            'channelId'             => $channel->id,
+            'title'                 => $channelAiring->Title,
+            'startTime'             => $startTime,
+            'stopTime'              => $stopTime,
+            'length'                => $length,
+            'isMovie'               => $isMovie
+        ]);
+
+        if (isset($channelAiring->Raw->program->titleLang)) {
+            $airing->setTitleLanguage(
+                $channelAiring->Raw->program->titleLang
+            );
+        }
+
+        if (isset($channelAiring->EpisodeTitle)) {
+            $airing->setSubTitle(
+                $channelAiring->EpisodeTitle
+            );
+        } elseif (isset($channelAiring->EventTitle)) {
+            $airing->setSubTitle(
+                $channelAiring->EventTitle
+            );
+        }
+
+        if (isset($channelAiring->Raw->long)
+            || isset($channelAiring->Raw->program->longDescription)
+            || isset($channelAiring->Raw->program->shortDescription)
+            || isset($channelAiring->Summary)) {
+            $airing->setDescription(
+                $channelAiring->Raw->program->longDescription ??
+                $channelAiring->Raw->program->shortDescription ??
+                $channelAiring->Summary
+            );
+        }
+
+        if (isset($channelAiring->Raw->program->descriptionLang)) {
+            $airing->setDescriptionLanguage(
+                $channelAiring->Raw->program->descriptionLang
+            );
+        }
+
+        if (isset($channelAiring->Raw->program->preferredImage->uri)
+            || isset($channelAiring->Image)) {
+            $airing->setImage(
+                $channelAiring->Raw->program->preferredImage->uri ??
+                $channelAiring->Image
+            );
+        }
+
+        if (isset($channelAiring->Source)) {
+            $airing->setSource(
+                $channelAiring->Source
+            );
+        }
+        
+        if (isset($channelAiring->ProgramID)) {
+            $airing->setProgramId($channelAiring->ProgramID);
+        }
+
+        if (!$isMovie && isset($channelAiring->SeriesID)) {
+            $airing->setSeriesId($channelAiring->SeriesID);
+        }
+
+        if (!$isMovie && isset($channelAiring->SeasonNumber)) {
+            $airing->setSeasonNumber(
+                $channelAiring->SeasonNumber
+            );
+        }
+
+        if (!$isMovie && isset($channelAiring->EpisodeNumber)) {
+            $airing->setEpisodeNumber(
+                $channelAiring->EpisodeNumber
+            );
+        }
+
+        if (isset($channelAiring->Directors)
+            && !is_null($channelAiring->Directors)) {
+            foreach ($channelAiring->Directors as $director) {
+                $airing->addDirector($director);
+            }
+        }
+
+        if (isset($channelAiring->Cast)
+            && !is_null($channelAiring->Cast)) {
+            foreach ($channelAiring->Cast as $cast) {
+                $airing->addActor($cast);
+            }
+        }
+
+        if (isset($channelAiring->OriginalDate)) {
+            $originalReleaseDate = Carbon::parse(
+                $channelAiring->OriginalDate
+            );
+            $airing->setOriginalReleaseDate(
+                $originalReleaseDate
+            );
+        }
+
+        if (isset($channelAiring->Genres)
+            && !is_null($channelAiring->Genres)) {
+            foreach ($channelAiring->Genres as $cat) {
+                $airing->addCategory($cat);
+            }
+        }
+
+        if (isset($channelAiring->Categories)
+            && !is_null($channelAiring->Categories)) {
+            foreach ($channelAiring->Categories as $cat) {
+                $airing->addCategory($cat);
+            }
+        }
+
+        if (isset($channelAiring->Tags)
+            && is_array($channelAiring->Tags)) {
+            if (in_array("Live", $channelAiring->Tags)) {
+                $airing->setIsLive(true);
+            }
+
+            if (in_array("New", $channelAiring->Tags)) {
+                $airing->setIsNew(true);
+            } elseif (isset($originalReleaseDate) && !$isMovie) {
+                $airing->setIsPreviouslyShown(true);
+                $airing->setFirstAiredDate(
+                    $originalReleaseDate->copy()
+                );
+            }
+
+            if (in_array("Season Premiere", $channelAiring->Tags)) {
+                $airing->setIsPremiere(true);
+            }
+
+            if (in_array("HDTV", $channelAiring->Tags)) {
+                $airing->setIsHdtv(true);
+            }
+
+            if (in_array("DD 5.1", $channelAiring->Tags)) {
+                $airing->setIsDolbyDigital(true);
+            } elseif (in_array("Dolby", $channelAiring->Tags)) {
+                $airing->setIsDolby(true);
+            } else {
+                $airing->setIsStereo(true);
+            }
+
+            if (in_array("CC", $channelAiring->Tags)) {
+                $airing->setHasClosedCaptioning(true);
+            }
+        } else {
+            $airing->setIsStereo(true);
+
+            if (!$isMovie
+                && isset($originalReleaseDate)
+                && $originalReleaseDate
+                    ->copy()
+                    ->endOfDay()
+                    ->isPast()) {
+                $airing->setIsPreviouslyShown(true);
+                $airing->setFirstAiredDate(
+                    $originalReleaseDate->copy()
+                );
+            }
+        }
+
+        if (isset($channelAiring->Raw->ratings)
+            && !is_null($channelAiring->Raw->ratings)) {
+            foreach ($channelAiring->Raw->ratings as $rating) {
+                $airing->addRating(
+                    new Rating(
+                        $rating->code,
+                        $rating->body ?? null
+                    )
+                );
+            }
+        }
+
+        if (isset($channelAiring->Raw->program)
+            && isset($channelAiring->Raw->program->qualityRating)
+            && !is_null($channelAiring->Raw->program->qualityRating)) {
+            $airing->addReview(
+                new Review(
+                    $channelAiring->Raw->program->qualityRating->value,
+                    $channelAiring->Raw->program->qualityRating->ratingsBody ?? null
+                )
+            );
+        }
+
+        return $airing;
+    }
+
+    private function generateAiringBlockForChannel(Channel $channel, Carbon $date): Airing
+    {
+        $airingId = md5(
+            $channel->id.$date->copy()->timestamp
+        );
+
+        $title = $channel->title
+            ?? $channel->name
+            ?? "To be announced";
+
+        $subTitle = sprintf(
+            "%s hour long block on %s.",
+            $title,
+            $date->copy()->format('M d, Y')
+        );
+
+        $description = $channel->description
+            ?? "To be announced";
+
+        $seriesId = md5($channel->id);
+        $programId = $seriesId . "." . $date->copy()->timestamp;
+        $seasonNumber = $date->copy()->format("Y");
+        $episodeNumber = $date->copy()->format("mdH");
+        
+        return new Airing([
+            'id'                    => $airingId,
+            'channelId'             => $channel->id,
+            'startTime'             => $date->copy()->startOfHour(),
+            'stopTime'              => $date->copy()->endOfHour(),
+            'length'                => 3600,
+            'title'                 => $title,
+            'subTitle'              => $subTitle,
+            'description'           => $description,
+            'programId'             => $programId,
+            'seriesId'              => $seriesId,
+            'seasonNumber'          => $seasonNumber,
+            'episodeNumber'         => $episodeNumber,
+            'originalReleaseDate'   => $date->copy(),
+            'isMovie'               => false
+        ]);
     }
 
     private function generateChannel(stdClass $srcChannel): Channel
@@ -502,18 +518,20 @@ class ChannelsBackendService
         return $channel;
     }
 
-    private function getDeviceChannels($source): Collection
+    private function getDeviceChannels($source): LazyCollection
     {
-        $deviceChannelsStream = $this->httpClient
+        $stream = $this->httpClient
             ->get(sprintf('/devices/%s/channels', $source));
-        $deviceChannelsJson = $deviceChannelsStream
-            ->getBody()
-            ->getContents();
-        $deviceChannels = collect(json_decode($deviceChannelsJson))
-            ->keyBy('GuideNumber')
-            ->sortBy("GuideNumber");
+        $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
+            $stream->getBody()
+        );
 
-        return $deviceChannels;
+        $channels = LazyCollection::make(JsonMachine::fromStream(
+            $json, '', new ExtJsonDecoder
+        ))->keyBy('GuideNumber')
+        ->sortBy("GuideNumber");
+
+        return $channels;
     }
 
     private function getStreamUrl(string $source, string $channelNumber): string {

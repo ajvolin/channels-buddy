@@ -4,7 +4,7 @@ namespace App\APIModels;
 
 use App\APIModels\Channel;
 use App\Exceptions\ChannelsInvalidObject;
-use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Class Channels
@@ -15,53 +15,39 @@ use Illuminate\Support\Collection;
 class Channels
 {
     /**
-     * @var Channel[]
+     * Yields a LazyCollection of Channel objects
+     * 
+     * @var LazyCollection
      */
-    public array $channels = [];
+    public LazyCollection $channels;
 
     /**
      * Channels constructor.
      *
      * @param array $attributes Initialize the channel with the provided attributes.
      */
-    public function __construct(array $channels = [])
+    public function __construct(LazyCollection $channels)
     {
-        foreach ($channels as $channel) {
-            if ($channel instanceof Channel) {
-                $this->addChannel($channel);
-            } else {
-                throw new ChannelsInvalidObject("Object must be instance of Channel: {$channel}");
-            }
-        }
+        $this->channels = $channels;
     }
 
-    /**
-     * Adds a channel to the $channels array
-     * 
-     * @param Channel $channel
-     */
-    public function addChannel(Channel $channel): void
-    {
-        array_push($this->channels, $channel);
-    }
+    // /**
+    //  * Adds a channel to the $channels array
+    //  * 
+    //  * @param Channel $channel
+    //  */
+    // public function addChannel(Channel $channel): void
+    // {
+    //     array_push($this->channels, $channel);
+    // }
 
     /**
-     * Returns the channels as an array
+     * Returns the channels LazyCollection
      * 
-     * @return Channel[]
+     * @return LazyCollection
      */
-    public function getChannels(): array
+    public function getChannels(): LazyCollection
     {
         return $this->channels;
-    }
-
-    /**
-     * Returns the channels as a collection
-     * 
-     * @return Collection
-     */
-    public function getChannelsCollection(): Collection
-    {
-        return collect($this->channels);
     }
 }
