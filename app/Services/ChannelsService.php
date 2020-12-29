@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\ChannelSourceModels\Airing;
-use App\ChannelSourceModels\Channel;
-use App\ChannelSourceModels\Channels;
-use App\ChannelSourceModels\Guide;
-use App\ChannelSourceModels\GuideEntry;
-use App\ChannelSourceModels\Rating;
-use App\ChannelSourceModels\Review;
-use App\Contracts\ChannelSource;
+use ChannelsBuddy\SourceProvider\Models\Airing;
+use ChannelsBuddy\SourceProvider\Models\Channel;
+use ChannelsBuddy\SourceProvider\Models\Channels;
+use ChannelsBuddy\SourceProvider\Models\Guide;
+use ChannelsBuddy\SourceProvider\Models\GuideEntry;
+use ChannelsBuddy\SourceProvider\Models\Rating;
+use ChannelsBuddy\SourceProvider\Models\Review;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use GuzzleHttp\Client;

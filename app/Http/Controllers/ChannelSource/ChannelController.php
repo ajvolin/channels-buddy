@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\ChannelSource;
 
-use App\Contracts\ChannelSource;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\SourceChannel;
 use App\Services\ChannelsService;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,9 +14,12 @@ class ChannelController extends Controller
 {
     protected $channelSource;
 
-    public function __construct(ChannelSource $channelSource)
+    public function __construct(Request $request, ChannelSourceProviders $channelSources)
     {
-        $this->channelSource = $channelSource;
+        $source = $channelSources
+            ->getChannelSourceProvider($request->channelSource);
+        $serviceClass = $source->getChannelSourceClass();
+        $this->channelSource = new $serviceClass;
     }
 
     public function list(Request $request, $source)

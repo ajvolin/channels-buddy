@@ -8,7 +8,12 @@ class LogController extends Controller
 {
     public function log()
     {
-        $log = file_get_contents(storage_path('logs/laravel.log'));
+        $logFiles = glob(
+            storage_path('logs/') . "laravel-*.log"
+        );
+        $logFilePath = end($logFiles) ?? null;
+        
+        $log = file_get_contents($logFilePath) ?? null;
         return view('log',
             [
                 'log' => $log

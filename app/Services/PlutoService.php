@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\ChannelSourceModels\Airing;
-use App\ChannelSourceModels\Channel;
-use App\ChannelSourceModels\Channels;
-use App\ChannelSourceModels\Guide;
-use App\ChannelSourceModels\GuideEntry;
-use App\ChannelSourceModels\Rating;
-use App\Contracts\ChannelSource;
+use ChannelsBuddy\SourceProvider\Models\Airing;
+use ChannelsBuddy\SourceProvider\Models\Channel;
+use ChannelsBuddy\SourceProvider\Models\Channels;
+use ChannelsBuddy\SourceProvider\Models\Guide;
+use ChannelsBuddy\SourceProvider\Models\GuideEntry;
+use ChannelsBuddy\SourceProvider\Models\Rating;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\LazyCollection;
@@ -133,15 +133,12 @@ class PlutoService implements ChannelSource
                             $airing->setSubTitle($channelAiring->episode->name);
                         }
 
-                        if ($isMovie) {
-                            $airingArt = $channelAiring->episode->poster->path
-                                ?? $channelAiring->episode->series->tile->path
-                                ?? null;
+                        if ($isMovie && isset($channelAiring->episode->poster)) {
+                            $airingArt = $channelAiring->episode->poster->path;
                         } else {
                             $airingArt = str_replace("h=660", "h=900",
-                                str_replace("w=660", "w=900",    
+                                str_replace("w=660", "w=900",
                                     $channelAiring->episode->series->tile->path
-                                    ?? $channelAiring->episode->poster->path
                                     ?? null
                                 )
                             );

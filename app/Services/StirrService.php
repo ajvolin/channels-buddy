@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\ChannelSourceModels\Airing;
-use App\ChannelSourceModels\Channel;
-use App\ChannelSourceModels\Channels;
-use App\ChannelSourceModels\Guide;
-use App\ChannelSourceModels\GuideEntry;
-use App\Contracts\ChannelSource;
+use ChannelsBuddy\SourceProvider\Models\Airing;
+use ChannelsBuddy\SourceProvider\Models\Channel;
+use ChannelsBuddy\SourceProvider\Models\Channels;
+use ChannelsBuddy\SourceProvider\Models\Guide;
+use ChannelsBuddy\SourceProvider\Models\GuideEntry;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;

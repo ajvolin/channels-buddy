@@ -4,8 +4,68 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c2f66955888725987aaf8adfcc4c934",
+    "content-hash": "61e1b6b93cf540b98c0526d686e21d9f",
     "packages": [
+        {
+            "name": "ajvolin/channels-buddy-source-provider",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ajvolin/channels-buddy-source-provider.git",
+                "reference": "8e9766c224584e0a695d57542f69efcf52d16cce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-source-provider/zipball/8e9766c224584e0a695d57542f69efcf52d16cce",
+                "reference": "8e9766c224584e0a695d57542f69efcf52d16cce",
+                "shasum": ""
+            },
+            "require": {
+                "ajvolin/xmltv": "^3.0.3",
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-xmlwriter": "*",
+                "guzzlehttp/guzzle": "^7.2",
+                "halaxa/json-machine": "^0.5.0",
+                "illuminate/support": "^8.0",
+                "nesbot/carbon": "^2.40.0",
+                "php": "^7.4|^8.0",
+                "ramsey/uuid": "^4.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ChannelsBuddy\\SourceProvider\\ServiceProviders\\ChannelsBuddySourceServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ChannelsBuddy\\SourceProvider\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Volin",
+                    "email": "trome.auay@gmail.com"
+                }
+            ],
+            "description": "A package for implementing channel sources for Channels Buddy",
+            "keywords": [
+                "Channels Buddy",
+                "channels"
+            ],
+            "support": {
+                "issues": "https://github.com/ajvolin/channels-buddy-source-provider/issues",
+                "source": "https://github.com/ajvolin/channels-buddy-source-provider/tree/0.1.2"
+            },
+            "time": "2020-12-29T22:38:40+00:00"
+        },
         {
             "name": "ajvolin/xmltv",
             "version": "3.0.3",
@@ -613,16 +673,16 @@
         },
         {
             "name": "egulias/email-validator",
-            "version": "2.1.24",
+            "version": "2.1.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "ca90a3291eee1538cd48ff25163240695bd95448"
+                "reference": "0dbf5d78455d4d6a41d186da50adc1122ec066f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/ca90a3291eee1538cd48ff25163240695bd95448",
-                "reference": "ca90a3291eee1538cd48ff25163240695bd95448",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/0dbf5d78455d4d6a41d186da50adc1122ec066f4",
+                "reference": "0dbf5d78455d4d6a41d186da50adc1122ec066f4",
                 "shasum": ""
             },
             "require": {
@@ -669,7 +729,7 @@
             ],
             "support": {
                 "issues": "https://github.com/egulias/EmailValidator/issues",
-                "source": "https://github.com/egulias/EmailValidator/tree/2.1.24"
+                "source": "https://github.com/egulias/EmailValidator/tree/2.1.25"
             },
             "funding": [
                 {
@@ -677,7 +737,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-11-14T15:56:27+00:00"
+            "time": "2020-12-29T14:50:06+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -2052,16 +2112,16 @@
         },
         {
             "name": "pbmedia/laravel-ffmpeg",
-            "version": "7.5.0",
+            "version": "7.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/protonemedia/laravel-ffmpeg.git",
-                "reference": "8df75e987520fc50626b60db51db2fe375fce5c0"
+                "reference": "a22d394d333be826e4760039973bd2fddfd97c9c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/protonemedia/laravel-ffmpeg/zipball/8df75e987520fc50626b60db51db2fe375fce5c0",
-                "reference": "8df75e987520fc50626b60db51db2fe375fce5c0",
+                "url": "https://api.github.com/repos/protonemedia/laravel-ffmpeg/zipball/a22d394d333be826e4760039973bd2fddfd97c9c",
+                "reference": "a22d394d333be826e4760039973bd2fddfd97c9c",
                 "shasum": ""
             },
             "require": {
@@ -2124,7 +2184,7 @@
             ],
             "support": {
                 "issues": "https://github.com/protonemedia/laravel-ffmpeg/issues",
-                "source": "https://github.com/protonemedia/laravel-ffmpeg/tree/7.5.0"
+                "source": "https://github.com/protonemedia/laravel-ffmpeg/tree/7.5.1"
             },
             "funding": [
                 {
@@ -2132,7 +2192,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-12-22T12:22:44+00:00"
+            "time": "2020-12-24T10:53:59+00:00"
         },
         {
             "name": "php-ffmpeg/php-ffmpeg",
@@ -5589,16 +5649,16 @@
         },
         {
             "name": "facade/ignition",
-            "version": "2.5.3",
+            "version": "2.5.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facade/ignition.git",
-                "reference": "d8dc4f90ed469f9f9313b976fb078c20585d5c99"
+                "reference": "8e907d81244649c5ea746e2ec30c32c5f59df472"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facade/ignition/zipball/d8dc4f90ed469f9f9313b976fb078c20585d5c99",
-                "reference": "d8dc4f90ed469f9f9313b976fb078c20585d5c99",
+                "url": "https://api.github.com/repos/facade/ignition/zipball/8e907d81244649c5ea746e2ec30c32c5f59df472",
+                "reference": "8e907d81244649c5ea746e2ec30c32c5f59df472",
                 "shasum": ""
             },
             "require": {
@@ -5662,7 +5722,7 @@
                 "issues": "https://github.com/facade/ignition/issues",
                 "source": "https://github.com/facade/ignition"
             },
-            "time": "2020-12-09T20:25:45+00:00"
+            "time": "2020-12-29T09:12:55+00:00"
         },
         {
             "name": "facade/ignition-contracts",

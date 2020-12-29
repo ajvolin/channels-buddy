@@ -7,7 +7,7 @@ use App\Models\SourceChannel;
 use App\Services\ChannelsService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use App\Exceptions\InvalidSourceException;
+use ChannelsBuddy\SourceProvider\Exceptions\InvalidSourceException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

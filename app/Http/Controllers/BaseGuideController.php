@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\ChannelSourceModels\Guide;
 use App\Http\Controllers\Controller;
+use ChannelsBuddy\SourceProvider\Models\Guide;
 use DOMDocument;
 use DOMElement;
 use DOMNode;

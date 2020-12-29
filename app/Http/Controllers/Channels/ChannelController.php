@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Channels;
 use App\Http\Controllers\Controller;
 use App\Models\SourceChannel;
 use App\Services\ChannelsService;
-use App\Exceptions\InvalidSourceException;
+use ChannelsBuddy\SourceProvider\Exceptions\InvalidSourceException;
 use Illuminate\Http\Request;
 
 class ChannelController extends Controller

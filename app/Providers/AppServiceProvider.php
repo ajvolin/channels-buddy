@@ -2,18 +2,15 @@
 
 namespace App\Providers;
 
-use App\Contracts\ChannelSource;
-use App\Exceptions\InvalidSourceException;
+use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
+use ChannelsBuddy\SourceProvider\Exceptions\InvalidSourceException;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    protected array $channelSources = [
-        'channels' => \App\Services\ChannelsService::class,
-        'pluto' => \App\Services\PlutoService::class,
-        'stirr' => \App\Services\StirrService::class
-    ];
-
     /**
      * Register any application services.
      *
@@ -21,16 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(ChannelSource::class, function() {
-            $source = explode(':', $this->app->make('router')->input('channelSource'))[0];
-
-            if (isset($this->channelSources[$source])) {
-                return new $this->channelSources[$source];
-            }
-            else {
-                throw new InvalidSourceException("Source {$source} does not exist.");
-            }
-        });
+        
     }
 
     /**
@@ -38,8 +26,16 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(ChannelSourceProviders $sourceProvider)
     {
-        //
+        $sourceProvider->registerChannelSourceProvider('pluto', new ChannelSourceProvider(
+            \App\Services\PlutoService::class,
+            'Pluto TV', true, true, 86400, 21600
+        ));
+
+        $sourceProvider->registerChannelSourceProvider('stirr', new ChannelSourceProvider(
+            \App\Services\StirrService::class,
+            'Stirr', true, false
+        ));
     }
 }

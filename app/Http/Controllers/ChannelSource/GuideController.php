@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\ChannelSource;
 
-use App\Contracts\ChannelSource;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use App\Http\Controllers\BaseGuideController;
 use App\Models\SourceChannel;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -15,9 +16,13 @@ class GuideController extends BaseGuideController
     protected ChannelSource $channelSource;
     protected string $source;
 
-    public function __construct(ChannelSource $channelSource, Request $request)
+    public function __construct(Request $request, ChannelSourceProviders $channelSources)
     {
-        $this->channelSource = $channelSource;
+        $source = $channelSources
+            ->getChannelSourceProvider($request->channelSource);
+        $serviceClass = $source->getChannelSourceClass();
+        $this->channelSource = new $serviceClass;
+
         $this->source = $request->channelSource;
         $this->existingChannels =
             SourceChannel::where('source', $this->source)

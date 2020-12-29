@@ -9,15 +9,14 @@
     "license": "MIT",
     "require": {
         "php": "^7.4|^8.0",
+        "ajvolin/channels-buddy-source-provider": "^0.1.2",
         "ajvolin/xmltv": "^3.0.1",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.2",
-        "halaxa/json-machine": "^0.5.0",
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
-        "pbmedia/laravel-ffmpeg": "^7.5",
-        "ramsey/uuid": "^4.1"
+        "pbmedia/laravel-ffmpeg": "^7.5"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
