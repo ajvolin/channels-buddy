@@ -61,28 +61,29 @@ class ChannelsService implements ChannelSource
         return $this->playlistBaseUrl;
     }
 
-    public function getChannels(?string $source = 'ANY'): Channels
+    public function getChannels(?string $device = 'ANY'): Channels
     {
         $guideChannels =
             $this->getGuideChannels()
             ->channels
             ->keyBy('number');
 
-        $channels = $this->getDeviceChannels($source)
+        $channels = $this->getDeviceChannels($device)
             ->filter(function ($channel, $key) {
                 return (property_exists($channel, 'Hidden')
                     && $channel->Hidden == 1) ? false : true;
-            })->map(function ($channel, $key) use ($guideChannels, $source) {
+            })->map(function ($channel, $key) use ($guideChannels, $device) {
                 $channel->CallSign = 
                     $guideChannels->get($key)->callSign ??
                         $channel->GuideName;
                 $channel->Name = $guideChannels->get($key)->name ??
                     $channel->GuideName;
                 $channel->StreamUrl = 
-                    $this->getStreamUrl($source, $channel->GuideNumber);
+                    $this->getStreamUrl($device, $channel->GuideNumber);
 
                 return $this->generateChannel($channel);
-            })->keyBy('number');
+            })->sortBy('number')
+            ->keyBy('number');
             
         return new Channels($channels);
     }
@@ -98,12 +99,13 @@ class ChannelsService implements ChannelSource
             $json, '', new ExtJsonDecoder
         ))->map(function($channel) {
             return $this->generateChannel($channel);
-        })->keyBy('number');
+        })->sortBy('number')
+        ->keyBy('number');
 
         return new Channels($channels);
     }
 
-    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $source = 'ANY'): Guide
+    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $device = 'ANY'): Guide
     {
         if (is_null($startTimestamp)) {
             $startTimestamp = Carbon::now()->timestamp;
@@ -113,13 +115,9 @@ class ChannelsService implements ChannelSource
             $duration = config('channels.backendChunkSize');
         }
 
-        if (is_null($source)) {
-            $source = 'ANY';
-        }
-
         $stream = $this->httpClient->get(
             sprintf('/devices/%s/guide?time=%d&duration=%d',
-                $source,
+                $device,
                 $startTimestamp,
                 $duration
             )
@@ -522,10 +520,10 @@ class ChannelsService implements ChannelSource
         return $channel;
     }
 
-    private function getDeviceChannels($source): LazyCollection
+    private function getDeviceChannels($device): LazyCollection
     {
         $stream = $this->httpClient
-            ->get(sprintf('/devices/%s/channels', $source));
+            ->get(sprintf('/devices/%s/channels', $device));
         $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
             $stream->getBody()
         );
@@ -538,10 +536,10 @@ class ChannelsService implements ChannelSource
         return $channels;
     }
 
-    private function getStreamUrl(string $source, string $channelNumber): string {
+    private function getStreamUrl(string $device, string $channelNumber): string {
         return sprintf("%s/devices/%s/channels/%s/stream.mpg",
             $this->playlistBaseUrl,
-            $source,
+            $device,
             $channelNumber
         );
     }

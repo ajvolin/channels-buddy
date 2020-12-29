@@ -174,7 +174,6 @@
 
         $("#channelMapForm input[type='submit']").on('click', function(e){
             e.preventDefault();
-            $('#channel_start_number').trigger("change");
             $("#channelMapForm").submit();
         });
     });

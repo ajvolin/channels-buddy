@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Channels;
 
 use App\Http\Controllers\Controller;
-use App\Models\DvrChannel;
+use App\Models\SourceChannel;
 use App\Services\ChannelsService;
-use Exception;
+use App\Exceptions\InvalidSourceException;
 use Illuminate\Http\Request;
 
 class ChannelController extends Controller
@@ -35,17 +35,19 @@ class ChannelController extends Controller
     {
         $source = $request->source;
         if(!$this->channelSource->isValidDevice($source)) {
-            throw new Exception('Invalid source detected.');
+            throw new InvalidSourceException('Invalid source detected.');
         }
 
         $allChannels = $this->channelSource->getGuideChannels()->channels;
         $sourceChannels = $this->channelSource->getChannels($source)->channels;
 
-        $existingChannels = DvrChannel::all()->keyBy("guide_number");
+        $existingChannels = SourceChannel::where('source', 'channels')
+            ->get()
+            ->keyBy("channel_id");
 
         $sourceChannels = $sourceChannels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = 
-                $existingChannels->get($key)->mapped_channel_number ??
+                $existingChannels->get($key)->channel_number ??
                     $channel->number;
             $channel->channel_enabled =
                 $existingChannels->get($key)->channel_enabled ?? true;
@@ -68,43 +70,46 @@ class ChannelController extends Controller
     {
         $source = $request->source;
         if(!$this->channelSource->isValidDevice($source)) {
-            throw new Exception('Invalid source detected.');
+            throw new InvalidSourceException('Invalid source detected.');
         }
 
-        $channels = collect($request->channel)->transform(function ($channel, $key) {
+        $channels = collect($request->channel)
+            ->transform(function ($channel, $key) use ($source) {
             return [
-                'guide_number' => $key,
-                'mapped_channel_number' => $channel['mapped'] ?? $key,
+                'source' => "channels",
+                'channel_id' => $key,
+                'channel_number' => $channel['mapped'] ?? $key,
                 'channel_enabled' => $channel['enabled'] ?? 0
             ];
         })->values()->toArray();
 
-        DvrChannel::upsert(
+        SourceChannel::upsert(
             $channels,
-            [ 'guide_number' ],
-            [ 'mapped_channel_number', 'channel_enabled' ],
+            [ 'source', 'channel_id' ],
+            [ 'channel_number', 'channel_enabled' ]
         );
 
         return redirect(route('getChannelMapUI', ['source' => $source]));
-
     }
 
     public function playlist(Request $request)
     {
         $source = $request->source;
         if(!$this->channelSource->isValidDevice($source)) {
-            throw new Exception('Invalid source detected.');
+            throw new InvalidSourceException('Invalid source detected.');
         }
 
         $channels = $this->channelSource->getChannels($source)->channels;
-        $existingChannels = DvrChannel::all()->keyBy("guide_number");
+        $existingChannels = SourceChannel::where('source', 'channels')
+            ->get()
+            ->keyBy("channel_id");
 
         $channels =
             $channels->filter(function ($channel, $key) use ($existingChannels) {
                 return $existingChannels->get($key)->channel_enabled ?? true;
             })->map(function($channel, $key) use ($existingChannels) {
                 $channel->mappedChannelNum =
-                    $existingChannels->get($key)->mapped_channel_number ??
+                    $existingChannels->get($key)->channel_number ??
                         $channel->number;
                 return $channel;
             })->values()->sortBy('mappedChannelNum');

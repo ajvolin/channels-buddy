@@ -4,7 +4,7 @@ namespace App\Http\Controllers\ChannelSource;
 
 use App\Contracts\ChannelSource;
 use App\Http\Controllers\BaseGuideController;
-use App\Models\ExternalChannel;
+use App\Models\SourceChannel;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ class GuideController extends BaseGuideController
         $this->channelSource = $channelSource;
         $this->source = $request->channelSource;
         $this->existingChannels =
-            ExternalChannel::where('source', $this->source)
+            SourceChannel::where('source', $this->source)
                 ->where('channel_enabled', 1)
                 ->pluck('channel_number', 'channel_id');
         $this->channelIdField = 'id';

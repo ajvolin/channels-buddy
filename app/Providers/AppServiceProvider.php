@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\ChannelSource;
-use Exception;
+use App\Exceptions\InvalidSourceException;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
                 return new $this->channelSources[$source];
             }
             else {
-                throw new Exception("Source {$source} does not exist.");
+                throw new InvalidSourceException("Source {$source} does not exist.");
             }
         });
     }

@@ -38,7 +38,7 @@ class StirrService implements ChannelSource
         return $this->baseUrl;
     }
 
-    public function getChannels(?string $source = null): Channels
+    public function getChannels(?string $device = null): Channels
     {
         $channels = LazyCollection::make(function() {
             $stationLineups = config(
@@ -112,12 +112,7 @@ class StirrService implements ChannelSource
         return new Channels($channels);
     }
 
-    public function getGuideChannels(): Channels
-    {
-        return $this->getChannels();
-    }
-
-    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $source = null): Guide
+    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $device = null): Guide
     {
         $guideEntries = LazyCollection::make(function() {
             $channels = $this->getChannels()->channels;

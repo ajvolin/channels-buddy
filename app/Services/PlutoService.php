@@ -41,7 +41,7 @@ class PlutoService implements ChannelSource
         return $this->baseUrl;
     }
 
-    public function getChannels(?string $source = null): Channels
+    public function getChannels(?string $device = null): Channels
     {
         $stream = $this->httpClient->get('/v2/channels');
         $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
@@ -62,13 +62,8 @@ class PlutoService implements ChannelSource
 
         return new Channels($channels);
     }
-
-    public function getGuideChannels(): Channels
-    {
-        return $this->getChannels();
-    }
  
-    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $source = null): Guide
+    public function getGuideData(?int $startTimestamp, ?int $duration, ?string $device = null): Guide
     {
         if (is_null($startTimestamp)) {
             $startTimestamp = Carbon::now()->timestamp;

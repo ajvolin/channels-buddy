@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class DvrChannel
+ * Class SourceChannel
  * @package App\Models
  *
  */
 
-class DvrChannel extends Model
+class SourceChannel extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'dvr_lineup_id',
-        'guide_number',
-        'mapped_channel_number',
+        'source',
+        'channel_id',
+        'channel_number',
         'channel_enabled'
     ];
 }

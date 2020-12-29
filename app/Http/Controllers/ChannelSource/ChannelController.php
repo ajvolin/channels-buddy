@@ -4,8 +4,8 @@ namespace App\Http\Controllers\ChannelSource;
 
 use App\Contracts\ChannelSource;
 use App\Http\Controllers\Controller;
-use App\Models\ExternalChannel;
 use App\Models\Setting;
+use App\Models\SourceChannel;
 use App\Services\ChannelsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +23,9 @@ class ChannelController extends Controller
     {
         $channels = $this->channelSource->getChannels()->channels;
 
-        $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
+        $existingChannels = SourceChannel::where('source', $source)
+            ->get()
+            ->keyBy("channel_id");
 
         $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
@@ -44,7 +46,8 @@ class ChannelController extends Controller
 
     public function map(Request $request, $source)
     {
-        $channels = collect($request->channel)->transform(function ($channel, $key) use ($source) {
+        $channels = collect($request->channel)
+            ->transform(function ($channel, $key) use ($source) {
             return [
                 'source' => $source,
                 'channel_id' => $key,
@@ -53,13 +56,16 @@ class ChannelController extends Controller
             ];
         })->values()->toArray();
 
-        ExternalChannel::upsert(
+        SourceChannel::upsert(
             $channels,
-            [ 'channel_id' ],
-            [ 'source', 'channel_number', 'channel_enabled' ],
+            [ 'source', 'channel_id' ],
+            [ 'channel_number', 'channel_enabled' ],
         );
 
-        Setting::updateSetting("{$source}_channelsource.channel_start_number", $request->channel_start_number);
+        Setting::updateSetting(
+            "{$source}_channelsource.channel_start_number",
+            $request->channel_start_number
+        );
 
         Cache::forget("{$source}_channelsource_m3u");
 
@@ -75,7 +81,9 @@ class ChannelController extends Controller
 
         $playlist = Cache::remember("{$source}_channelsource_m3u", 1800, function () use ($source) {
             $channels = $this->channelSource->getChannels()->channels;
-            $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
+            $existingChannels = SourceChannel::where('source', $source)
+                ->get()
+                ->keyBy("channel_id");
 
             $channels =
                 $channels->filter(function ($channel, $key) use ($existingChannels) {

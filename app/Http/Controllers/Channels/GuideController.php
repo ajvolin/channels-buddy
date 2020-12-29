@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Channels;
 
 use App\Http\Controllers\BaseGuideController;
-use App\Models\DvrChannel;
+use App\Models\SourceChannel;
 use App\Services\ChannelsService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Exception;
+use App\Exceptions\InvalidSourceException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -15,12 +15,13 @@ class GuideController extends BaseGuideController
 {
     protected ChannelsService $channelSource;
 
-    public function __construct(ChannelsService $channelSource)
+    public function __construct(ChannelsService $channelSource, Request $request)
     {
         $this->channelSource = $channelSource;
         $this->existingChannels =
-            DvrChannel::where('channel_enabled', 1)
-                ->pluck('mapped_channel_number', 'guide_number');
+            SourceChannel::where('source', 'channels')
+                ->where('channel_enabled', 1)
+                ->pluck('channel_number', 'channel_id');
         $this->channelIdField = 'number';
     }
 
@@ -28,7 +29,7 @@ class GuideController extends BaseGuideController
     {
         $source = $request->source;
         if (!$this->channelSource->isValidDevice($source)) {
-            throw new Exception('Invalid source detected.');
+            throw new InvalidSourceException('Invalid source detected.');
         }
 
         if (!isset($request->duration)) {
