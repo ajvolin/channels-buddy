@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\APIModels\Guide;
+use App\ChannelSourceModels\Guide;
 use App\Http\Controllers\Controller;
 use DOMDocument;
 use DOMElement;

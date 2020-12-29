@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Channels;
 
 use App\Http\Controllers\BaseGuideController;
 use App\Models\DvrChannel;
-use App\Services\ChannelsBackendService;
+use App\Services\ChannelsService;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Exception;
@@ -13,11 +13,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GuideController extends BaseGuideController
 {
-    protected ChannelsBackendService $backend;
+    protected ChannelsService $channelSource;
 
-    public function __construct(ChannelsBackendService $backend)
+    public function __construct(ChannelsService $channelSource)
     {
-        $this->backend = $backend;
+        $this->channelSource = $channelSource;
         $this->existingChannels =
             DvrChannel::where('channel_enabled', 1)
                 ->pluck('mapped_channel_number', 'guide_number');
@@ -27,7 +27,7 @@ class GuideController extends BaseGuideController
     public function xmltv(Request $request): StreamedResponse
     {
         $source = $request->source;
-        if (!$this->backend->isValidDevice($source)) {
+        if (!$this->channelSource->isValidDevice($source)) {
             throw new Exception('Invalid source detected.');
         }
 
@@ -62,7 +62,7 @@ class GuideController extends BaseGuideController
             );
 
             foreach ($guideIntervals as $guideInterval) {
-                $guideData = $this->backend
+                $guideData = $this->channelSource
                 ->getGuideData(
                     $guideInterval->timestamp,
                     $guideChunkSize,

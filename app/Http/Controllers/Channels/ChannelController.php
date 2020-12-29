@@ -4,22 +4,22 @@ namespace App\Http\Controllers\Channels;
 
 use App\Http\Controllers\Controller;
 use App\Models\DvrChannel;
-use App\Services\ChannelsBackendService;
+use App\Services\ChannelsService;
 use Exception;
 use Illuminate\Http\Request;
 
 class ChannelController extends Controller
 {
-    protected $channelsBackend;
+    protected $channelSource;
 
-    public function __construct(ChannelsBackendService $channelsBackend)
+    public function __construct(ChannelsService $channelSource)
     {
-        $this->channelsBackend = $channelsBackend;
+        $this->channelSource = $channelSource;
     }
 
     public function index()
     {
-        $sources = $this->channelsBackend->getDevices();
+        $sources = $this->channelSource->getDevices();
 
         if($sources->count() > 0) {
             return view('layouts.main', [
@@ -27,19 +27,19 @@ class ChannelController extends Controller
             ]);
         }
         else {
-            return view('empty', ['channelsBackendUrl' => $this->channelsBackend->getBaseUrl()]);
+            return view('empty', ['channelsBackendUrl' => $this->channelSource->getBaseUrl()]);
         }
     }
 
     public function list(Request $request)
     {
         $source = $request->source;
-        if(!$this->channelsBackend->isValidDevice($source)) {
+        if(!$this->channelSource->isValidDevice($source)) {
             throw new Exception('Invalid source detected.');
         }
 
-        $allChannels = $this->channelsBackend->getGuideChannels()->channels;
-        $sourceChannels = $this->channelsBackend->getChannels($source)->channels;
+        $allChannels = $this->channelSource->getGuideChannels()->channels;
+        $sourceChannels = $this->channelSource->getChannels($source)->channels;
 
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
@@ -55,10 +55,10 @@ class ChannelController extends Controller
         return view('channels.remap.map',
             [
                 'source' => $source,
-                'sources' => $this->channelsBackend->getDevices(),
+                'sources' => $this->channelSource->getDevices(),
                 'allChannels' => $allChannels,
                 'sourceChannels' => $sourceChannels,
-                'channelsBackendUrl' => $this->channelsBackend->getBaseUrl(),
+                'channelsBackendUrl' => $this->channelSource->getBaseUrl(),
             ]
         );
 
@@ -67,7 +67,7 @@ class ChannelController extends Controller
     public function map(Request $request)
     {
         $source = $request->source;
-        if(!$this->channelsBackend->isValidDevice($source)) {
+        if(!$this->channelSource->isValidDevice($source)) {
             throw new Exception('Invalid source detected.');
         }
 
@@ -92,11 +92,11 @@ class ChannelController extends Controller
     public function playlist(Request $request)
     {
         $source = $request->source;
-        if(!$this->channelsBackend->isValidDevice($source)) {
+        if(!$this->channelSource->isValidDevice($source)) {
             throw new Exception('Invalid source detected.');
         }
 
-        $channels = $this->channelsBackend->getChannels($source)->channels;
+        $channels = $this->channelSource->getChannels($source)->channels;
         $existingChannels = DvrChannel::all()->keyBy("guide_number");
 
         $channels =

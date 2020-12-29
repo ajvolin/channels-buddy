@@ -2,10 +2,10 @@
 
 namespace App\Contracts;
 
-use App\APIModels\Channels;
-use App\APIModels\Guide;
+use App\ChannelSourceModels\Channels;
+use App\ChannelSourceModels\Guide;
 
-interface BackendService
+interface ChannelSource
 {
     /**
      * Return the channel list.

@@ -1,15 +1,15 @@
 <?php
 
-namespace App\APIModels;
+namespace App\ChannelSourceModels;
 
-use App\APIModels\Rating;
-use App\APIModels\Review;
+use App\ChannelSourceModels\Rating;
+use App\ChannelSourceModels\Review;
 use App\Exceptions\AiringPropertyDoesNotExist;
 use Carbon\Carbon;
 
 /**
  * Class Airing
- * @package App\APIModels
+ * @package App\ChannelSourceModels
  *
  */
 

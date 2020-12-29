@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\ChannelSource;
 
-use App\Contracts\BackendService;
+use App\Contracts\ChannelSource;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalChannel;
 use App\Models\Setting;
-use App\Services\ChannelsBackendService;
+use App\Services\ChannelsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class ChannelController extends Controller
 {
-    protected $backend;
+    protected $channelSource;
 
-    public function __construct(BackendService $backend)
+    public function __construct(ChannelSource $channelSource)
     {
-        $this->backend = $backend;
+        $this->channelSource = $channelSource;
     }
 
     public function list(Request $request, $source)
     {
-        $channels = $this->backend->getChannels()->channels;
+        $channels = $this->channelSource->getChannels()->channels;
 
         $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
@@ -34,7 +34,7 @@ class ChannelController extends Controller
         return view('channelsource.channels.map',
             [
                 'channels' => $channels,
-                'channelsBackendUrl' => (new ChannelsBackendService)->getBaseUrl(),
+                'channelsBackendUrl' => (new ChannelsService)->getBaseUrl(),
                 'channelStartNumber' => Setting::getSetting("{$source}_channelsource.channel_start_number"),
                 'channelSource' => $source,
                 'channelSources' => collect(config('channels.channelSources'))
@@ -74,7 +74,7 @@ class ChannelController extends Controller
         }
 
         $playlist = Cache::remember("{$source}_channelsource_m3u", 1800, function () use ($source) {
-            $channels = $this->backend->getChannels()->channels;
+            $channels = $this->channelSource->getChannels()->channels;
             $existingChannels = ExternalChannel::where('source', $source)->get()->keyBy("channel_id");
 
             $channels =

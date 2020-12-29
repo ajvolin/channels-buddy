@@ -1,15 +1,12 @@
 <?php
 
-namespace App\APIModels;
+namespace App\ChannelSourceModels;
 
-use App\APIModels\GuideEntry;
-use App\Exceptions\GuideInvalidObject;
-use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 
 /**
  * Class Guide
- * @package App\APIModels
+ * @package App\ChannelSourceModels
  *
  */
 
@@ -32,26 +29,6 @@ class Guide
     {
         $this->guideEntries = $guideEntries;
     }
-
-    // /**
-    //  * Adds a guide entry to the $guideEntries array 
-    //  * 
-    //  * @param GuideEntry $entry
-    //  */
-    // public function addGuideEntry(GuideEntry $entry): void
-    // {
-    //     array_push($this->guideEntries, $entry);
-    // }
-
-    // /**
-    //  * Returns the guide entries as an array
-    //  * 
-    //  * @return GuideEntry[]
-    //  */
-    // public function getGuideEntries(): array
-    // {
-    //     return $this->guideEntries;
-    // }
 
     /**
      * Returns the guideEntries LazyCollection

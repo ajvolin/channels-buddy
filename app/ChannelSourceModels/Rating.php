@@ -1,10 +1,10 @@
 <?php
 
-namespace App\APIModels;
+namespace App\ChannelSourceModels;
 
 /**
  * Class Rating
- * @package App\APIModels
+ * @package App\ChannelSourceModels
  *
  */
 

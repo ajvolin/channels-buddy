@@ -1,14 +1,12 @@
 <?php
 
-namespace App\APIModels;
+namespace App\ChannelSourceModels;
 
-use App\APIModels\Channel;
-use App\Exceptions\ChannelsInvalidObject;
 use Illuminate\Support\LazyCollection;
 
 /**
  * Class Channels
- * @package App\APIModels
+ * @package App\ChannelSourceModels
  *
  */
 
@@ -30,16 +28,6 @@ class Channels
     {
         $this->channels = $channels;
     }
-
-    // /**
-    //  * Adds a channel to the $channels array
-    //  * 
-    //  * @param Channel $channel
-    //  */
-    // public function addChannel(Channel $channel): void
-    // {
-    //     array_push($this->channels, $channel);
-    // }
 
     /**
      * Returns the channels LazyCollection

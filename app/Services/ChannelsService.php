@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\APIModels\Airing;
-use App\APIModels\Channel;
-use App\APIModels\Channels;
-use App\APIModels\Guide;
-use App\APIModels\GuideEntry;
-use App\APIModels\Rating;
-use App\APIModels\Review;
-use App\Contracts\BackendService;
+use App\ChannelSourceModels\Airing;
+use App\ChannelSourceModels\Channel;
+use App\ChannelSourceModels\Channels;
+use App\ChannelSourceModels\Guide;
+use App\ChannelSourceModels\GuideEntry;
+use App\ChannelSourceModels\Rating;
+use App\ChannelSourceModels\Review;
+use App\Contracts\ChannelSource;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use GuzzleHttp\Client;
@@ -19,7 +19,7 @@ use JsonMachine\JsonMachine;
 use JsonMachine\JsonDecoder\ExtJsonDecoder;
 use stdClass;
 
-class ChannelsBackendService implements BackendService
+class ChannelsService implements ChannelSource
 {
     protected $baseUrl;
     protected $playlistBaseUrl;

@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\APIModels\Airing;
-use App\APIModels\Channel;
-use App\APIModels\Channels;
-use App\APIModels\Guide;
-use App\APIModels\GuideEntry;
-use App\APIModels\Rating;
-use App\Contracts\BackendService;
+use App\ChannelSourceModels\Airing;
+use App\ChannelSourceModels\Channel;
+use App\ChannelSourceModels\Channels;
+use App\ChannelSourceModels\Guide;
+use App\ChannelSourceModels\GuideEntry;
+use App\ChannelSourceModels\Rating;
+use App\Contracts\ChannelSource;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\LazyCollection;
@@ -17,7 +17,7 @@ use JsonMachine\JsonDecoder\ExtJsonDecoder;
 use Ramsey\Uuid\Uuid;
 use stdClass;
 
-class PlutoBackendService implements BackendService
+class PlutoService implements ChannelSource
 {
     protected $baseUrl;
     protected $httpClient;

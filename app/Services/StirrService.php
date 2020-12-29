@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\APIModels\Airing;
-use App\APIModels\Channel;
-use App\APIModels\Channels;
-use App\APIModels\Guide;
-use App\APIModels\GuideEntry;
-use App\Contracts\BackendService;
+use App\ChannelSourceModels\Airing;
+use App\ChannelSourceModels\Channel;
+use App\ChannelSourceModels\Channels;
+use App\ChannelSourceModels\Guide;
+use App\ChannelSourceModels\GuideEntry;
+use App\Contracts\ChannelSource;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -16,7 +16,7 @@ use JsonMachine\JsonMachine;
 use JsonMachine\JsonDecoder\ExtJsonDecoder;
 use stdClass;
 
-class StirrBackendService implements BackendService
+class StirrService implements ChannelSource
 {
     protected $baseUrl;
     protected $baseStationUrl;

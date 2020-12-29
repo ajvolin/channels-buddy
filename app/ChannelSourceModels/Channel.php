@@ -1,12 +1,12 @@
 <?php
 
-namespace App\APIModels;
+namespace App\ChannelSourceModels;
 
 use App\Exceptions\ChannelPropertyDoesNotExist;
 
 /**
  * Class Channel
- * @package App\APIModels
+ * @package App\ChannelSourceModels
  *
  */
 

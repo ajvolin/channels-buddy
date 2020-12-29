@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\ChannelSource;
 
-use App\Contracts\BackendService;
+use App\Contracts\ChannelSource;
 use App\Http\Controllers\BaseGuideController;
 use App\Models\ExternalChannel;
 use Carbon\Carbon;
@@ -12,14 +12,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GuideController extends BaseGuideController
 {
-    protected BackendService $backend;
+    protected ChannelSource $channelSource;
+    protected string $source;
 
-    public function __construct(BackendService $backend, $channelSource)
+    public function __construct(ChannelSource $channelSource, Request $request)
     {
-        $this->backend = $backend;
-        $this->source = $channelSource;
+        $this->channelSource = $channelSource;
+        $this->source = $request->channelSource;
         $this->existingChannels =
-            ExternalChannel::where('source', $channelSource)
+            ExternalChannel::where('source', $this->source)
                 ->where('channel_enabled', 1)
                 ->pluck('channel_number', 'channel_id');
         $this->channelIdField = 'id';
@@ -33,7 +34,7 @@ class GuideController extends BaseGuideController
         return $this->streamResponse(function($handle)
             use ($guideChunkSize, $guideDuration) {
             if (is_null($guideChunkSize) && is_null($guideDuration)) {
-                $guideData = $this->backend
+                $guideData = $this->channelSource
                         ->getGuideData(null, null);
     
                 $this->parseGuide($guideData, $handle);
@@ -46,7 +47,7 @@ class GuideController extends BaseGuideController
                     );
 
                 foreach ($guideIntervals as $guideInterval) {
-                    $guideData = $this->backend
+                    $guideData = $this->channelSource
                         ->getGuideData($guideInterval->timestamp, $guideChunkSize);
 
                     $this->parseGuide($guideData, $handle);
