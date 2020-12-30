@@ -5,28 +5,19 @@ namespace App\Http\Controllers\ChannelSource;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\SourceChannel;
-use App\Services\ChannelsService;
-use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
+use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class ChannelController extends Controller
 {
-    protected $channelSource;
-
-    public function __construct(Request $request, ChannelSourceProviders $channelSources)
+    public function list(ChannelSourceProvider $channelSource)
     {
-        $source = $channelSources
-            ->getChannelSourceProvider($request->channelSource);
-        $serviceClass = $source->getChannelSourceClass();
-        $this->channelSource = new $serviceClass;
-    }
+        $sourceName = $channelSource->getSourceName();
+        $service = $channelSource->getChannelSourceService();
+        $channels = $service->getChannels()->channels;
 
-    public function list(Request $request, $source)
-    {
-        $channels = $this->channelSource->getChannels()->channels;
-
-        $existingChannels = SourceChannel::where('source', $source)
+        $existingChannels = SourceChannel::where('source', $sourceName)
             ->get()
             ->keyBy("channel_id");
 
@@ -39,20 +30,20 @@ class ChannelController extends Controller
         return view('channelsource.channels.map',
             [
                 'channels' => $channels,
-                'channelsBackendUrl' => (new ChannelsService)->getBaseUrl(),
-                'channelStartNumber' => Setting::getSetting("{$source}_channelsource.channel_start_number"),
-                'channelSource' => $source,
-                'channelSources' => collect(config('channels.channelSources'))
+                'channelStartNumber' => Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
+                'channelSource' => $sourceName,
             ]
         );
     }
 
-    public function map(Request $request, $source)
+    public function map(Request $request)
     {
+        $sourceName = $request->channelSource->getSourceName();
+        
         $channels = collect($request->channel)
-            ->transform(function ($channel, $key) use ($source) {
+            ->transform(function ($channel, $key) use ($sourceName) {
             return [
-                'source' => $source,
+                'source' => $sourceName,
                 'channel_id' => $key,
                 'channel_number' => $channel['mapped'] ?? $channel['number'],
                 'channel_enabled' => $channel['enabled'] ?? 0
@@ -66,25 +57,28 @@ class ChannelController extends Controller
         );
 
         Setting::updateSetting(
-            "{$source}_channelsource.channel_start_number",
+            "{$sourceName}_channelsource.channel_start_number",
             $request->channel_start_number
         );
 
-        Cache::forget("{$source}_channelsource_m3u");
+        Cache::forget("{$sourceName}_channelsource_m3u");
 
-        return redirect(route('getChannelSourceMapUI', ['channelSource' => $source]));
+        return redirect(route('getChannelSourceMapUI', ['channelSource' => $sourceName]));
 
     }
 
-    public function playlist(Request $request, $source)
+    public function playlist(Request $request)
     {
+        $sourceName = $request->channelSource->getSourceName();
+        $service = $request->channelSource->getChannelSourceService();
+
         if ($request->has("fresh")) {
-            Cache::forget("{$source}_channelsource_m3u");
+            Cache::forget("{$sourceName}_channelsource_m3u");
         }
 
-        $playlist = Cache::remember("{$source}_channelsource_m3u", 1800, function () use ($source) {
-            $channels = $this->channelSource->getChannels()->channels;
-            $existingChannels = SourceChannel::where('source', $source)
+        $playlist = Cache::remember("{$sourceName}_channelsource_m3u", 1800, function () use ($sourceName, $service) {
+            $channels = $service->getChannels()->channels;
+            $existingChannels = SourceChannel::where('source', $sourceName)
                 ->get()
                 ->keyBy("channel_id");
 

@@ -7,25 +7,22 @@ use App\Http\Controllers\BaseGuideController;
 use App\Models\SourceChannel;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
 use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GuideController extends BaseGuideController
 {
-    protected ChannelSource $channelSource;
-    protected string $source;
+    protected ChannelSourceProvider $channelSourceProvider;
+    protected ChannelSource $channelService;
+    protected string $sourceName;
 
-    public function __construct(Request $request, ChannelSourceProviders $channelSources)
+    public function __construct(Request $request)
     {
-        $source = $channelSources
-            ->getChannelSourceProvider($request->channelSource);
-        $serviceClass = $source->getChannelSourceClass();
-        $this->channelSource = new $serviceClass;
-
-        $this->source = $request->channelSource;
+        $this->sourceName = $request->channelSource;
         $this->existingChannels =
-            SourceChannel::where('source', $this->source)
+            SourceChannel::where('source', $this->sourceName)
                 ->where('channel_enabled', 1)
                 ->pluck('channel_number', 'channel_id');
         $this->channelIdField = 'id';
@@ -33,17 +30,42 @@ class GuideController extends BaseGuideController
 
     public function xmltv(Request $request): StreamedResponse
     {
-        $guideDuration = config("channels.channelSources.{$this->source}.guideDuration");
-        $guideChunkSize = config("channels.channelSources.{$this->source}.guideChunkSize");
+        $this->channelSourceProvider = $request->channelSource;
+        $this->channelService = $this->channelSourceProvider->getChannelSourceService();
 
-        return $this->streamResponse(function($handle)
-            use ($guideChunkSize, $guideDuration) {
-            if (is_null($guideChunkSize) && is_null($guideDuration)) {
-                $guideData = $this->channelSource
+        if (!isset($request->duration)) {
+            $durationDays = intval($request->days) ?? 0;
+            $durationHours = intval($request->hours) ?? 0;
+            $durationMinutes = intval($request->minutes) ?? 0;
+            $durationSeconds = intval($request->seconds) ?? 0;
+
+            $duration = (($durationDays * 86400) + ($durationHours * 3600) +
+                ($durationMinutes * 60) + $durationSeconds) ?: config('channels.guideDuration');
+        } else {
+            $duration = intval($request->duration);
+        }
+
+        return $this->streamResponse(function($handle) use ($duration) {
+            if (!$this->channelSourceProvider->guideIsChunkable()
+                || (is_null($this->channelSourceProvider->getMaxGuideDuration())
+                && is_null($this->channelSourceProvider->getMaxGuideChunkSize()))
+                ) {
+                $guideData = $this->channelService
                         ->getGuideData(null, null);
     
                 $this->parseGuide($guideData, $handle);
             } else {
+                $guideDuration = intval(
+                    min(
+                        $duration,
+                        $this->channelSourceProvider->getMaxGuideDuration()
+                    )
+                );
+                $guideChunkSize = min(
+                    $guideDuration,
+                    $this->channelSourceProvider->getMaxGuideChunkSize()
+                );
+
                 $now = Carbon::now();
                 $guideIntervals = CarbonInterval::seconds($guideChunkSize)
                     ->toPeriod(
@@ -52,7 +74,7 @@ class GuideController extends BaseGuideController
                     );
 
                 foreach ($guideIntervals as $guideInterval) {
-                    $guideData = $this->channelSource
+                    $guideData = $this->channelService
                         ->getGuideData($guideInterval->timestamp, $guideChunkSize);
 
                     $this->parseGuide($guideData, $handle);

@@ -9,7 +9,9 @@
     "license": "MIT",
     "require": {
         "php": "^7.4|^8.0",
+        "ajvolin/channels-buddy-pluto": "^0.1.0",
         "ajvolin/channels-buddy-source-provider": "^0.1.2",
+        "ajvolin/channels-buddy-stirr": "^0.1.0",
         "ajvolin/xmltv": "^3.0.1",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",

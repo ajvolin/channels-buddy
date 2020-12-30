@@ -4,27 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "61e1b6b93cf540b98c0526d686e21d9f",
+    "content-hash": "9fa667e328c5f1bbf50554aefb35937c",
     "packages": [
         {
-            "name": "ajvolin/channels-buddy-source-provider",
+            "name": "ajvolin/channels-buddy-pluto",
             "version": "0.1.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ajvolin/channels-buddy-source-provider.git",
-                "reference": "8e9766c224584e0a695d57542f69efcf52d16cce"
+                "url": "https://github.com/ajvolin/channels-buddy-pluto.git",
+                "reference": "43a575a962d5cc94334d33c69b1ebdb4cbc9328c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/channels-buddy-source-provider/zipball/8e9766c224584e0a695d57542f69efcf52d16cce",
-                "reference": "8e9766c224584e0a695d57542f69efcf52d16cce",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-pluto/zipball/43a575a962d5cc94334d33c69b1ebdb4cbc9328c",
+                "reference": "43a575a962d5cc94334d33c69b1ebdb4cbc9328c",
                 "shasum": ""
             },
             "require": {
-                "ajvolin/xmltv": "^3.0.3",
-                "ext-dom": "*",
-                "ext-libxml": "*",
-                "ext-xmlwriter": "*",
+                "ajvolin/channels-buddy-source-provider": "^0.1.2",
                 "guzzlehttp/guzzle": "^7.2",
                 "halaxa/json-machine": "^0.5.0",
                 "illuminate/support": "^8.0",
@@ -36,7 +33,61 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "ChannelsBuddy\\SourceProvider\\ServiceProviders\\ChannelsBuddySourceServiceProvider"
+                        "ChannelsBuddy\\Pluto\\ChannelsBuddyPlutoServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ChannelsBuddy\\Pluto\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Volin",
+                    "email": "trome.auay@gmail.com"
+                }
+            ],
+            "description": "Adds Pluto TV as a source to Channels Buddy",
+            "keywords": [
+                "Channels Buddy",
+                "Pluto TV",
+                "channels"
+            ],
+            "support": {
+                "issues": "https://github.com/ajvolin/channels-buddy-pluto/issues",
+                "source": "https://github.com/ajvolin/channels-buddy-pluto/tree/0.1.2"
+            },
+            "time": "2020-12-30T05:22:42+00:00"
+        },
+        {
+            "name": "ajvolin/channels-buddy-source-provider",
+            "version": "0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ajvolin/channels-buddy-source-provider.git",
+                "reference": "b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-source-provider/zipball/b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9",
+                "reference": "b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^8.0",
+                "nesbot/carbon": "^2.40.0",
+                "php": "^7.4|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ChannelsBuddy\\SourceProvider\\ChannelsBuddySourceServiceProvider"
                     ]
                 }
             },
@@ -62,9 +113,66 @@
             ],
             "support": {
                 "issues": "https://github.com/ajvolin/channels-buddy-source-provider/issues",
-                "source": "https://github.com/ajvolin/channels-buddy-source-provider/tree/0.1.2"
+                "source": "https://github.com/ajvolin/channels-buddy-source-provider/tree/0.1.5"
             },
-            "time": "2020-12-29T22:38:40+00:00"
+            "time": "2020-12-30T05:58:40+00:00"
+        },
+        {
+            "name": "ajvolin/channels-buddy-stirr",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ajvolin/channels-buddy-stirr.git",
+                "reference": "1f88a8ec0ae3692f74d2e2a830c9428f80f53db6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-stirr/zipball/1f88a8ec0ae3692f74d2e2a830c9428f80f53db6",
+                "reference": "1f88a8ec0ae3692f74d2e2a830c9428f80f53db6",
+                "shasum": ""
+            },
+            "require": {
+                "ajvolin/channels-buddy-source-provider": "^0.1.2",
+                "guzzlehttp/guzzle": "^7.2",
+                "halaxa/json-machine": "^0.5.0",
+                "illuminate/support": "^8.0",
+                "nesbot/carbon": "^2.40.0",
+                "php": "^7.4|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ChannelsBuddy\\Stirr\\ChannelsBuddyStirrServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ChannelsBuddy\\Stirr\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Volin",
+                    "email": "trome.auay@gmail.com"
+                }
+            ],
+            "description": "Adds Stirr as a source to Channels Buddy",
+            "keywords": [
+                "Channels Buddy",
+                "Stirr",
+                "channels"
+            ],
+            "support": {
+                "issues": "https://github.com/ajvolin/channels-buddy-stirr/issues",
+                "source": "https://github.com/ajvolin/channels-buddy-stirr/tree/0.1.1"
+            },
+            "time": "2020-12-30T05:22:13+00:00"
         },
         {
             "name": "ajvolin/xmltv",

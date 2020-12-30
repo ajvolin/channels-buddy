@@ -6,15 +6,7 @@ const MAX_BACKEND_CHUNK_SIZE = 86400*14;
 return [
 
     'channelSources' => [
-        'pluto' => [
-            'displayName' => 'Pluto TV',
-            'guideChunkSize' => 21600,
-            'guideDuration' => 86400
-        ],
         'stirr' => [
-            'displayName'  => 'Stirr TV',
-            'guideChunkSize' => null,
-            'guideDuration' => null,
             'stationLineups'  => [
                 'national'
             ]

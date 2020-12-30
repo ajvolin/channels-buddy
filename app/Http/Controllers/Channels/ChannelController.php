@@ -27,7 +27,7 @@ class ChannelController extends Controller
             ]);
         }
         else {
-            return view('empty', ['channelsBackendUrl' => $this->channelSource->getBaseUrl()]);
+            return view('empty', []);
         }
     }
 

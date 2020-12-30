@@ -3,7 +3,7 @@
 @section('content')
 <div class="row mb-3">
     <div class="col-xs-8 col-md-10 col-lg-10">
-        <h1>{{ $channelSources[$channelSource]['displayName'] }}</h1>
+        <h1>{{ $channelSources->getChannelSourceProvider($channelSource)->getDisplayName() }}</h1>
         <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
         <div class="custom-control custom-radio custom-control-inline">
             <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />

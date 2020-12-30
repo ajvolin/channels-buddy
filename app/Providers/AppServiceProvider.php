@@ -7,6 +7,7 @@ use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use ChannelsBuddy\SourceProvider\Exceptions\InvalidSourceException;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,16 +27,15 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot(ChannelSourceProviders $sourceProvider)
+    public function boot(ChannelSourceProviders $sourceProviders)
     {
-        $sourceProvider->registerChannelSourceProvider('pluto', new ChannelSourceProvider(
-            \App\Services\PlutoService::class,
-            'Pluto TV', true, true, 86400, 21600
-        ));
+        Route::bind('channelSource', function (string $channelSource)
+            use ($sourceProviders): ChannelSourceProvider {
+            return $sourceProviders->getChannelSourceProvider($channelSource);
+        });
 
-        $sourceProvider->registerChannelSourceProvider('stirr', new ChannelSourceProvider(
-            \App\Services\StirrService::class,
-            'Stirr', true, false
-        ));
+        View::composer('*', function ($view) use ($sourceProviders) {
+            $view->with('channelSources', $sourceProviders);
+        });
     }
 }
