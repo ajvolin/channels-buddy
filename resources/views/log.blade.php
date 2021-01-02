@@ -9,7 +9,7 @@
 <div class="row mb-3">
     <div class="col-12">
         <h1>Application Log</h1>
-        <pre class="log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded">{{ $log }}</pre>
+        <pre class="log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded">{!! $log !!}</pre>
     </div>
 </div>
 @endsection

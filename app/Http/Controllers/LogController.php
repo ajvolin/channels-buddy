@@ -16,7 +16,7 @@ class LogController extends Controller
         $log = file_get_contents($logFilePath) ?? null;
         return view('log',
             [
-                'log' => $log
+                'log' => nl2br($log)
             ]
         );
     }
