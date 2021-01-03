@@ -145,7 +145,7 @@
             var currentChannelRemapSearch = $(this).children(".channel-remap-search");
             currentChannelRemapSearch.append(channelSelectList);
             channelSelectList.hide()
-                .filter("[data-channel-number!=" + currentRemappedChannelNumber + "]")
+                .filter("[data-channel-number!='" + currentRemappedChannelNumber + "']")
                 .show();
 
             var currenChannelSelectListMatch = currentChannelRemapSearch.find(".channel-select-list-match");
@@ -184,7 +184,7 @@
 
             currenChannelSelectListMatch.append(
                 channelSelectList.find(channelMatches)
-                    .not(".channel-remap-select[data-channel-number=" + currentRemappedChannelNumber + "]")
+                    .not(".channel-remap-select[data-channel-number='" + currentRemappedChannelNumber + "']")
                     .clone()
                     .show()
                     .addClass("bg-light")
