@@ -95,6 +95,8 @@ class ChannelController extends Controller
     public function playlist(Request $request)
     {
         $source = $request->source;
+        $maxChannel = $request->max_channel;
+
         if(!$this->channelSource->isValidDevice($source)) {
             throw new InvalidSourceException('Invalid source detected.');
         }
@@ -105,8 +107,9 @@ class ChannelController extends Controller
             ->keyBy("channel_id");
 
         $channels =
-            $channels->filter(function ($channel, $key) use ($existingChannels) {
-                return $existingChannels->get($key)->channel_enabled ?? true;
+            $channels->filter(function ($channel, $key) use ($existingChannels, $maxChannel) {
+                return (!is_null($maxChannel) ? intval($key) <= $maxChannel : true)
+                    && ($existingChannels->get($key)->channel_enabled ?? true);
             })->map(function($channel, $key) use ($existingChannels) {
                 $channel->mappedChannelNum =
                     $existingChannels->get($key)->channel_number ??
