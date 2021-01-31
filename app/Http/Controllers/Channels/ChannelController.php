@@ -103,6 +103,7 @@ class ChannelController extends Controller
         return response()->stream(function() use ($request, $source) {
             $handle = fopen('php://output', 'w');
             fputs($handle, "#EXTM3U\n\n");
+            flush();
 
             $maxChannel = $request->max_channel;
             $channels = $this->channelSource->getChannels($source)->channels;
@@ -125,6 +126,7 @@ class ChannelController extends Controller
                 fputs($handle, view('playlist.channel', [
                     'channel' => $channel
                 ])->render());
+                flush();
             }
             
             fclose($handle);

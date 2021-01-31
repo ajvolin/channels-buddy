@@ -75,6 +75,7 @@ class ChannelController extends Controller
 
             $handle = fopen('php://output', 'w');
             fputs($handle, "#EXTM3U\n\n");
+            flush();
 
             $channels = $service->getChannels()->channels;
             $existingChannels = SourceChannel::where('source', $sourceName)
@@ -94,6 +95,7 @@ class ChannelController extends Controller
                 fputs($handle, view('playlist.channel', [
                     'channel' => $channel
                 ])->render());
+                flush();
             }
 
             fclose($handle);
