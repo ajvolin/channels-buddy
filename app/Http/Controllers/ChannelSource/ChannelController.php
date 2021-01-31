@@ -101,7 +101,8 @@ class ChannelController extends Controller
             fclose($handle);
         }, 200,
         [
-            'Content-Type' => 'application/x-mpegurl'
+            'Content-Type' => 'application/x-mpegurl',
+            'X-Accel-Buffering' => 'no'
         ]);
     }
 }
