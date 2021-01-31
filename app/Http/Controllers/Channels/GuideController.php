@@ -54,7 +54,7 @@ class GuideController extends BaseGuideController
             config('channels.backendChunkSize')
         );
 
-        return $this->streamResponse(function($handle)
+        return $this->streamResponse(function()
             use ($source, $guideChunkSize, $guideDuration) {
             $now = Carbon::now();
             $guideIntervals = CarbonInterval::seconds($guideChunkSize)
@@ -71,7 +71,7 @@ class GuideController extends BaseGuideController
                     $source
                 );
                 
-                $this->parseGuide($guideData, $handle);
+                $this->parseGuide($guideData);
             }
         });
     }

@@ -45,7 +45,7 @@ class GuideController extends BaseGuideController
             $duration = intval($request->duration);
         }
 
-        return $this->streamResponse(function($handle) use ($duration) {
+        return $this->streamResponse(function() use ($duration) {
             if (!$this->channelSourceProvider->guideIsChunkable()
                 || (is_null($this->channelSourceProvider->getMaxGuideDuration())
                 && is_null($this->channelSourceProvider->getMaxGuideChunkSize()))
@@ -53,7 +53,7 @@ class GuideController extends BaseGuideController
                 $guideData = $this->channelService
                         ->getGuideData(null, null);
     
-                $this->parseGuide($guideData, $handle);
+                $this->parseGuide($guideData);
             } else {
                 $guideDuration = intval(
                     min(
@@ -77,7 +77,7 @@ class GuideController extends BaseGuideController
                     $guideData = $this->channelService
                         ->getGuideData($guideInterval->timestamp, $guideChunkSize);
 
-                    $this->parseGuide($guideData, $handle);
+                    $this->parseGuide($guideData);
                 }
             }
         });

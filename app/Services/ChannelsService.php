@@ -91,13 +91,10 @@ class ChannelsService implements ChannelSource
     public function getGuideChannels(): Channels
     {
         $stream = $this->httpClient->get('/dvr/guide/channels');
-        $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
-            $stream->getBody()
-        );
+        $json = $stream->getBody()->getContents();
 
-        $channels = LazyCollection::make(JsonMachine::fromStream(
-            $json, '', new ExtJsonDecoder
-        ))->map(function($channel) {
+        $channels = LazyCollection::make(json_decode($json))
+        ->map(function($channel) {
             return $this->generateChannel($channel);
         })->sortBy('number')
         ->keyBy('number');
@@ -524,13 +521,10 @@ class ChannelsService implements ChannelSource
     {
         $stream = $this->httpClient
             ->get(sprintf('/devices/%s/channels', $device));
-        $json = \GuzzleHttp\Psr7\StreamWrapper::getResource(
-            $stream->getBody()
-        );
+        $json = $stream->getBody()->getContents();
 
-        $channels = LazyCollection::make(JsonMachine::fromStream(
-            $json, '', new ExtJsonDecoder
-        ))->keyBy('GuideNumber')
+        $channels = LazyCollection::make(json_decode($json))
+        ->keyBy('GuideNumber')
         ->sortBy("GuideNumber");
 
         return $channels;

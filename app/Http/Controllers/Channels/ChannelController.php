@@ -101,8 +101,7 @@ class ChannelController extends Controller
         }
 
         return response()->stream(function() use ($request, $source) {
-            $handle = fopen('php://output', 'w');
-            fputs($handle, "#EXTM3U\n\n");
+            echo "#EXTM3U\n\n";
             flush();
 
             $maxChannel = $request->max_channel;
@@ -123,13 +122,11 @@ class ChannelController extends Controller
                 })->values()->sortBy('mappedChannelNum');
 
             foreach($channels as $channel) {
-                fputs($handle, view('playlist.channel', [
+                echo view('playlist.channel', [
                     'channel' => $channel
-                ])->render());
+                ])->render();
                 flush();
             }
-            
-            fclose($handle);
         }, 200,
         [
             'Content-Type' => 'application/x-mpegurl',

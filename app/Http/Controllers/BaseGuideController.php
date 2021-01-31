@@ -34,20 +34,21 @@ abstract class BaseGuideController extends Controller
     final protected function streamResponse(callable $callable): StreamedResponse
     {
         return response()->stream(function() use ($callable) {
-            $handle = fopen('php://output', 'w');
-
             $xmlOpen = '<?xml version="1.0" encoding="UTF-8"?>'."\n" .
                         '<!DOCTYPE tv SYSTEM "xmltv.dtd">'."\n" .
                         '<tv source-info-name="channels-buddy">';
-            fputs($handle, $xmlOpen);
 
-            $callable($handle);
+            echo $xmlOpen;
+            flush();
 
-            fputs($handle, "</tv>");
-            fclose($handle);
+            $callable();
+
+            echo "</tv>";
+            flush();
         }, 200,
         [
-            'Content-Type' => 'text/xml'
+            'Content-Type' => 'text/xml',
+            'X-Accel-Buffering' => 'no'
         ]);
     }
 
@@ -55,9 +56,8 @@ abstract class BaseGuideController extends Controller
      * Parses the Guide.
      *
      * @param Guide $guide  The Guide object to parse
-     * @param resource  $handle The handle to stream to
      */
-    final protected function parseGuide(Guide $guide, $handle): void
+    final protected function parseGuide(Guide $guide): void
     {
         foreach ($guide->guideEntries as $entry) {
             if($this->existingChannels
@@ -106,7 +106,8 @@ abstract class BaseGuideController extends Controller
                         );
                     }
 
-                    fputs($handle, $this->renderXmlTvElement($channel));
+                    echo $this->renderXmlTvElement($channel);
+                    flush();
                 }
 
                 foreach ($entry->airings as $airing) {
@@ -372,7 +373,8 @@ abstract class BaseGuideController extends Controller
                             );
                         }
 
-                        fputs($handle, $this->renderXmlTvElement($program));
+                        echo $this->renderXmlTvElement($program);
+                        flush();
                     }
                 }
             }

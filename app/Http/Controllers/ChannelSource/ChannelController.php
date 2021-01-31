@@ -73,8 +73,7 @@ class ChannelController extends Controller
             $sourceName = $request->channelSource->getSourceName();
             $service = $request->channelSource->getChannelSourceService();
 
-            $handle = fopen('php://output', 'w');
-            fputs($handle, "#EXTM3U\n\n");
+            echo "#EXTM3U\n\n";
             flush();
 
             $channels = $service->getChannels()->channels;
@@ -92,13 +91,11 @@ class ChannelController extends Controller
                 })->values()->sortBy('mappedChannelNum');
 
             foreach($channels as $channel) {
-                fputs($handle, view('playlist.channel', [
+                echo view('playlist.channel', [
                     'channel' => $channel
-                ])->render());
+                ])->render();
                 flush();
             }
-
-            fclose($handle);
         }, 200,
         [
             'Content-Type' => 'application/x-mpegurl',
