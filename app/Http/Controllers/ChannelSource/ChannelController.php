@@ -69,14 +69,13 @@ class ChannelController extends Controller
 
     public function playlist(Request $request)
     {
-        $sourceName = $request->channelSource->getSourceName();
-        $service = $request->channelSource->getChannelSourceService();
+        return response()->stream(function() use ($request) {
+            $sourceName = $request->channelSource->getSourceName();
+            $service = $request->channelSource->getChannelSourceService();
 
-        if ($request->has("fresh")) {
-            Cache::forget("{$sourceName}_channelsource_m3u");
-        }
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "#EXTM3U\n\n");
 
-        $playlist = Cache::remember("{$sourceName}_channelsource_m3u", 1800, function () use ($sourceName, $service) {
             $channels = $service->getChannels()->channels;
             $existingChannels = SourceChannel::where('source', $sourceName)
                 ->get()
@@ -90,12 +89,17 @@ class ChannelController extends Controller
                         $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
                     return $channel;
                 })->values()->sortBy('mappedChannelNum');
-                
-            return view('playlist.full', [
-                'channels' => $channels
-            ])->render();
-        });
 
-        return response($playlist)->header('Content-Type', 'application/x-mpegurl');
+            foreach($channels as $channel) {
+                fputs($handle, view('playlist.channel', [
+                    'channel' => $channel
+                ])->render());
+            }
+
+            fclose($handle);
+        }, 200,
+        [
+            'Content-Type' => 'application/x-mpegurl'
+        ]);
     }
 }

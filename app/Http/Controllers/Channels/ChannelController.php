@@ -95,30 +95,42 @@ class ChannelController extends Controller
     public function playlist(Request $request)
     {
         $source = $request->source;
-        $maxChannel = $request->max_channel;
 
         if(!$this->channelSource->isValidDevice($source)) {
             throw new InvalidSourceException('Invalid source detected.');
         }
 
-        $channels = $this->channelSource->getChannels($source)->channels;
-        $existingChannels = SourceChannel::where('source', 'channels')
-            ->get()
-            ->keyBy("channel_id");
+        return response()->stream(function() use ($request, $source) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "#EXTM3U\n\n");
 
-        $channels =
-            $channels->filter(function ($channel, $key) use ($existingChannels, $maxChannel) {
-                return (!is_null($maxChannel) ? intval($key) <= $maxChannel : true)
-                    && ($existingChannels->get($key)->channel_enabled ?? true);
-            })->map(function($channel, $key) use ($existingChannels) {
-                $channel->mappedChannelNum =
-                    $existingChannels->get($key)->channel_number ??
-                        $channel->number;
-                return $channel;
-            })->values()->sortBy('mappedChannelNum');
+            $maxChannel = $request->max_channel;
+            $channels = $this->channelSource->getChannels($source)->channels;
+            $existingChannels = SourceChannel::where('source', 'channels')
+                ->get()
+                ->keyBy("channel_id");
 
-        return response(view('playlist.full', [
-            'channels' => $channels
-        ]))->header('Content-Type', 'application/x-mpegurl');
+            $channels =
+                $channels->filter(function ($channel, $key) use ($existingChannels, $maxChannel) {
+                    return (!is_null($maxChannel) ? intval($key) <= $maxChannel : true)
+                        && ($existingChannels->get($key)->channel_enabled ?? true);
+                })->map(function($channel, $key) use ($existingChannels) {
+                    $channel->mappedChannelNum =
+                        $existingChannels->get($key)->channel_number ??
+                            $channel->number;
+                    return $channel;
+                })->values()->sortBy('mappedChannelNum');
+
+            foreach($channels as $channel) {
+                fputs($handle, view('playlist.channel', [
+                    'channel' => $channel
+                ])->render());
+            }
+            
+            fclose($handle);
+        }, 200,
+        [
+            'Content-Type' => 'application/x-mpegurl'
+        ]);
     }
 }

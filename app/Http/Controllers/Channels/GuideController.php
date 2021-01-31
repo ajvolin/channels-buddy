@@ -39,7 +39,8 @@ class GuideController extends BaseGuideController
             $durationSeconds = intval($request->seconds) ?? 0;
 
             $duration = (($durationDays * 86400) + ($durationHours * 3600) +
-                ($durationMinutes * 60) + $durationSeconds) ?: config('channels.guideDuration');
+                ($durationMinutes * 60) + $durationSeconds) ?:
+                    config('channels.guideDuration');
         } else {
             $duration = intval($request->duration);
         }
