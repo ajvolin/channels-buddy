@@ -46,6 +46,7 @@ RUN ln -sf /usr/src/app/nginx.conf /etc/nginx/nginx.conf
 RUN ln -sf /usr/src/app/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
 RUN ln -sf /usr/src/app/php.ini-channels /etc/php8/conf.d/php-channels-settings.ini
 RUN mkdir -p /etc/supervisor/conf.d/ && ln -sf /usr/src/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN ln -sf /usr/bin/php8 /usr/bin/php
 
 # Set working directory
 WORKDIR /usr/src/app
