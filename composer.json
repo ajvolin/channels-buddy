@@ -1,12 +1,18 @@
 {
-    "name": "laravel/laravel",
-    "type": "project",
-    "description": "The Laravel Framework.",
+    "name": "ajvolin/channels-buddy",
+    "description": "This PHP application generates M3U playlists and XMLTV guides with enhanced metadata from a Channels DVR server and other Internet based sources that can be used as an input for any IPTV software, including Emby (requires Emby Premiere) or even another Channels DVR instance. Channel numbers can be mapped to a different number using a friendly UI.",
     "keywords": [
-        "framework",
-        "laravel"
+        "Channels",
+        "Channels Buddy"
     ],
+    "type": "project",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Adam Volin",
+            "email": "trome.auay@gmail.com"
+        }
+    ],
     "require": {
         "php": "^7.4|^8.0",
         "ajvolin/channels-buddy-pluto": "^0.1.0",
