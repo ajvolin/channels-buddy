@@ -33,7 +33,7 @@ RUN apk add --update --no-cache \
                         oniguruma-dev \
                         supervisor \
                         unzip \
-                        zip \
+                        zip
 
 # Remove Cache
 RUN rm -rf /var/cache/apk/*
@@ -51,9 +51,9 @@ RUN mkdir -p /etc/supervisor/conf.d/ && ln -sf /usr/src/app/supervisord.conf /et
 WORKDIR /usr/src/app
 
 # Run setup commands
-RUN chmod o+x ./install-composer.sh
-RUN chmod o+x ./entrypoint.sh
-RUN ./install-composer.sh
+RUN chmod o+x /usr/src/app/install-composer.sh
+RUN chmod o+x /usr/src/app/entrypoint.sh
+RUN /usr/src/app/install-composer.sh
 RUN composer install --no-dev --no-cache --no-interaction --optimize-autoloader --quiet --profile
 
 EXPOSE 80
