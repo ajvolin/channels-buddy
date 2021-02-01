@@ -52,7 +52,7 @@ class ChannelController extends Controller
             $channel->channel_enabled =
                 $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
-        });
+        })->sortBy('number');
 
         return view('channels.remap.map',
             [
@@ -119,7 +119,7 @@ class ChannelController extends Controller
                         $existingChannels->get($key)->channel_number ??
                             $channel->number;
                     return $channel;
-                })->values()->sortBy('mappedChannelNum');
+                });
 
             foreach($channels as $channel) {
                 echo view('playlist.channel', [

@@ -25,7 +25,11 @@ class ChannelController extends Controller
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
             $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
             return $channel;
-        });
+        })->sortBy(function($channel) {
+            return $channel->sortValue ??
+                $channel->number ??
+                $channel->id;
+        }, SORT_NATURAL | SORT_FLAG_CASE);
 
         return view('channelsource.channels.map',
             [
@@ -88,7 +92,7 @@ class ChannelController extends Controller
                     $channel->mappedChannelNum =
                         $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
                     return $channel;
-                })->values()->sortBy('mappedChannelNum');
+                });//->values()->sortBy('mappedChannelNum');
 
             foreach($channels as $channel) {
                 echo view('playlist.channel', [

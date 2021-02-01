@@ -64,9 +64,7 @@ class ChannelsService implements ChannelSource
     public function getChannels(?string $device = 'ANY'): Channels
     {
         $guideChannels =
-            $this->getGuideChannels()
-            ->channels
-            ->keyBy('number');
+            $this->getGuideChannels()->channels;
 
         $channels = $this->getDeviceChannels($device)
             ->filter(function ($channel, $key) {
@@ -82,8 +80,7 @@ class ChannelsService implements ChannelSource
                     $this->getStreamUrl($device, $channel->GuideNumber);
 
                 return $this->generateChannel($channel);
-            })->sortBy('number')
-            ->keyBy('number');
+            })->keyBy('number');
             
         return new Channels($channels);
     }
@@ -99,8 +96,7 @@ class ChannelsService implements ChannelSource
             $json, '', new ExtJsonDecoder
         ))->map(function($channel) {
             return $this->generateChannel($channel);
-        })->sortBy('number')
-        ->keyBy('number');
+        })->keyBy('number');
 
         return new Channels($channels);
     }
@@ -530,8 +526,7 @@ class ChannelsService implements ChannelSource
 
         $channels = LazyCollection::make(JsonMachine::fromStream(
             $json, '', new ExtJsonDecoder
-        ))->keyBy('GuideNumber')
-        ->sortBy("GuideNumber");
+        ))->keyBy('GuideNumber');
 
         return $channels;
     }
