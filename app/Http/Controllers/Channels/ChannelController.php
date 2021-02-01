@@ -38,7 +38,10 @@ class ChannelController extends Controller
             throw new InvalidSourceException('Invalid source detected.');
         }
 
-        $allChannels = $this->channelSource->getGuideChannels()->channels;
+        $allChannels = $this->channelSource
+            ->getGuideChannels()
+            ->channels
+            ->sortBy('number');
         $sourceChannels = $this->channelSource->getChannels($source)->channels;
 
         $existingChannels = SourceChannel::where('source', 'channels')
