@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.13
 LABEL maintainer="Adam Volin <ajvolin@gmail.com>"
 
 # Update apk and add dependencies
@@ -20,6 +20,7 @@ RUN apk add --update --no-cache \
                         php8-pcntl \
                         php8-pdo \
                         php8-pdo_sqlite \
+                        php8-phar \
                         php8-session \
                         php8-sqlite3 \
                         php8-tokenizer \
