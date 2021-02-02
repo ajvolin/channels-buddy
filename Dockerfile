@@ -39,8 +39,12 @@ RUN apk add --update --no-cache \
 # Remove Cache
 RUN rm -rf /var/cache/apk/*
 
-# Clone github repo
-RUN git clone https://github.com/ajvolin/channels-buddy /usr/src/app
+# Download latest Channels Buddy release
+RUN curl --silent $(curl --silent "https://api.github.com/repos/ajvolin/channels-buddy/releases/latest" | grep '"tarball_url":' | sed -E 's/.*"([^"]+)".*/\1/') -L -o channels-buddy.tar.gz && \
+tar -zxf channels-buddy.tar.gz && \
+mkdir -p /usr/src && \
+mv ajvolin-channels-buddy*/ /usr/src/app && \
+rm channels-buddy.tar.gz
 
 # Install config files
 RUN ln -sf /usr/src/app/nginx.conf /etc/nginx/nginx.conf
