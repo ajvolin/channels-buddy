@@ -41,8 +41,8 @@ RUN rm -rf /var/cache/apk/*
 
 # Download latest Channels Buddy release
 RUN curl --silent $(curl --silent "https://api.github.com/repos/ajvolin/channels-buddy/releases/latest" | grep '"tarball_url":' | sed -E 's/.*"([^"]+)".*/\1/') -L -o channels-buddy.tar.gz && \
-tar -zxf channels-buddy.tar.gz && \
 mkdir -p /usr/src && \
+tar -zxf channels-buddy.tar.gz && \
 mv ajvolin-channels-buddy*/ /usr/src/app && \
 rm channels-buddy.tar.gz
 
