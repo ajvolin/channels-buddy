@@ -5,7 +5,7 @@
         border: 1px solid #ccc;
     }
 </style>
-@section('fluid-content')
+@section('content')
 <div class="row mb-3">
     <div class="col-12">
         <h1>Application Log</h1>

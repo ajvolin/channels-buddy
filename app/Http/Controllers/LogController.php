@@ -11,9 +11,9 @@ class LogController extends Controller
         $logFiles = glob(
             storage_path('logs/') . "laravel-*.log"
         );
-        $logFilePath = end($logFiles) ?? null;
+        $logFilePath = end($logFiles) ?: null;
         
-        $log = file_get_contents($logFilePath) ?? null;
+        $log = !is_null($logFilePath) ? file_get_contents($logFilePath) : 'No errors found! Yay :)';
         return view('log',
             [
                 'log' => nl2br($log)

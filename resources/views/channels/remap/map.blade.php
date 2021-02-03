@@ -1,5 +1,19 @@
 @extends('layouts.main')
-
+@section('nav-left')
+    @if(isset($sources))
+    <a class="nav-link active" href="#">Channels DVR</a>
+    <div class="dropdown nav-item">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true">
+            Sources
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            @foreach($sources as $src => $srcName)
+            <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{ $srcName }}</a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+@stop
 @section('content')
 <style>
     #channel-select-list-container {
@@ -25,51 +39,62 @@
         height: 30px;
     }
 </style>
-<div class="row mb-3">
-    <div class="col-xs-8 col-md-10 col-lg-10">
-        <h1>{{ $sources->get($source) }}</h1>
-        <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />
-            <label class="custom-control-label" for="channel_status_any">All Channels</label>
+<div class="row mt-4">
+    <div class="col-xl-10 offset-xl-1">
+        <div class="row mb-3">
+            <div class="col-xs-8 col-md-10 col-lg-10">
+                <h1>{{ $sources->get($source) }}</h1>
+                <div class="card">
+                    <div class="card-body">
+                        <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('sourcePlaylist', ['source' => $source]) }}</code>
+                        <br/>
+                        <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('sourceXmlTv', ['source' => $source]) }}</code>
+                    </div>
+                </div>
+                <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />
+                    <label class="custom-control-label" for="channel_status_any">All Channels</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="channel_status_enabled" name="channel_status" class="custom-control-input" value="1" />
+                    <label class="custom-control-label" for="channel_status_enabled">Enabled Channels</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="channel_status_disabled" name="channel_status" class="custom-control-input" value="0" />
+                    <label class="custom-control-label" for="channel_status_disabled">Disabled Channels</label>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2 col-lg-2">
+            </div>
         </div>
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_enabled" name="channel_status" class="custom-control-input" value="1" />
-            <label class="custom-control-label" for="channel_status_enabled">Enabled Channels</label>
-        </div>
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_disabled" name="channel_status" class="custom-control-input" value="0" />
-            <label class="custom-control-label" for="channel_status_disabled">Disabled Channels</label>
-        </div>
-    </div>
-    <div class="col-xs-4 col-md-2 col-lg-2">
+        <form action="{{ route('applyChannelMap', ['source' => $source]) }}" method="POST">
+            @csrf
+            <div class="row">
+                <div class="col-xs-8 col-md-10 col-lg-10">
+                    <table class="table table-hover table-responsive" width="100%">
+                        <caption>List of channels</caption>
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">DVR Channel</th>
+                                <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Re-Mapped Channel Number</th>
+                                <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sourceChannels as $channel)
+                            @include('channels.remap.table.row')
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-xs-4 col-md-2 col-lg-2 align-left">
+                    <input type="submit" value="Save Channel Map" class="btn btn-primary" />
+                </div>
+            </div>
+        </form>
     </div>
 </div>
-<form action="{{ route('applyChannelMap', ['source' => $source]) }}" method="POST">
-    @csrf
-    <div class="row">
-        <div class="col-xs-8 col-md-10 col-lg-10">
-            <table class="table table-hover table-responsive" width="100%">
-                <caption>List of channels</caption>
-                <thead class="thead-light">
-                    <tr>
-                        <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">DVR Channel</th>
-                        <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Re-Mapped Channel Number</th>
-                        <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($sourceChannels as $channel)
-                    @include('channels.remap.table.row')
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        <div class="col-xs-4 col-md-2 col-lg-2 align-left">
-            <input type="submit" value="Save Channel Map" class="btn btn-primary" />
-        </div>
-    </div>
-</form>
 @include('channels.remap.dropdown.list')
 <script>
     $(document).ready(function() {
