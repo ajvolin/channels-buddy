@@ -17,20 +17,6 @@ class ChannelController extends Controller
         $this->channelSource = $channelSource;
     }
 
-    public function index()
-    {
-        $sources = $this->channelSource->getDevices();
-
-        if($sources->count() > 0) {
-            return view('layouts.main', [
-                'sources' => $sources,
-            ]);
-        }
-        else {
-            return view('empty', []);
-        }
-    }
-
     public function list(Request $request)
     {
         $source = $request->source;
@@ -54,6 +40,14 @@ class ChannelController extends Controller
                     $channel->number;
             $channel->channel_enabled =
                 $existingChannels->get($key)->channel_enabled ?? true;
+            $channel->logo =
+                $existingChannels->get($key)->custom_logo ?? $channel->logo ?? null;
+            $channel->channelArt =
+                $existingChannels->get($key)->custom_channel_art ?? $channel->channelArt ?? null;
+            $channel->custom_logo =
+                $existingChannels->get($key)->custom_logo ?? null;
+            $channel->custom_channel_art =
+                $existingChannels->get($key)->custom_channel_art ?? null;
             return $channel;
         })->sortBy('number');
 
@@ -66,7 +60,6 @@ class ChannelController extends Controller
                 'channelsBackendUrl' => $this->channelSource->getBaseUrl(),
             ]
         );
-
     }
 
     public function map(Request $request)
@@ -82,14 +75,16 @@ class ChannelController extends Controller
                 'source' => "channels",
                 'channel_id' => $key,
                 'channel_number' => $channel['mapped'] ?? $key,
-                'channel_enabled' => $channel['enabled'] ?? 0
+                'channel_enabled' => $channel['enabled'] ?? 0,
+                'custom_logo' => $channel['custom_logo'] ?? null,
+                'custom_channel_art' => $channel['custom_channel_art'] ?? null
             ];
         })->values()->toArray();
 
         SourceChannel::upsert(
             $channels,
             [ 'source', 'channel_id' ],
-            [ 'channel_number', 'channel_enabled' ]
+            [ 'channel_number', 'channel_enabled', 'custom_logo', 'custom_channel_art' ],
         );
 
         return redirect(route('getChannelMapUI', ['source' => $source]));
@@ -121,6 +116,11 @@ class ChannelController extends Controller
                     $channel->mappedChannelNum =
                         $existingChannels->get($key)->channel_number ??
                             $channel->number;
+                    $channel->logo = $existingChannels->get($key)->custom_logo ??
+                        $channel->logo ?? null;
+                    $channel->channelArt = $existingChannels->get($key)->custom_channel_art ??
+                        $channel->channelArt ?? null;
+
                     return $channel;
                 });
 

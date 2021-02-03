@@ -26,4 +26,9 @@
                                     <label class="custom-control-label" for="{{ md5($source.$channel->id) }}">{{ $channel->channel_enabled ? "Enabled" : "Disabled" }}</label>
                                 </div>
                             </td>
+                            <td style="padding: 10px;" class="align-middle text-center">
+                                <a href="#" class="open-channel-settings" aria-label="Customize channel" title="Customize channel" data-channel-name="{{ $channel->name }}" data-toggle="modal" data-target="#channel-settings"><i class="las la-fw la-2x la-cog"></i></a>
+                                <input type="hidden" class="custom-logo-input" name="channel[{{ $channel->number }}][custom_logo]" value="{{ $channel->custom_logo }}" />
+                                <input type="hidden" class="custom-channel-art-input" name="channel[{{ $channel->number }}][custom_channel_art]" value="{{ $channel->custom_channel_art }}" />
+                            </td>
                         </tr>

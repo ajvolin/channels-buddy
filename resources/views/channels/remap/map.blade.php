@@ -79,6 +79,7 @@
                                 <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">DVR Channel</th>
                                 <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Re-Mapped Channel Number</th>
                                 <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
+                                <th scope="col" class="text-center" style="padding: 10px;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,6 +94,32 @@
                 </div>
             </div>
         </form>
+    </div>
+</div>
+<div id="channel-settings" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="customChannelLogo">Custom Logo URL</label>
+                    <input type="text" class="form-control" name="customChannelLogo">
+                </div>
+                <div class="form-group">
+                    <label for="customChannelArt">Custom Channel Art URL</label>
+                    <input type="text" class="form-control" name="customChannelArt">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-channel-settings">Save</button>
+            </div>
+        </div>
     </div>
 </div>
 @include('channels.remap.dropdown.list')
@@ -281,6 +308,38 @@
                 .parent()
                 .attr('data-channel-remapped-number', channelNumber);
         });
+
+        $(".open-channel-settings").on('click', function(e) {
+            e.preventDefault();
+        });
+
+        $("#channel-settings").on('show.bs.modal', function(event) {
+            var modal = $(this);
+            var el = $(event.relatedTarget);
+
+            $(".modal-title").text(
+                el.attr('data-channel-name')
+            );
+
+            modal.find("[name='customChannelLogo']").val(
+                el.siblings('input.custom-logo-input').val()
+            );
+
+            modal.find("[name='customChannelArt']").val(
+                el.siblings('input.custom-channel-art-input').val()
+            );
+
+            $("#save-channel-settings").on('click', function(e){
+                e.preventDefault();
+                el.siblings('input.custom-logo-input').val(
+                    modal.find("[name='customChannelLogo']").val()
+                );
+                el.siblings('input.custom-channel-art-input').val(
+                    modal.find("[name='customChannelArt']").val()
+                );
+                modal.modal('hide');
+            });
+        });        
     });
 </script>
 @endsection

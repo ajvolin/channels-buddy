@@ -19,6 +19,7 @@
         "ajvolin/channels-buddy-source-provider": "^0.1.2",
         "ajvolin/channels-buddy-stirr": "^0.1.0",
         "ajvolin/xmltv": "^3.0.1",
+        "doctrine/dbal": "^3.0",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.2",

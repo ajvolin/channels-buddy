@@ -24,6 +24,14 @@ class ChannelController extends Controller
         $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
             $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
+            $channel->logo =
+                $existingChannels->get($key)->custom_logo ?? $channel->logo ?? null;
+            $channel->channelArt =
+                $existingChannels->get($key)->custom_channel_art ?? $channel->channelArt ?? null;
+            $channel->custom_logo =
+                $existingChannels->get($key)->custom_logo ?? null;
+            $channel->custom_channel_art =
+                $existingChannels->get($key)->custom_channel_art ?? null;
             return $channel;
         })->sortBy(function($channel) {
             return $channel->sortValue ??
@@ -50,14 +58,16 @@ class ChannelController extends Controller
                 'source' => $sourceName,
                 'channel_id' => $key,
                 'channel_number' => $channel['mapped'] ?? $channel['number'],
-                'channel_enabled' => $channel['enabled'] ?? 0
+                'channel_enabled' => $channel['enabled'] ?? 0,
+                'custom_logo' => $channel['custom_logo'] ?? null,
+                'custom_channel_art' => $channel['custom_channel_art'] ?? null
             ];
         })->values()->toArray();
 
         SourceChannel::upsert(
             $channels,
             [ 'source', 'channel_id' ],
-            [ 'channel_number', 'channel_enabled' ],
+            [ 'channel_number', 'channel_enabled', 'custom_logo', 'custom_channel_art' ],
         );
 
         Setting::updateSetting(
@@ -68,7 +78,6 @@ class ChannelController extends Controller
         Cache::forget("{$sourceName}_channelsource_m3u");
 
         return redirect(route('getChannelSourceMapUI', ['channelSource' => $sourceName]));
-
     }
 
     public function playlist(Request $request)
@@ -91,8 +100,12 @@ class ChannelController extends Controller
                 })->map(function($channel, $key) use ($existingChannels) {
                     $channel->mappedChannelNum =
                         $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
+                    $channel->logo = $existingChannels->get($key)->custom_logo ??
+                        $channel->logo ?? null;
+                    $channel->channelArt = $existingChannels->get($key)->custom_channel_art ??
+                        $channel->channelArt ?? null;
                     return $channel;
-                });//->values()->sortBy('mappedChannelNum');
+                });
 
             foreach($channels as $channel) {
                 echo view('playlist.channel', [

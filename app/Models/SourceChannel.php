@@ -19,6 +19,8 @@ class SourceChannel extends Model
         'source',
         'channel_id',
         'channel_number',
-        'channel_enabled'
+        'channel_enabled',
+        'custom_logo',
+        'custom_channel_art'
     ];
 }
