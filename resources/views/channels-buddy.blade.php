@@ -21,9 +21,11 @@
                         </h6>
                     </div>
                     <ul class="list-group list-group-flush">
-                        @foreach($channelsSources as $src => $srcName)
+                        @forelse($channelsSources as $src => $srcName)
                         <a class="list-group-item list-group-item-action" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{$srcName}}</a>
-                        @endforeach
+                        @empty
+                        <li class="list-group-item text-center"><strong>No Channels DVR Server Configured</strong></li>
+                        @endforelse
                     </ul>
                 </div>
             </div>
@@ -36,9 +38,11 @@
                         </h6>
                     </div>
                     <ul class="list-group list-group-flush">
-                        @foreach($channelSources->getChannelSourceProviders() as $value)
+                        @forelse($channelSources->getChannelSourceProviders() as $value)
                         <a class="list-group-item list-group-item-action" href="{{ route('getChannelSourceMapUI', ['channelSource' => $value->getSourceName()]) }}">{{ $value->getDisplayName() }}</a>
-                        @endforeach
+                        @empty
+                        <li class="list-group-item text-center"><strong>No External Source Providers Configured</strong></li>
+                        @endforelse
                     </ul>
                 </div>
             </div>

@@ -17,7 +17,8 @@ class ChannelsBuddyController extends Controller
 
     public function index()
     {
-        $channelsSources = $this->channelSource->getDevices();
+        $channelsSources = $this->channelSource->getDevices()
+            ?? null;
 
         return view('channels-buddy', [
             'channelsSources' => $channelsSources

@@ -13,6 +13,7 @@ use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use JsonMachine\JsonMachine;
@@ -21,34 +22,30 @@ use stdClass;
 
 class ChannelsService implements ChannelSource
 {
+    protected $channelsServiceDisabled = false;
     protected $baseUrl;
     protected $playlistBaseUrl;
     protected $httpClient;
 
     public function __construct()
     {
-        if(env('CHANNELS_SERVER_IP') === null) {
-            die('CHANNELS_SERVER_IP .env variable must be set. Cannot continue.');
+        if(env('CHANNELS_SERVER_IP') === null || env('CHANNELS_SERVER_PORT') === null) {
+            $this->channelsServiceDisabled = true;
+        } else {
+            $this->baseUrl =
+                sprintf("http://%s:%s",
+                    env('CHANNELS_SERVER_IP'),
+                    env('CHANNELS_SERVER_PORT')
+                );
+            
+            $this->playlistBaseUrl =
+                sprintf("http://%s:%s",
+                    env('CHANNELS_SERVER_IP_FOR_PLAYLIST'),
+                    env('CHANNELS_SERVER_PORT_FOR_PLAYLIST')
+                );
+
+            $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
         }
-
-        if(env('CHANNELS_SERVER_PORT') === null) {
-            die('CHANNELS_SERVER_PORT .env variable must be set. Cannot continue.');
-        }
-
-        $this->baseUrl =
-            sprintf("http://%s:%s",
-                env('CHANNELS_SERVER_IP'),
-                env('CHANNELS_SERVER_PORT')
-            );
-        
-        $this->playlistBaseUrl =
-            sprintf("http://%s:%s",
-                env('CHANNELS_SERVER_IP_FOR_PLAYLIST'),
-                env('CHANNELS_SERVER_PORT_FOR_PLAYLIST')
-            );
-
-        $this->httpClient = new Client(['base_uri' => $this->baseUrl]);
-
     }
 
     public function getBaseUrl(): string
@@ -173,22 +170,33 @@ class ChannelsService implements ChannelSource
 
     public function isValidDevice($device): bool
     {
-        return ($this->getDevices()->has($device) !== false);
+        if ($this->channelsServiceDisabled) {
+            return false;
+        } else {
+            return ($this->getDevices()->has($device) !== false);
+        }
     }
 
     public function getDevices($allowAny = true): Collection
     {
-        $stream = $this->httpClient->get('/devices');
-        $json = $stream->getBody()->getContents();
+        if ($this->channelsServiceDisabled) {
+            return collect();
+        } else {
+            try {
+                $stream = $this->httpClient->get('/devices');
+                $json = $stream->getBody()->getContents();
 
-        $devices = collect(json_decode($json))
-            ->pluck('FriendlyName', 'DeviceID');
-        if($allowAny) {
-            $devices->prepend('All Devices', 'ANY');
-        }
-
-        return $devices;
-
+                $devices = collect(json_decode($json))
+                    ->pluck('FriendlyName', 'DeviceID');
+                if($allowAny) {
+                    $devices->prepend('All Devices', 'ANY');
+                }
+                
+                return $devices;
+            } catch (RequestException $e) {
+                return collect();
+            }
+        }        
     }
 
     private function generateAiring(Channel $channel, stdClass $channelAiring): Airing

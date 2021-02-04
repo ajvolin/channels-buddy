@@ -21,8 +21,10 @@
                 <div class="card">
                     <div class="card-body">
                         <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('channelSourcePlaylist', ['channelSource' => $channelSource]) }}</code>
+                        @if($channelSources->getChannelSourceProvider($channelSource)->providesGuide())
                         <br/>
                         <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('channelSourceXmlTv', ['channelSource' => $channelSource]) }}</code>
+                        @endif
                     </div>
                 </div>
                 <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />

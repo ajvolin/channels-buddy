@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "55deb0cddb28629b986354fff5de473a",
+    "content-hash": "e284729171c9ca3e867f5d90e647eff2",
     "packages": [
         {
             "name": "ajvolin/channels-buddy-pluto",
@@ -173,6 +173,63 @@
                 "source": "https://github.com/ajvolin/channels-buddy-stirr/tree/0.1.4"
             },
             "time": "2021-02-03T20:49:01+00:00"
+        },
+        {
+            "name": "ajvolin/channels-buddy-xumo",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ajvolin/channels-buddy-xumo.git",
+                "reference": "400fb2e951d2ac3f7872e1411d3a522a28d2dcdc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-xumo/zipball/400fb2e951d2ac3f7872e1411d3a522a28d2dcdc",
+                "reference": "400fb2e951d2ac3f7872e1411d3a522a28d2dcdc",
+                "shasum": ""
+            },
+            "require": {
+                "ajvolin/channels-buddy-source-provider": "^0.1.2",
+                "guzzlehttp/guzzle": "^7.2",
+                "halaxa/json-machine": "^0.5.0",
+                "illuminate/support": "^8.0",
+                "nesbot/carbon": "^2.40.0",
+                "php": "^7.4|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ChannelsBuddy\\Xumo\\ChannelsBuddyXumoServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ChannelsBuddy\\Xumo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Volin",
+                    "email": "trome.auay@gmail.com"
+                }
+            ],
+            "description": "Adds Xumo as a source to Channels Buddy",
+            "keywords": [
+                "Channels Buddy",
+                "Xumo",
+                "channels"
+            ],
+            "support": {
+                "issues": "https://github.com/ajvolin/channels-buddy-xumo/issues",
+                "source": "https://github.com/ajvolin/channels-buddy-xumo/tree/0.0.1"
+            },
+            "time": "2021-02-04T08:04:29+00:00"
         },
         {
             "name": "ajvolin/xmltv",
