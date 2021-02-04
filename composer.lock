@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e284729171c9ca3e867f5d90e647eff2",
+    "content-hash": "9b1823760be7ab83a588ebd50b809732",
     "packages": [
         {
             "name": "ajvolin/channels-buddy-pluto",
-            "version": "0.1.2",
+            "version": "0.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ajvolin/channels-buddy-pluto.git",
-                "reference": "1568b83446f920055070adaf54af37a5ec59682e"
+                "reference": "bd56f546e7ca20947a32c9d912bac5271035b56d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/channels-buddy-pluto/zipball/1568b83446f920055070adaf54af37a5ec59682e",
-                "reference": "1568b83446f920055070adaf54af37a5ec59682e",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-pluto/zipball/bd56f546e7ca20947a32c9d912bac5271035b56d",
+                "reference": "bd56f546e7ca20947a32c9d912bac5271035b56d",
                 "shasum": ""
             },
             "require": {
@@ -60,9 +60,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ajvolin/channels-buddy-pluto/issues",
-                "source": "https://github.com/ajvolin/channels-buddy-pluto/tree/0.1.2"
+                "source": "https://github.com/ajvolin/channels-buddy-pluto/tree/0.1.3"
             },
-            "time": "2021-02-01T06:29:12+00:00"
+            "time": "2021-02-04T20:55:07+00:00"
         },
         {
             "name": "ajvolin/channels-buddy-source-provider",
@@ -176,16 +176,16 @@
         },
         {
             "name": "ajvolin/channels-buddy-xumo",
-            "version": "0.0.1",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ajvolin/channels-buddy-xumo.git",
-                "reference": "400fb2e951d2ac3f7872e1411d3a522a28d2dcdc"
+                "reference": "3f36a8f947fd76bda26b7f8fca3a320e59590129"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/channels-buddy-xumo/zipball/400fb2e951d2ac3f7872e1411d3a522a28d2dcdc",
-                "reference": "400fb2e951d2ac3f7872e1411d3a522a28d2dcdc",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-xumo/zipball/3f36a8f947fd76bda26b7f8fca3a320e59590129",
+                "reference": "3f36a8f947fd76bda26b7f8fca3a320e59590129",
                 "shasum": ""
             },
             "require": {
@@ -227,9 +227,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ajvolin/channels-buddy-xumo/issues",
-                "source": "https://github.com/ajvolin/channels-buddy-xumo/tree/0.0.1"
+                "source": "https://github.com/ajvolin/channels-buddy-xumo/tree/0.1.1"
             },
-            "time": "2021-02-04T08:04:29+00:00"
+            "time": "2021-02-04T22:55:02+00:00"
         },
         {
             "name": "ajvolin/xmltv",
