@@ -413,11 +413,7 @@ class ChannelsService implements ChannelSource
             ?? $channel->name
             ?? "To be announced";
 
-        $subTitle = sprintf(
-            "%s hour long block on %s.",
-            $title,
-            $date->copy()->format('M d, Y')
-        );
+        $subTitle = sprintf("%s hour long block", $title);
 
         $description = $channel->description
             ?? "To be announced";
@@ -441,6 +437,7 @@ class ChannelsService implements ChannelSource
             'seasonNumber'          => $seasonNumber,
             'episodeNumber'         => $episodeNumber,
             'originalReleaseDate'   => $date->copy(),
+            'image'                 => $channel->channelArt ?? null,
             'isMovie'               => false
         ]);
     }
