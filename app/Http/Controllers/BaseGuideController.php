@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\SourceChannel;
 use ChannelsBuddy\SourceProvider\Models\Guide;
 use DOMDocument;
 use DOMElement;
@@ -19,10 +20,18 @@ use XmlTv\XmlSerializable;
 abstract class BaseGuideController extends Controller
 {
     protected Collection $existingChannels;
-    protected string $channelIdField;
+    protected string $sourceName;
     protected array $processedChannels = [];
     protected array $processedAirings = [];
-
+    
+    public function __construct()
+    {
+        $this->existingChannels =
+            SourceChannel::where('source', $this->sourceName)
+                ->where('channel_enabled', 1)
+                ->get()
+                ->keyBy('channel_id');
+    }
 
     abstract public function xmltv(Request $request): StreamedResponse;
 
@@ -60,14 +69,16 @@ abstract class BaseGuideController extends Controller
     final protected function parseGuide(Guide $guide): void
     {
         foreach ($guide->guideEntries as $entry) {
-            if($this->existingChannels
-                ->has($entry->channel->{$this->channelIdField})) {
+            $existingChannel = $this->existingChannels->get($entry->channel->id)
+                ?? null;
+            if(!is_null($existingChannel)) {
                 if (!in_array($entry->channel->id, $this->processedChannels)) {
                     $this->processedChannels[] = $entry->channel->id;
-                    $channel = new Tv\Channel($entry->channel->id);
+                    $channel = new Tv\Channel(
+                        sprintf('%s.%s', $this->sourceName, $entry->channel->id)
+                    );
                     
-                    $channelNumber = $this->existingChannels
-                    ->get($entry->channel->{$this->channelIdField}) ?: 
+                    $channelNumber = $existingChannel->channel_number ?: 
                         $entry->channel->number;
 
                     if (isset($entry->channel->title)) {
@@ -100,9 +111,12 @@ abstract class BaseGuideController extends Controller
                         );
                     }
 
-                    if (isset($entry->channel->logo)) {
+                    if (!is_null($entry->channel->logo ??
+                        $existingChannel->custom_logo ?? null)) {
                         $channel->addIcon(
-                            new Tv\Elements\Icon($entry->channel->logo)
+                            new Tv\Elements\Icon(
+                                $existingChannel->custom_logo ?? $entry->channel->logo
+                            )
                         );
                     }
 
@@ -145,9 +159,15 @@ abstract class BaseGuideController extends Controller
                             )
                         );
 
-                        if (isset($airing->image)) {
+                        if (!is_null($airing->image ??
+                            $entry->channel->channelArt ??
+                            $existingChannel->custom_channel_art ?? null)) {
                             $program->addIcon(
-                                new Tv\Elements\Icon($airing->image)
+                                new Tv\Elements\Icon(
+                                    $airing->image ??
+                                    $existingChannel->custom_channel_art ??
+                                    $entry->channel->channelArt
+                                )
                             );
                         }
 

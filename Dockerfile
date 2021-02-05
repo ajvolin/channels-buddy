@@ -33,6 +33,7 @@ RUN apk add --update --no-cache \
                         nginx \
                         oniguruma-dev \
                         supervisor \
+                        tzdata \
                         unzip \
                         zip
 

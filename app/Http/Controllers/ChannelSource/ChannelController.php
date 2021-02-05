@@ -97,13 +97,15 @@ class ChannelController extends Controller
             $channels =
                 $channels->filter(function ($channel, $key) use ($existingChannels) {
                     return $existingChannels->get($key)->channel_enabled ?? false;
-                })->map(function($channel, $key) use ($existingChannels) {
+                })->map(function($channel, $key) use ($existingChannels, $sourceName) {
                     $channel->mappedChannelNum =
                         $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
                     $channel->logo = $existingChannels->get($key)->custom_logo ??
                         $channel->logo ?? null;
                     $channel->channelArt = $existingChannels->get($key)->custom_channel_art ??
                         $channel->channelArt ?? null;
+                    $channel->id =
+                        sprintf('%s.%s', $sourceName, $channel->id);
                     return $channel;
                 });
 
