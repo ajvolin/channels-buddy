@@ -309,37 +309,40 @@
                 .attr('data-channel-remapped-number', channelNumber);
         });
 
+        var currentChannelEl;
+        var modal;
+
         $(".open-channel-settings").on('click', function(e) {
             e.preventDefault();
         });
 
         $("#channel-settings").on('show.bs.modal', function(event) {
-            var modal = $(this);
-            var el = $(event.relatedTarget);
+            modal = $(this);
+            currentChannelEl = $(event.relatedTarget);
 
             $(".modal-title").text(
-                el.attr('data-channel-name')
+                currentChannelEl.attr('data-channel-name')
             );
 
             modal.find("[name='customChannelLogo']").val(
-                el.siblings('input.custom-logo-input').val()
+                currentChannelEl.siblings('input.custom-logo-input').val()
             );
 
             modal.find("[name='customChannelArt']").val(
-                el.siblings('input.custom-channel-art-input').val()
+                currentChannelEl.siblings('input.custom-channel-art-input').val()
             );
+        });
 
-            $("#save-channel-settings").on('click', function(e){
-                e.preventDefault();
-                el.siblings('input.custom-logo-input').val(
-                    modal.find("[name='customChannelLogo']").val()
-                );
-                el.siblings('input.custom-channel-art-input').val(
-                    modal.find("[name='customChannelArt']").val()
-                );
-                modal.modal('hide');
-            });
-        });        
+        $("#save-channel-settings").on('click', function(e){
+            e.preventDefault();
+            currentChannelEl.siblings('input.custom-logo-input').val(
+                modal.find("[name='customChannelLogo']").val()
+            );
+            currentChannelEl.siblings('input.custom-channel-art-input').val(
+                modal.find("[name='customChannelArt']").val()
+            );
+            modal.modal('hide');
+        });
     });
 </script>
 @endsection
