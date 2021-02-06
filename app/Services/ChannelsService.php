@@ -446,15 +446,9 @@ class ChannelsService implements ChannelSource
     {
         $channel = new Channel;
 
-        if (isset($srcChannel->CallSign)
-            || isset($srcChannel->GuideNumber)
-            || isset($srcChannel->Number)) {
-            $channel->setId(
-                $srcChannel->CallSign ??
-                $srcChannel->GuideNumber ??
-                $srcChannel->Number
-            );
-        }
+        $channel->setId(
+            $srcChannel->GuideNumber ?? $srcChannel->Number
+        );
         
         if (isset($srcChannel->Name)) {
             $channel->setName($srcChannel->Name);

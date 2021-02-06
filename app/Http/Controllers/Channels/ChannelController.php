@@ -11,10 +11,12 @@ use Illuminate\Http\Request;
 class ChannelController extends Controller
 {
     protected $channelSource;
+    protected $sourceName;
 
     public function __construct(ChannelsService $channelSource)
     {
         $this->channelSource = $channelSource;
+        $this->sourceName = 'channels';
     }
 
     public function list(Request $request)
@@ -120,6 +122,8 @@ class ChannelController extends Controller
                         $channel->logo ?? null;
                     $channel->channelArt = $existingChannels->get($key)->custom_channel_art ??
                         $channel->channelArt ?? null;
+                    $channel->id =
+                        sprintf('%s.%s', $this->sourceName, $channel->id);
 
                     return $channel;
                 });

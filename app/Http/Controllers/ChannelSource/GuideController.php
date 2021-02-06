@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\ChannelSource;
 
-use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use App\Http\Controllers\BaseGuideController;
-use App\Models\SourceChannel;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
-use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
+use ChannelsBuddy\SourceProvider\Contracts\ChannelSource;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,16 +14,11 @@ class GuideController extends BaseGuideController
 {
     protected ChannelSourceProvider $channelSourceProvider;
     protected ChannelSource $channelService;
-    protected string $sourceName;
 
     public function __construct(Request $request)
     {
         $this->sourceName = $request->channelSource;
-        $this->existingChannels =
-            SourceChannel::where('source', $this->sourceName)
-                ->where('channel_enabled', 1)
-                ->pluck('channel_number', 'channel_id');
-        $this->channelIdField = 'id';
+       parent::__construct();
     }
 
     public function xmltv(Request $request): StreamedResponse

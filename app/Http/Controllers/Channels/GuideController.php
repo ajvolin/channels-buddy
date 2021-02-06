@@ -13,22 +13,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GuideController extends BaseGuideController
 {
-    protected ChannelsService $channelSource;
+    protected ChannelsService $channelService;
 
-    public function __construct(ChannelsService $channelSource, Request $request)
+    public function __construct(ChannelsService $channelService)
     {
-        $this->channelSource = $channelSource;
-        $this->existingChannels =
-            SourceChannel::where('source', 'channels')
-                ->where('channel_enabled', 1)
-                ->pluck('channel_number', 'channel_id');
-        $this->channelIdField = 'number';
+        $this->channelService = $channelService;
+        $this->sourceName = 'channels';
+        parent::__construct();
     }
 
     public function xmltv(Request $request): StreamedResponse
     {
         $source = $request->source;
-        if (!$this->channelSource->isValidDevice($source)) {
+        if (!$this->channelService->isValidDevice($source)) {
             throw new InvalidSourceException('Invalid source detected.');
         }
 
@@ -64,7 +61,7 @@ class GuideController extends BaseGuideController
             );
 
             foreach ($guideIntervals as $guideInterval) {
-                $guideData = $this->channelSource
+                $guideData = $this->channelService
                 ->getGuideData(
                     $guideInterval->timestamp,
                     $guideChunkSize,

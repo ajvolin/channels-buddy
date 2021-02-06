@@ -2,7 +2,7 @@
 
 This PHP application generates M3U playlists and XMLTV guides with enhanced metadata from a [Channels](https://getchannels.com) DVR server and other Internet based sources that can be used as an input for any IPTV software, including Emby (requires Emby Premiere) or even another Channels DVR instance. Channel numbers can be mapped to a different number using a friendly UI.
 
-Forked from [@crackers8199's](https://github.com/crackers8199) channels-dvr-mapper, thanks for the code!
+Originally forked from [@crackers8199's](https://github.com/crackers8199) channels-dvr-mapper, thanks for the code!
 
 ## Setup
 Run the container, substituting your Channels DVR server IP address and port.

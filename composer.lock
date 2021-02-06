@@ -176,16 +176,16 @@
         },
         {
             "name": "ajvolin/channels-buddy-xumo",
-            "version": "0.1.1",
+            "version": "0.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ajvolin/channels-buddy-xumo.git",
-                "reference": "3f36a8f947fd76bda26b7f8fca3a320e59590129"
+                "reference": "7416a6ec23ebdc845f504f21c968789130a87a97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/channels-buddy-xumo/zipball/3f36a8f947fd76bda26b7f8fca3a320e59590129",
-                "reference": "3f36a8f947fd76bda26b7f8fca3a320e59590129",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-xumo/zipball/7416a6ec23ebdc845f504f21c968789130a87a97",
+                "reference": "7416a6ec23ebdc845f504f21c968789130a87a97",
                 "shasum": ""
             },
             "require": {
@@ -227,22 +227,22 @@
             ],
             "support": {
                 "issues": "https://github.com/ajvolin/channels-buddy-xumo/issues",
-                "source": "https://github.com/ajvolin/channels-buddy-xumo/tree/0.1.1"
+                "source": "https://github.com/ajvolin/channels-buddy-xumo/tree/0.1.3"
             },
-            "time": "2021-02-04T22:55:02+00:00"
+            "time": "2021-02-05T22:54:14+00:00"
         },
         {
             "name": "ajvolin/xmltv",
-            "version": "3.0.3",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ajvolin/xmltv.git",
-                "reference": "67fbf4fc1b75aebac588a2ff2bbdcd5a059f3df7"
+                "reference": "2434325c2262ac7cbdad6e171ed2e16b0b59d4b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/xmltv/zipball/67fbf4fc1b75aebac588a2ff2bbdcd5a059f3df7",
-                "reference": "67fbf4fc1b75aebac588a2ff2bbdcd5a059f3df7",
+                "url": "https://api.github.com/repos/ajvolin/xmltv/zipball/2434325c2262ac7cbdad6e171ed2e16b0b59d4b3",
+                "reference": "2434325c2262ac7cbdad6e171ed2e16b0b59d4b3",
                 "shasum": ""
             },
             "require": {
@@ -281,9 +281,9 @@
                 "XMLTV"
             ],
             "support": {
-                "source": "https://github.com/ajvolin/xmltv/tree/3.0.3"
+                "source": "https://github.com/ajvolin/xmltv/tree/3.0.4"
             },
-            "time": "2020-12-19T19:47:51+00:00"
+            "time": "2021-02-05T05:31:53+00:00"
         },
         {
             "name": "alchemy/binary-driver",
@@ -6231,16 +6231,16 @@
         },
         {
             "name": "facade/ignition",
-            "version": "2.5.10",
+            "version": "2.5.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facade/ignition.git",
-                "reference": "98154e8b991fb616304c213cd405299ffedc26f5"
+                "reference": "e91d67353054bf827c64687fcac5ea44e4dcec54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facade/ignition/zipball/98154e8b991fb616304c213cd405299ffedc26f5",
-                "reference": "98154e8b991fb616304c213cd405299ffedc26f5",
+                "url": "https://api.github.com/repos/facade/ignition/zipball/e91d67353054bf827c64687fcac5ea44e4dcec54",
+                "reference": "e91d67353054bf827c64687fcac5ea44e4dcec54",
                 "shasum": ""
             },
             "require": {
@@ -6304,7 +6304,7 @@
                 "issues": "https://github.com/facade/ignition/issues",
                 "source": "https://github.com/facade/ignition"
             },
-            "time": "2021-02-02T10:15:48+00:00"
+            "time": "2021-02-05T12:52:11+00:00"
         },
         {
             "name": "facade/ignition-contracts",
