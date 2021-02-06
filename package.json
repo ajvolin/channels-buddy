@@ -10,10 +10,23 @@
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "devDependencies": {
-        "axios": "^0.19",
+        "@inertiajs/inertia": "^0.8.4",
+        "@inertiajs/inertia-vue": "^0.5.5",
+        "@popperjs/core": "^2.6.0",
+        "axios": "^0.21.1",
+        "bootstrap": "^4.6.0",
         "cross-env": "^7.0",
+        "jquery": "^3.5.1",
         "laravel-mix": "^5.0.1",
-        "lodash": "^4.17.19",
-        "resolve-url-loader": "^3.1.0"
+        "lodash": "^4.17.20",
+        "resolve-url-loader": "^3.1.2",
+        "v-tooltip": "^3.0.0-alpha.21",
+        "vue": "^2.6.12",
+        "vue-meta": "^2.4.0",
+        "vue-template-compiler": "^2.6.12",
+        "webpack-chunk-rename-plugin": "^1.0.3"
+    },
+    "dependencies": {
+        "ziggy-js": "^1.0.5"
     }
 }

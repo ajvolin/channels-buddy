@@ -7,6 +7,7 @@ use App\Http\Controllers\ChannelSource\GuideController as ChannelSourceGuideCont
 use App\Http\Controllers\ChannelsBuddyController;
 use App\Http\Controllers\LogController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,17 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/home', function(){
+    Inertia::setRootView('layouts.app');
+    Inertia::version(function () {
+        return md5_file(public_path('mix-manifest.json'));
+    });
+    
+    return Inertia::render('Home', [
+        
+    ]);
+});
 
 Route::get('/', [ChannelsBuddyController::class, 'index'])->name('home');
 
