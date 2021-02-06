@@ -71,12 +71,12 @@ abstract class BaseGuideController extends Controller
         foreach ($guide->guideEntries as $entry) {
             $existingChannel = $this->existingChannels->get($entry->channel->id)
                 ?? null;
+            $entry->channel->id =
+                sprintf('%s.%s', $this->sourceName, $entry->channel->id);
             if(!is_null($existingChannel)) {
                 if (!in_array($entry->channel->id, $this->processedChannels)) {
                     $this->processedChannels[] = $entry->channel->id;
-                    $channel = new Tv\Channel(
-                        sprintf('%s.%s', $this->sourceName, $entry->channel->id)
-                    );
+                    $channel = new Tv\Channel($entry->channel->id);
                     
                     $channelNumber = $existingChannel->channel_number ?: 
                         $entry->channel->number;
