@@ -90,11 +90,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Home',
   props: {
-    title: String
-  }
+    title: String,
+    channels_dvr: Object,
+    external_sources: Object
+  },
+  methods: {
+    hasSources: function hasSources(provider) {
+      return Object.keys(provider.sources).length > 0;
+    }
+  },
+  computed: {}
 });
 
 /***/ }),
@@ -119,39 +129,154 @@ var render = function() {
       _vm._m(0),
       _vm._v(" "),
       _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-sm" }, [
-          _c("div", { staticClass: "card bg-light" }, [
-            _vm._m(1),
-            _vm._v(" "),
-            _c("ul", { staticClass: "list-group list-group-flush" }, [
-              _vm._v(
-                "\n                        @forelse($channelsSources as $src => $srcName)\n                        "
-              ),
-              _c(
-                "a",
-                {
-                  staticClass: "list-group-item list-group-item-action",
-                  attrs: { href: "" }
-                },
-                [_vm._v(_vm._s(_vm.$srcName))]
-              ),
-              _vm._v(
-                "\n                        @empty\n                        "
-              ),
-              _vm._m(2),
-              _vm._v(
-                "\n                        @endforelse\n                    "
-              )
-            ])
-          ])
-        ]),
+        _c(
+          "div",
+          { staticClass: "col-sm" },
+          [
+            _c(
+              "b-card",
+              { attrs: { "bg-variant": "light", "no-body": "" } },
+              [
+                _c(
+                  "b-card-body",
+                  [
+                    _c("b-card-title", { attrs: { "title-tag": "h5" } }, [
+                      _vm._v("Channels DVR")
+                    ]),
+                    _vm._v(" "),
+                    _c("b-card-sub-title", [
+                      _vm._v(
+                        "Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server"
+                      )
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _vm.hasSources(_vm.channels_dvr)
+                  ? _c(
+                      "b-list-group",
+                      { attrs: { flush: "" } },
+                      _vm._l(_vm.channels_dvr.sources, function(source) {
+                        return _c(
+                          "b-list-group-item",
+                          {
+                            key: source.source_name,
+                            attrs: {
+                              to: "channels/" + source.source_name,
+                              "router-component-name": "b-vue-inertia-link"
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(source.display_name) +
+                                "\n                        "
+                            )
+                          ]
+                        )
+                      }),
+                      1
+                    )
+                  : _c(
+                      "b-list-group",
+                      { attrs: { flush: "" } },
+                      [
+                        _c(
+                          "b-list-group-item",
+                          { staticClass: "text-center" },
+                          [
+                            _c("strong", [
+                              _vm._v("No Channels DVR Server Configured")
+                            ])
+                          ]
+                        )
+                      ],
+                      1
+                    )
+              ],
+              1
+            )
+          ],
+          1
+        ),
         _vm._v(" "),
-        _vm._m(3)
+        _c(
+          "div",
+          { staticClass: "col-sm" },
+          [
+            _c(
+              "b-card",
+              { attrs: { "bg-variant": "light", "no-body": "" } },
+              [
+                _c(
+                  "b-card-body",
+                  [
+                    _c("b-card-title", { attrs: { "title-tag": "h5" } }, [
+                      _vm._v("External Source Providers")
+                    ]),
+                    _vm._v(" "),
+                    _c("b-card-sub-title", [
+                      _vm._v(
+                        "Set channel numbers and export M3U playlists and XMLTV guide data from external source providers"
+                      )
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _vm.hasSources(_vm.external_sources)
+                  ? _c(
+                      "b-list-group",
+                      { attrs: { flush: "" } },
+                      _vm._l(_vm.external_sources.sources, function(source) {
+                        return _c(
+                          "b-list-group-item",
+                          {
+                            key: source.source_name,
+                            attrs: {
+                              to: "source/" + source.source_name,
+                              "router-component-name": "b-vue-inertia-link"
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(source.display_name) +
+                                "\n                        "
+                            )
+                          ]
+                        )
+                      }),
+                      1
+                    )
+                  : _c(
+                      "b-list-group",
+                      { attrs: { flush: "" } },
+                      [
+                        _c(
+                          "b-list-group-item",
+                          { staticClass: "text-center" },
+                          [
+                            _c("strong", [
+                              _vm._v("No External Source Providers Configured")
+                            ])
+                          ]
+                        )
+                      ],
+                      1
+                    )
+              ],
+              1
+            )
+          ],
+          1
+        )
       ]),
       _vm._v(" "),
       _c("hr"),
       _vm._v(" "),
-      _vm._m(4)
+      _vm._m(1)
     ])
   ])
 }
@@ -176,64 +301,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-body" }, [
-      _c("h5", { staticClass: "card-title" }, [_vm._v("Channels DVR")]),
-      _vm._v(" "),
-      _c("h6", { staticClass: "card-subtitle text-muted" }, [
-        _vm._v(
-          "\n                            Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server\n                        "
-        )
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "list-group-item text-center" }, [
-      _c("strong", [_vm._v("No Channels DVR Server Configured")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-sm" }, [
-      _c("div", { staticClass: "card bg-light" }, [
-        _c("div", { staticClass: "card-body" }, [
-          _c("h5", { staticClass: "card-title" }, [
-            _vm._v("External Source Providers")
-          ]),
-          _vm._v(" "),
-          _c("h6", { staticClass: "card-subtitle text-muted" }, [
-            _vm._v(
-              "\n                            Set channel numbers and export M3U playlists and XMLTV guide data from external source providers\n                        "
-            )
-          ])
-        ]),
-        _vm._v(" "),
-        _c("ul", { staticClass: "list-group list-group-flush" }, [
-          _vm._v(
-            "\n                        @forelse($channelSources->getChannelSourceProviders() as $value)\n                        "
-          ),
-          _c("a", {
-            staticClass: "list-group-item list-group-item-action",
-            attrs: { href: "" }
-          }),
-          _vm._v("\n                        @empty\n                        "),
-          _c("li", { staticClass: "list-group-item text-center" }, [
-            _c("strong", [_vm._v("No External Source Providers Configured")])
-          ]),
-          _vm._v("\n                        @endforelse\n                    ")
-        ])
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row" }, [
+    return _c("div", { staticClass: "row mb-3" }, [
       _c("div", { staticClass: "col-sm" }, [
         _c("div", { staticClass: "card bg-light" }, [
           _c("div", { staticClass: "card-body" }, [

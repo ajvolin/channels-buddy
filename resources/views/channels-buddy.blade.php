@@ -21,8 +21,8 @@
                         </h6>
                     </div>
                     <ul class="list-group list-group-flush">
-                        @forelse($channelsSources as $src => $srcName)
-                        <a class="list-group-item list-group-item-action" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{$srcName}}</a>
+                        @forelse($channelsSources as $src)
+                        <a class="list-group-item list-group-item-action" href="{{ route('getChannelMapUI', ['source' => $src->source_name]) }}">{{$src->display_name}}</a>
                         @empty
                         <li class="list-group-item text-center"><strong>No Channels DVR Server Configured</strong></li>
                         @endforelse

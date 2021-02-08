@@ -66,16 +66,16 @@
         },
         {
             "name": "ajvolin/channels-buddy-source-provider",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ajvolin/channels-buddy-source-provider.git",
-                "reference": "b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9"
+                "reference": "8d83330658279f5215908e8e2444511ae6bfa52a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ajvolin/channels-buddy-source-provider/zipball/b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9",
-                "reference": "b920f50c39c372caf8a37d60c10c6ad1f5cbc8a9",
+                "url": "https://api.github.com/repos/ajvolin/channels-buddy-source-provider/zipball/8d83330658279f5215908e8e2444511ae6bfa52a",
+                "reference": "8d83330658279f5215908e8e2444511ae6bfa52a",
                 "shasum": ""
             },
             "require": {
@@ -113,9 +113,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ajvolin/channels-buddy-source-provider/issues",
-                "source": "https://github.com/ajvolin/channels-buddy-source-provider/tree/0.1.5"
+                "source": "https://github.com/ajvolin/channels-buddy-source-provider/tree/0.1.6"
             },
-            "time": "2020-12-30T05:58:40+00:00"
+            "time": "2021-02-07T04:18:48+00:00"
         },
         {
             "name": "ajvolin/channels-buddy-stirr",

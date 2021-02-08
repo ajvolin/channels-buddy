@@ -7,8 +7,8 @@
             Sources
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            @foreach($sources as $src => $srcName)
-            <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src]) }}">{{ $srcName }}</a>
+            @foreach($sources as $src)
+            <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src->source_name]) }}">{{ $src->display_name }}</a>
             @endforeach
         </div>
     </div>
@@ -43,7 +43,7 @@
     <div class="col-xl-10 offset-xl-1">
         <div class="row mb-3">
             <div class="col-xs-8 col-md-10 col-lg-10">
-                <h1>{{ $sources->get($source) }}</h1>
+                <h1>{{ $sources->get($source)->display_name }}</h1>
                 <div class="card">
                     <div class="card-body">
                         <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('sourcePlaylist', ['source' => $source]) }}</code>

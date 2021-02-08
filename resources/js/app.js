@@ -4,6 +4,7 @@ import 'bootstrap'
 import Vue from 'vue'
 import VueMeta from 'vue-meta'
 import VTooltip from 'v-tooltip'
+import { BootstrapVue } from 'bootstrap-vue'
 import { InertiaApp } from "@inertiajs/inertia-vue"
 import route from 'ziggy-js'
 import MainLayout from './layouts/Main.vue'
@@ -17,6 +18,7 @@ Vue.mixin({
 Vue.use(VTooltip)
 Vue.use(InertiaApp)
 Vue.use(VueMeta)
+Vue.use(BootstrapVue)
 
 // Register global components
 const requireComponents = require.context('./components', true, /[A-Z]\w+\.(vue|js)$/)
@@ -37,6 +39,8 @@ requireComponents.keys().forEach(component => {
     // Register component with Vue
     Vue.component(componentName, componentConfig.default || componentConfig)
 })
+
+Vue.prototype.$router = 'fake'
 
 let app = document.getElementById('app');
 new Vue({

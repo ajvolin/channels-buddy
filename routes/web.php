@@ -6,6 +6,8 @@ use App\Http\Controllers\ChannelSource\ChannelController as ChannelSourceChannel
 use App\Http\Controllers\ChannelSource\GuideController as ChannelSourceGuideController;
 use App\Http\Controllers\ChannelsBuddyController;
 use App\Http\Controllers\LogController;
+use App\Services\ChannelsService;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,14 +22,20 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/home', function(){
+Route::get('/home', function(ChannelSourceProviders $sourceProviders, ChannelsService $channelSource){
     Inertia::setRootView('layouts.app');
     Inertia::version(function () {
         return md5_file(public_path('mix-manifest.json'));
     });
-    
+
+    // return $channelSource->getDevices();
+    // return $sourceProviders->toArray()['providers'];
+            // ?? null;
+
+
     return Inertia::render('Home', [
-        
+        'channels_dvr' => ['sources' => $channelSource->getDevices() ?? []],
+        'external_sources' => ['sources' => $sourceProviders->toArray()['providers'] ?? []]
     ]);
 });
 

@@ -11,42 +11,44 @@
             </div>
             <div class="row">
                 <div class="col-sm">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Channels DVR</h5>
-                            <h6 class="card-subtitle text-muted">
-                                Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server
-                            </h6>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            @forelse($channelsSources as $src => $srcName)
-                            <a class="list-group-item list-group-item-action" href="">{{$srcName}}</a>
-                            @empty
-                            <li class="list-group-item text-center"><strong>No Channels DVR Server Configured</strong></li>
-                            @endforelse
-                        </ul>
-                    </div>
+                    <b-card bg-variant="light" no-body>
+                        <b-card-body>
+                            <b-card-title title-tag="h5">Channels DVR</b-card-title>
+                            <b-card-sub-title>Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server</b-card-sub-title>
+                        </b-card-body>
+                        <b-list-group flush v-if="hasSources(channels_dvr)">
+                            <b-list-group-item v-for="source in channels_dvr.sources" :key="source.source_name" :to="'channels/'+source.source_name" router-component-name="b-vue-inertia-link">
+                                {{ source.display_name }}
+                            </b-list-group-item>
+                        </b-list-group>
+                        <b-list-group flush v-else>
+                            <b-list-group-item class="text-center">
+                                <strong>No Channels DVR Server Configured</strong>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </b-card>
                 </div>
                 <div class="col-sm">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">External Source Providers</h5>
-                            <h6 class="card-subtitle text-muted">
-                                Set channel numbers and export M3U playlists and XMLTV guide data from external source providers
-                            </h6>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            @forelse($channelSources->getChannelSourceProviders() as $value)
-                            <a class="list-group-item list-group-item-action" href=""></a>
-                            @empty
-                            <li class="list-group-item text-center"><strong>No External Source Providers Configured</strong></li>
-                            @endforelse
-                        </ul>
-                    </div>
+                    <b-card bg-variant="light" no-body>
+                        <b-card-body>
+                            <b-card-title title-tag="h5">External Source Providers</b-card-title>
+                            <b-card-sub-title>Set channel numbers and export M3U playlists and XMLTV guide data from external source providers</b-card-sub-title>
+                        </b-card-body>
+                        <b-list-group flush v-if="hasSources(external_sources)">
+                            <b-list-group-item v-for="source in external_sources.sources" :key="source.source_name" :to="'source/'+source.source_name" router-component-name="b-vue-inertia-link">
+                                {{ source.display_name }}
+                            </b-list-group-item>
+                        </b-list-group>
+                        <b-list-group flush v-else>
+                            <b-list-group-item class="text-center">
+                                <strong>No External Source Providers Configured</strong>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </b-card>
                 </div>
             </div>
             <hr />
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-sm">
                     <div class="card bg-light">
                         <div class="card-body">
@@ -83,7 +85,17 @@
 export default {
   name: 'Home',
   props: {
-      title: String
+        title: String,
+        channels_dvr: Object,
+        external_sources: Object
+  },
+  methods: {
+        hasSources: function(provider) {
+            return Object.keys(provider.sources).length > 0;
+        }
+  },
+  computed: {
+
   }
 };
 </script>

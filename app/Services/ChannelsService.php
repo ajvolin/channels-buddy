@@ -187,11 +187,24 @@ class ChannelsService implements ChannelSource
                 $json = $stream->getBody()->getContents();
 
                 $devices = collect(json_decode($json))
-                    ->pluck('FriendlyName', 'DeviceID');
+                    ->transform(function($device){
+                        $newDevice = new stdClass;
+                        $newDevice->source_name = (string) $device->DeviceID;
+                        $newDevice->display_name = $device->FriendlyName;
+                        return $newDevice;
+                    });
                 if($allowAny) {
-                    $devices->prepend('All Devices', 'ANY');
+                    $newDevice = new stdClass;
+                    $newDevice->source_name = 'ANY';
+                    $newDevice->display_name = 'All Devices';
+                    $devices->prepend(
+                        $newDevice
+                    );
                 }
-                
+                $devices = $devices->keyBy(function($device) {
+                    return $device->source_name;
+                })->sortBy('display_name');
+
                 return $devices;
             } catch (RequestException $e) {
                 return collect();
