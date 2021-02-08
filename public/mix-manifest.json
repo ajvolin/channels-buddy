@@ -2,5 +2,11 @@
     "/js/app.js": "/js/app.js",
     "/js/manifest.js": "/js/manifest.js",
     "/js/vendor.js": "/js/vendor.js",
-    "/js/Home.js": "/js/Home.js?id=5a6ca790111ea176112a"
+    "/js/Home.js": "/js/Home.js?id=374049ee356967f64572",
+    "/js/Log.js": "/js/Log.js?id=f07e6f597d82d9b8fa8e",
+    "/js/Channels-ChannelsRemap.js": "/js/Channels-ChannelsRemap.js?id=ca9bfab41aff4ec34b75",
+    "/js/channels-remap.js": "/js/channels-remap.js?id=8f539b38e32cdcc8b04e",
+    "/js/channelsource-map.js": "/js/channelsource-map.js?id=9fd061857f9f9c62d560",
+    "/js/channels-Remap.js": "/js/channels-Remap.js?id=6d187145ba803579931b",
+    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=2d9bef60ff2db0618469"
 }

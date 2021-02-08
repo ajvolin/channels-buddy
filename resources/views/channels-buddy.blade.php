@@ -22,7 +22,7 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         @forelse($channelsSources as $src)
-                        <a class="list-group-item list-group-item-action" href="{{ route('getChannelMapUI', ['source' => $src->source_name]) }}">{{$src->display_name}}</a>
+                        <a class="list-group-item list-group-item-action" href="{{ route('channels.source.map-ui', ['source' => $src->source_name]) }}">{{$src->display_name}}</a>
                         @empty
                         <li class="list-group-item text-center"><strong>No Channels DVR Server Configured</strong></li>
                         @endforelse
@@ -39,7 +39,7 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         @forelse($channelSources->getChannelSourceProviders() as $value)
-                        <a class="list-group-item list-group-item-action" href="{{ route('getChannelSourceMapUI', ['channelSource' => $value->getSourceName()]) }}">{{ $value->getDisplayName() }}</a>
+                        <a class="list-group-item list-group-item-action" href="{{ route('channel-source.source.map-ui', ['channelSource' => $value->getSourceName()]) }}">{{ $value->getDisplayName() }}</a>
                         @empty
                         <li class="list-group-item text-center"><strong>No External Source Providers Configured</strong></li>
                         @endforelse

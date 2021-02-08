@@ -196,7 +196,7 @@ class ChannelsService implements ChannelSource
                 if($allowAny) {
                     $newDevice = new stdClass;
                     $newDevice->source_name = 'ANY';
-                    $newDevice->display_name = 'All Devices';
+                    $newDevice->display_name = 'All Sources';
                     $devices->prepend(
                         $newDevice
                     );

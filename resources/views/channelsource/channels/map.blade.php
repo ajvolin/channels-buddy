@@ -7,7 +7,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             @foreach($channelSources->getChannelSourceProviders() as $source)
-            <a class="dropdown-item" href="{{ route('getChannelSourceMapUI', ['channelSource' => $source->getSourceName()]) }}">{{ $source->getDisplayName() }}</a>
+            <a class="dropdown-item" href="{{ route('channel-source.source.map-ui', ['channelSource' => $source->getSourceName()]) }}">{{ $source->getDisplayName() }}</a>
             @endforeach
         </div>
     </div>
@@ -20,10 +20,10 @@
                 <h1>{{ $channelSources->getChannelSourceProvider($channelSource)->getDisplayName() }}</h1>
                 <div class="card">
                     <div class="card-body">
-                        <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('channelSourcePlaylist', ['channelSource' => $channelSource]) }}</code>
+                        <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('channel-source.source.playlist', ['channelSource' => $channelSource]) }}</code>
                         @if($channelSources->getChannelSourceProvider($channelSource)->providesGuide())
                         <br/>
-                        <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('channelSourceXmlTv', ['channelSource' => $channelSource]) }}</code>
+                        <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('channel-source.source.guide', ['channelSource' => $channelSource]) }}</code>
                         @endif
                     </div>
                 </div>
@@ -44,7 +44,7 @@
             <div class="col-xs-4 col-md-2 col-lg-2">
             </div>
         </div>
-        <form action="{{ route('applyChannelSourceChannelMap', ['channelSource' => $channelSource]) }}" method="POST" id="channelMapForm">
+        <form action="{{ route('channel-source.source.apply-map', ['channelSource' => $channelSource]) }}" method="POST" id="channelMapForm">
             @csrf
             <div class="row">
                 <div class="col-xs-8 col-md-10 col-lg-10">

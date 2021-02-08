@@ -8,7 +8,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             @foreach($sources as $src)
-            <a class="dropdown-item" href="{{ route('getChannelMapUI', ['source' => $src->source_name]) }}">{{ $src->display_name }}</a>
+            <a class="dropdown-item" href="{{ route('channels.source.map-ui', ['source' => $src->source_name]) }}">{{ $src->display_name }}</a>
             @endforeach
         </div>
     </div>
@@ -46,9 +46,9 @@
                 <h1>{{ $sources->get($source)->display_name }}</h1>
                 <div class="card">
                     <div class="card-body">
-                        <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('sourcePlaylist', ['source' => $source]) }}</code>
+                        <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('channels.source.playlist', ['source' => $source]) }}</code>
                         <br/>
-                        <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('sourceXmlTv', ['source' => $source]) }}</code>
+                        <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('channels.source.guide', ['source' => $source]) }}</code>
                     </div>
                 </div>
                 <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
@@ -68,7 +68,7 @@
             <div class="col-xs-4 col-md-2 col-lg-2">
             </div>
         </div>
-        <form action="{{ route('applyChannelMap', ['source' => $source]) }}" method="POST">
+        <form action="{{ route('channels.source.apply-map', ['source' => $source]) }}" method="POST">
             @csrf
             <div class="row">
                 <div class="col-xs-8 col-md-10 col-lg-10">

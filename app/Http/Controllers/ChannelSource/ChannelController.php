@@ -8,6 +8,7 @@ use App\Models\SourceChannel;
 use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Inertia;
 
 class ChannelController extends Controller
 {
@@ -38,6 +39,13 @@ class ChannelController extends Controller
                 $channel->number ??
                 $channel->id;
         }, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return Inertia::render('channelsource/Map', [
+            'title' => $channelSource->getDisplayName() . ' - External Source Provider',
+            'source' => $channelSource->toArray(),
+            'channels' => $channels->values(),
+            'channelStartNumber' => Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
+        ]);
 
         return view('channelsource.channels.map',
             [
@@ -77,7 +85,7 @@ class ChannelController extends Controller
 
         Cache::forget("{$sourceName}_channelsource_m3u");
 
-        return redirect(route('getChannelSourceMapUI', ['channelSource' => $sourceName]));
+        return redirect(route('channel-source.source.map-ui', ['channelSource' => $sourceName]));
     }
 
     public function playlist(Request $request)

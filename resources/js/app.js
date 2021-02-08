@@ -12,7 +12,7 @@ import MainLayout from './layouts/Main.vue'
 Vue.config.productionTip = false;
 Vue.mixin({
     methods: {
-        route: (name, params, absolute) => route(name, params, absolute, Ziggy)
+        route: (name, params, absolute, config = Ziggy) => route(name, params, absolute, config)
     }
 })
 Vue.use(VTooltip)

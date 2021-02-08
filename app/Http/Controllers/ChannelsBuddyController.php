@@ -4,24 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\ChannelsService;
-use Illuminate\Http\Request;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
+use Inertia\Inertia;
 
 class ChannelsBuddyController extends Controller
 {
-    protected $channelSource;
-
-    public function __construct(ChannelsService $channelSource)
+    public function index(ChannelsService $channelSource, ChannelSourceProviders $sourceProviders)
     {
-        $this->channelSource = $channelSource;
-    }
+        $channelsSources = 
+            $channelSource->getDevices()->values() ?? [];
+        $externalSources =
+            collect($sourceProviders->toArray()['providers'])->values() ?? [];
 
-    public function index()
-    {
-        $channelsSources = $this->channelSource->getDevices()
-            ?? null;
-
-        return view('channels-buddy', [
-            'channelsSources' => $channelsSources
+        return Inertia::render('Home', [
+            'title' => 'Home',
+            'sources' => [
+                'channels_dvr' => $channelsSources,
+                'external' => $externalSources
+            ]
         ]);
     }
 }

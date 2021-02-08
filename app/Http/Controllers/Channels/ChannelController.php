@@ -89,7 +89,7 @@ class ChannelController extends Controller
             [ 'channel_number', 'channel_enabled', 'custom_logo', 'custom_channel_art' ],
         );
 
-        return redirect(route('getChannelMapUI', ['source' => $source]));
+        return redirect(route('channels.source.map-ui', ['source' => $source]));
     }
 
     public function playlist(Request $request)

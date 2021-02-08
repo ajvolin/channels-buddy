@@ -22,47 +22,30 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/home', function(ChannelSourceProviders $sourceProviders, ChannelsService $channelSource){
-    Inertia::setRootView('layouts.app');
-    Inertia::version(function () {
-        return md5_file(public_path('mix-manifest.json'));
-    });
-
-    // return $channelSource->getDevices();
-    // return $sourceProviders->toArray()['providers'];
-            // ?? null;
-
-
-    return Inertia::render('Home', [
-        'channels_dvr' => ['sources' => $channelSource->getDevices() ?? []],
-        'external_sources' => ['sources' => $sourceProviders->toArray()['providers'] ?? []]
-    ]);
-});
-
 Route::get('/', [ChannelsBuddyController::class, 'index'])->name('home');
 
 Route::get('/log', [LogController::class, 'log'])->name('log');
 
 Route::get('/channels/{source}', [ChannelController::class, 'list'])
-    ->name('getChannelMapUI');
+    ->name('channels.source.map-ui');
 
 Route::post('/channels/{source}/map', [ChannelController::class, 'map'])
-    ->name('applyChannelMap');
+    ->name('channels.source.apply-map');
 
 Route::get('/channels/{source}/playlist', [ChannelController::class, 'playlist'])
-    ->name('sourcePlaylist');
+    ->name('channels.source.playlist');
 
 Route::get('/channels/{source}/guide', [GuideController::class, 'xmltv'])
-    ->name('sourceXmlTv');
+    ->name('channels.source.guide');
 
 Route::get('/source/{channelSource}', [ChannelSourceChannelController::class, 'list'])
-    ->name('getChannelSourceMapUI');
+    ->name('channel-source.source.map-ui');
 
 Route::post('/source/{channelSource}/map', [ChannelSourceChannelController::class, 'map'])
-    ->name('applyChannelSourceChannelMap');
+    ->name('channel-source.source.apply-map');
 
 Route::get('/source/{channelSource}/playlist', [ChannelSourceChannelController::class, 'playlist'])
-    ->name('channelSourcePlaylist');
+    ->name('channel-source.source.playlist');
 
 Route::get('/source/{channelSource}/guide', [ChannelSourceGuideController::class, 'xmltv'])
-    ->name('channelSourceXmlTv');
+    ->name('channel-source.source.guide');

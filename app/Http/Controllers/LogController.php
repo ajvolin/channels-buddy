@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Inertia\Inertia;
 
 class LogController extends Controller
 {
@@ -13,11 +14,11 @@ class LogController extends Controller
         );
         $logFilePath = end($logFiles) ?: null;
         
-        $log = !is_null($logFilePath) ? file_get_contents($logFilePath) : 'No errors found! Yay :)';
-        return view('log',
-            [
-                'log' => nl2br($log)
-            ]
-        );
+        $log = nl2br(!is_null($logFilePath) ? file_get_contents($logFilePath) : 'No errors found! Yay :)');
+
+        return Inertia::render('Log', [
+            'title' => 'Application Log',
+            'log' => $log
+        ]);
     }
 }

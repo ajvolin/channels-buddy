@@ -60,49 +60,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  metaInfo: function metaInfo() {
+    return {
+      title: "".concat(this.title)
+    };
+  },
   name: 'Home',
   props: {
     title: String,
-    channels_dvr: Object,
-    external_sources: Object
-  },
-  methods: {
-    hasSources: function hasSources(provider) {
-      return Object.keys(provider.sources).length > 0;
-    }
+    sources: Object
   },
   computed: {}
 });
@@ -133,74 +100,42 @@ var render = function() {
           "div",
           { staticClass: "col-sm" },
           [
-            _c(
-              "b-card",
-              { attrs: { "bg-variant": "light", "no-body": "" } },
-              [
-                _c(
-                  "b-card-body",
-                  [
-                    _c("b-card-title", { attrs: { "title-tag": "h5" } }, [
-                      _vm._v("Channels DVR")
-                    ]),
-                    _vm._v(" "),
-                    _c("b-card-sub-title", [
-                      _vm._v(
-                        "Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server"
-                      )
-                    ])
-                  ],
-                  1
-                ),
-                _vm._v(" "),
-                _vm.hasSources(_vm.channels_dvr)
-                  ? _c(
-                      "b-list-group",
-                      { attrs: { flush: "" } },
-                      _vm._l(_vm.channels_dvr.sources, function(source) {
-                        return _c(
-                          "b-list-group-item",
-                          {
-                            key: source.source_name,
-                            attrs: {
-                              to: "channels/" + source.source_name,
-                              "router-component-name": "b-vue-inertia-link"
-                            }
-                          },
-                          [
-                            _vm._v(
-                              "\n                            " +
-                                _vm._s(source.display_name) +
-                                "\n                        "
-                            )
-                          ]
-                        )
-                      }),
-                      1
-                    )
-                  : _c(
-                      "b-list-group",
-                      { attrs: { flush: "" } },
-                      [
-                        _c(
-                          "b-list-group-item",
-                          { staticClass: "text-center" },
-                          [
-                            _c("strong", [
-                              _vm._v("No Channels DVR Server Configured")
-                            ])
-                          ]
-                        )
-                      ],
-                      1
-                    )
-              ],
-              1
-            )
+            _c("source-provider-card", {
+              attrs: {
+                title: "Channels DVR",
+                subtitle:
+                  "Remap channels and export M3U playlists and XMLTV guide data from your Channels DVR server",
+                noSourcesMessage: "No Channels DVR Server Configured",
+                sourceProvider: _vm.sources.channels_dvr,
+                sourceRoute: "channels.source.map-ui"
+              }
+            })
           ],
           1
         ),
         _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "col-sm" },
+          [
+            _c("source-provider-card", {
+              attrs: {
+                title: "External Source Providers",
+                subtitle:
+                  "Set channel numbers and export M3U playlists and XMLTV guide data from external source providers",
+                noSourcesMessage: "No External Source Providers Configured",
+                sourceProvider: _vm.sources.external,
+                sourceRoute: "channel-source.source.map-ui"
+              }
+            })
+          ],
+          1
+        )
+      ]),
+      _vm._v(" "),
+      _c("hr"),
+      _vm._v(" "),
+      _c("div", { staticClass: "row mb-3" }, [
         _c(
           "div",
           { staticClass: "col-sm" },
@@ -213,70 +148,68 @@ var render = function() {
                   "b-card-body",
                   [
                     _c("b-card-title", { attrs: { "title-tag": "h5" } }, [
-                      _vm._v("External Source Providers")
+                      _vm._v("Help / Instructions")
                     ]),
                     _vm._v(" "),
-                    _c("b-card-sub-title", [
+                    _c(
+                      "b-card-sub-title",
+                      { attrs: { "sub-title-text-variant": "" } },
+                      [_vm._v("Mapping Channel Numbers")]
+                    ),
+                    _vm._v(" "),
+                    _c("b-card-text", [
                       _vm._v(
-                        "Set channel numbers and export M3U playlists and XMLTV guide data from external source providers"
+                        "Leave the Channel Number field empty to use the original channel number. For external sources, you can use the Starting Channel Number field to automatically number all channels starting with the entered number."
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("hr"),
+                    _vm._v(" "),
+                    _c(
+                      "b-card-sub-title",
+                      { attrs: { "sub-title-text-variant": "" } },
+                      [_vm._v("Channels DVR Sources - M3U Playlist Options")]
+                    ),
+                    _vm._v(" "),
+                    _c("b-card-text", [
+                      _vm._v("Append "),
+                      _c("code", [_vm._v("?max_number=CHANNEL_NUMBER")]),
+                      _vm._v(
+                        " to the playlist URL to only include channel numbers up to and including the number provided."
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("hr"),
+                    _vm._v(" "),
+                    _c(
+                      "b-card-sub-title",
+                      { attrs: { "sub-title-text-variant": "" } },
+                      [_vm._v("All Sources - XMLTV Guide Options")]
+                    ),
+                    _vm._v(" "),
+                    _c("b-card-text", [
+                      _vm._v("Append "),
+                      _c("code", [_vm._v("?days=")]),
+                      _vm._v(" or "),
+                      _c("code", [_vm._v("?hours=")]),
+                      _vm._v(" or "),
+                      _c("code", [_vm._v("?minutes=")]),
+                      _vm._v(" or "),
+                      _c("code", [_vm._v("?seconds=")]),
+                      _vm._v(
+                        " to the XMLTV guide URL to export guide data for the provided duration."
                       )
                     ])
                   ],
                   1
-                ),
-                _vm._v(" "),
-                _vm.hasSources(_vm.external_sources)
-                  ? _c(
-                      "b-list-group",
-                      { attrs: { flush: "" } },
-                      _vm._l(_vm.external_sources.sources, function(source) {
-                        return _c(
-                          "b-list-group-item",
-                          {
-                            key: source.source_name,
-                            attrs: {
-                              to: "source/" + source.source_name,
-                              "router-component-name": "b-vue-inertia-link"
-                            }
-                          },
-                          [
-                            _vm._v(
-                              "\n                            " +
-                                _vm._s(source.display_name) +
-                                "\n                        "
-                            )
-                          ]
-                        )
-                      }),
-                      1
-                    )
-                  : _c(
-                      "b-list-group",
-                      { attrs: { flush: "" } },
-                      [
-                        _c(
-                          "b-list-group-item",
-                          { staticClass: "text-center" },
-                          [
-                            _c("strong", [
-                              _vm._v("No External Source Providers Configured")
-                            ])
-                          ]
-                        )
-                      ],
-                      1
-                    )
+                )
               ],
               1
             )
           ],
           1
         )
-      ]),
-      _vm._v(" "),
-      _c("hr"),
-      _vm._v(" "),
-      _vm._m(1)
+      ])
     ])
   ])
 }
@@ -294,72 +227,6 @@ var staticRenderFns = [
         ]),
         _vm._v(" "),
         _c("hr")
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row mb-3" }, [
-      _c("div", { staticClass: "col-sm" }, [
-        _c("div", { staticClass: "card bg-light" }, [
-          _c("div", { staticClass: "card-body" }, [
-            _c("h5", { staticClass: "card-title" }, [
-              _vm._v("Help / Instructions")
-            ]),
-            _vm._v(" "),
-            _c("h6", { staticClass: "card-subtitle" }, [
-              _vm._v(
-                "\n                            Mapping Channel Numbers\n                        "
-              )
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "card-text" }, [
-              _vm._v(
-                "\n                            Leave the Channel Number field empty to use the original channel number. For external sources, you can use the Starting Channel Number field to automatically number all channels starting with the entered number.\n                        "
-              )
-            ]),
-            _vm._v(" "),
-            _c("hr"),
-            _vm._v(" "),
-            _c("h6", { staticClass: "card-subtitle" }, [
-              _vm._v(
-                "\n                            Channels DVR Sources - M3U Playlist Options\n                        "
-              )
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "card-text" }, [
-              _vm._v("\n                            Append "),
-              _c("code", [_vm._v("?max_number=CHANNEL_NUMBER")]),
-              _vm._v(
-                " to the playlist URL to only include channel numbers up to and including the number provided.\n                        "
-              )
-            ]),
-            _vm._v(" "),
-            _c("hr"),
-            _vm._v(" "),
-            _c("h6", { staticClass: "card-subtitle" }, [
-              _vm._v(
-                "\n                            All Sources - XMLTV Guide Options\n                        "
-              )
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "card-text" }, [
-              _vm._v("\n                            Append "),
-              _c("code", [_vm._v("?days=")]),
-              _vm._v(" or "),
-              _c("code", [_vm._v("?hours=")]),
-              _vm._v(" or "),
-              _c("code", [_vm._v("?minutes=")]),
-              _vm._v(" or "),
-              _c("code", [_vm._v("?seconds=")]),
-              _vm._v(
-                " to the XMLTV guide URL to export guide data for the provided duration.\n                        "
-              )
-            ])
-          ])
-        ])
       ])
     ])
   }
