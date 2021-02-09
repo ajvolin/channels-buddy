@@ -104,14 +104,11 @@ var render = function() {
       _c("b-col", { attrs: { cols: "12" } }, [
         _c("h4", [_vm._v("Application Log")]),
         _vm._v(" "),
-        _c(
-          "pre",
-          {
-            staticClass:
-              "log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded"
-          },
-          [_vm._v(_vm._s(_vm.log))]
-        )
+        _c("pre", {
+          staticClass:
+            "log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded",
+          domProps: { innerHTML: _vm._s(_vm.log) }
+        })
       ])
     ],
     1

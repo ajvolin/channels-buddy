@@ -2,7 +2,7 @@
     <b-row class="mb-3">
         <b-col cols="12">
             <h4>Application Log</h4>
-            <pre class="log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded">{{ log }}</pre>
+            <pre class="log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded" v-html="log"></pre>
         </b-col>
     </b-row>
 </template>

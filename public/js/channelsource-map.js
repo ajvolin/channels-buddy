@@ -101,6 +101,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -111,7 +120,7 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     title: String,
     source: Object,
-    channelStartNumber: String
+    channelStartNumber: Number
   },
   data: function data() {
     return {
@@ -140,17 +149,21 @@ __webpack_require__.r(__webpack_exports__);
         "class": 'text-center align-middle'
       }],
       search: null,
-      searchOn: ['number', 'name', 'mapped_channel_number', 'callSign', 'title', 'stationId']
+      searchOn: ['number', 'name', 'mapped_channel_number', 'callSign', 'title', 'stationId'],
+      channelRenumberStart: null
     };
   },
   methods: {
-    renumberChannels: function renumberChannels(evt) {
-      var currentNumber = evt.target.value;
+    renumberChannels: function renumberChannels(value) {
+      var currentNumber = value;
       this.channels.forEach(function (o, i, a) {
         a[i].mapped_channel_number = currentNumber;
         currentNumber++;
       });
     }
+  },
+  created: function created() {
+    this.channelRenumberStart = this.channelStartNumber;
   },
   mounted: function mounted() {
     var _this = this;
@@ -251,8 +264,9 @@ var render = function() {
                       _c("b-form-input", {
                         attrs: {
                           id: "search-input",
-                          type: "search",
-                          placeholder: "Search channels"
+                          type: "text",
+                          placeholder: "Search channels",
+                          debounce: "300"
                         },
                         model: {
                           value: _vm.search,
@@ -564,46 +578,41 @@ var render = function() {
               ),
               _vm._v(" "),
               _c("b-col", { attrs: { xs: "4", md: "2", lg: "2" } }, [
-                _c("div", { staticClass: "form-group" }, [
-                  _c("label", { attrs: { for: "channel_start_number" } }, [
-                    _vm._v("Starting Channel Number")
-                  ]),
-                  _vm._v(" "),
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model.lazy",
-                        value: _vm.channelStartNumber,
-                        expression: "channelStartNumber",
-                        modifiers: { lazy: true }
-                      }
-                    ],
-                    staticClass: "form-control text-center mx-auto",
-                    attrs: {
-                      type: "text",
-                      id: "channel_start_number",
-                      name: "channel_start_number"
-                    },
-                    domProps: { value: _vm.channelStartNumber },
-                    on: {
-                      change: [
-                        function($event) {
-                          _vm.channelStartNumber = $event.target.value
+                _c(
+                  "div",
+                  { staticClass: "form-group" },
+                  [
+                    _c("label", { attrs: { for: "channel_start_number" } }, [
+                      _vm._v("Starting Channel Number")
+                    ]),
+                    _vm._v(" "),
+                    _c("b-form-input", {
+                      staticClass: "text-center mx-auto",
+                      attrs: {
+                        id: "channel_start_number",
+                        type: "number",
+                        placeholder: "Starting channel number",
+                        number: "",
+                        debounce: "300"
+                      },
+                      on: { update: _vm.renumberChannels },
+                      model: {
+                        value: _vm.channelRenumberStart,
+                        callback: function($$v) {
+                          _vm.channelRenumberStart = $$v
                         },
-                        function($event) {
-                          return _vm.renumberChannels($event)
-                        }
-                      ]
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("small", [
-                    _vm._v(
-                      "Enter a starting number to automatically re-number the channels"
-                    )
-                  ])
-                ]),
+                        expression: "channelRenumberStart"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("small", [
+                      _vm._v(
+                        "Enter a starting number to automatically re-number the channels"
+                      )
+                    ])
+                  ],
+                  1
+                ),
                 _vm._v(" "),
                 _c("input", {
                   staticClass: "btn btn-primary",
