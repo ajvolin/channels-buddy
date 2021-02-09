@@ -1,10 +1,10 @@
 <template>
-    <div class="row mb-3">
-        <div class="col-12">
+    <b-row class="mb-3">
+        <b-col cols="12">
             <h4>Application Log</h4>
             <pre class="log-display overflow-auto text-wrap p-2 d-flex flex-column-reverse h-75 rounded">{{ log }}</pre>
-        </div>
-    </div>
+        </b-col>
+    </b-row>
 </template>
 
 <script>

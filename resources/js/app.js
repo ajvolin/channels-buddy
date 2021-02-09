@@ -7,7 +7,7 @@ import VTooltip from 'v-tooltip'
 import { BootstrapVue } from 'bootstrap-vue'
 import { InertiaApp } from "@inertiajs/inertia-vue"
 import route from 'ziggy-js'
-import MainLayout from './layouts/Main.vue'
+import MainLayout from './layouts/MainLayout.vue'
 
 Vue.config.productionTip = false;
 Vue.mixin({

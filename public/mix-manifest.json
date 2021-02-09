@@ -2,11 +2,9 @@
     "/js/app.js": "/js/app.js",
     "/js/manifest.js": "/js/manifest.js",
     "/js/vendor.js": "/js/vendor.js",
-    "/js/Home.js": "/js/Home.js?id=374049ee356967f64572",
-    "/js/Log.js": "/js/Log.js?id=f07e6f597d82d9b8fa8e",
-    "/js/Channels-ChannelsRemap.js": "/js/Channels-ChannelsRemap.js?id=ca9bfab41aff4ec34b75",
-    "/js/channels-remap.js": "/js/channels-remap.js?id=8f539b38e32cdcc8b04e",
-    "/js/channelsource-map.js": "/js/channelsource-map.js?id=9fd061857f9f9c62d560",
-    "/js/channels-Remap.js": "/js/channels-Remap.js?id=6d187145ba803579931b",
-    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=2d9bef60ff2db0618469"
+    "/js/Home.js": "/js/Home.js?id=28429d3256d2e2e5b33d",
+    "/js/Log.js": "/js/Log.js?id=fe9e7824d2182d1607dd",
+    "/js/channels-Remap.js": "/js/channels-Remap.js?id=8c98b3d2d021a3dcebb3",
+    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=7708ed01a11119e534bc",
+    "/js/channelsource-Map2.js": "/js/channelsource-Map2.js?id=b1ed282c70c597e0f541"
 }

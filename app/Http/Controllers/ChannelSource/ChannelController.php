@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 class ChannelController extends Controller
 {
-    public function list(ChannelSourceProvider $channelSource)
+    public function getChannels(ChannelSourceProvider $channelSource)
     {
         $sourceName = $channelSource->getSourceName();
         $service = $channelSource->getChannelSourceService();
@@ -24,7 +24,7 @@ class ChannelController extends Controller
 
         $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
             $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
-            $channel->channel_enabled = $existingChannels->get($key)->channel_enabled ?? true;
+            $channel->channel_enabled = (bool) ($existingChannels->get($key)->channel_enabled ?? true);
             $channel->logo =
                 $existingChannels->get($key)->custom_logo ?? $channel->logo ?? null;
             $channel->channelArt =
@@ -39,24 +39,27 @@ class ChannelController extends Controller
                 $channel->number ??
                 $channel->id;
         }, SORT_NATURAL | SORT_FLAG_CASE);
+        
+        return response()->json($channels->values(), 200);
+    }
+
+    public function updateChannels(Request $request)
+    {
+
+    }
+
+    public function mapUi(ChannelSourceProvider $channelSource)
+    {
+        $sourceName = $channelSource->getSourceName();
 
         return Inertia::render('channelsource/Map', [
             'title' => $channelSource->getDisplayName() . ' - External Source Provider',
             'source' => $channelSource->toArray(),
-            'channels' => $channels->values(),
             'channelStartNumber' => Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
         ]);
-
-        return view('channelsource.channels.map',
-            [
-                'channels' => $channels,
-                'channelStartNumber' => Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
-                'channelSource' => $sourceName,
-            ]
-        );
     }
 
-    public function map(Request $request)
+    public function applyMap(Request $request)
     {
         $sourceName = $request->channelSource->getSourceName();
         

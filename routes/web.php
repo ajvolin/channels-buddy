@@ -38,10 +38,16 @@ Route::get('/channels/{source}/playlist', [ChannelController::class, 'playlist']
 Route::get('/channels/{source}/guide', [GuideController::class, 'xmltv'])
     ->name('channels.source.guide');
 
-Route::get('/source/{channelSource}', [ChannelSourceChannelController::class, 'list'])
+Route::get('/source/{channelSource}/channels', [ChannelSourceChannelController::class, 'getChannels'])
+    ->name('channel-source.source.get-channels');
+
+Route::put('/source/{channelSource}/channels', [ChannelSourceChannelController::class, 'updateChannels'])
+    ->name('channel-source.source.update-channels');
+
+Route::get('/source/{channelSource}', [ChannelSourceChannelController::class, 'mapUi'])
     ->name('channel-source.source.map-ui');
 
-Route::post('/source/{channelSource}/map', [ChannelSourceChannelController::class, 'map'])
+Route::post('/source/{channelSource}/map', [ChannelSourceChannelController::class, 'applyMap'])
     ->name('channel-source.source.apply-map');
 
 Route::get('/source/{channelSource}/playlist', [ChannelSourceChannelController::class, 'playlist'])

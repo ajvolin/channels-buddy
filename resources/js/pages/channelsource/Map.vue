@@ -1,17 +1,28 @@
 <template>
-    <div class="row mt-4">
-        <div class="col-xl-10 offset-xl-1">
-            <div class="row mb-3">
-                <div class="col-xs-8 col-md-10 col-lg-10">
+    <b-row class="mt-4">
+        <b-col xl="10" offset-xl="1">
+            <b-row class="mb-3">
+                <b-col xs="8" md="10" lg="10">
                     <h1>{{ source.display_name }}</h1>
-                    <div class="card">
-                        <div class="card-body">
+                    <b-card  bg-variant="white">
+                        <b-card-text>
                             <small class="text-muted">M3U Playlist URL:</small> <code>{{ route('channel-source.source.playlist', { channelSource: source.source_name }) }}</code>
-                            <br v-if="source.provides_guide" />
-                            <small v-if="source.provides_guide" class="text-muted">XMLTV Guide URL: </small><code>{{ route('channel-source.source.guide', { channelSource: source.source_name }) }}</code>
-                        </div>
-                    </div>
-                    <input type="text" class="form-control my-3" id="search_channels" name="search_channels" placeholder="Search channels" />
+                        </b-card-text>
+                        <b-card-text v-if="source.provides_guide">
+                            <small class="text-muted">XMLTV Guide URL: </small><code>{{ route('channel-source.source.guide', { channelSource: source.source_name }) }}</code>
+                        </b-card-text>
+                    </b-card>
+                    
+                    <b-input-group class="my-3">
+                        <b-form-input
+                            id="search-input"
+                            v-model="search"
+                            type="search"
+                            placeholder="Search channels" />
+                        <b-input-group-append>
+                            <b-button :disabled="!search" @click="search = ''"><i class="las la-fw la-times"></i></b-button>
+                        </b-input-group-append>
+                    </b-input-group>
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />
                         <label class="custom-control-label" for="channel_status_any">All Channels</label>
@@ -24,67 +35,59 @@
                         <input type="radio" id="channel_status_disabled" name="channel_status" class="custom-control-input" value="0" />
                         <label class="custom-control-label" for="channel_status_disabled">Disabled Channels</label>
                     </div>
-                </div>
-                <div class="col-xs-4 col-md-2 col-lg-2">
-                </div>
-            </div>
-            <form :action="route('channel-source.source.apply-map', { channelSource: source.source_name })" method="POST" id="channelMapForm">
-                <div class="row">
-                    <div class="col-xs-8 col-md-10 col-lg-10">
-                        <table class="table table-hover table-responsive" width="100%">
-                            <caption>List of channels</caption>
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col" class="text-left" style="padding: 10px; max-width: 125px;">Source Channel</th>
-                                    <th scope="col" class="text-center" style="padding: 10px; max-width: 300px;">Channel Number</th>
-                                    <th scope="col" class="text-center" style="padding: 10px;">Channel Status</th>
-                                    <th scope="col" class="text-center" style="padding: 10px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <channel-source-table-row v-for="channel in channels" :key="channel.id" :channel="channel" />
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-xs-4 col-md-2 col-lg-2 align-left">
-                        <div class="form-group">
-                            <label for="channel_start_number">Starting Channel Number</label>
-                            <input type="text" class="form-control text-center mx-auto" id="channel_start_number" name="channel_start_number" :value="channelStartNumber" />
-                            <small>Enter a starting number to automatically re-number the channels</small>
-                        </div>
-                        <input type="submit" value="Save Channel Map" class="btn btn-primary" />
-                        <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- <div id="channel-settings" class="modal fade" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                </b-col>
+            </b-row>
+            <b-row class="mb-3">
+                <b-col xs="8" md="10" lg="10">
+                    <b-table
+                        hover
+                        head-variant="light"
+                        caption="List of channels"
+                        :busy="dataLoading"
+                        :items="channels"
+                        :fields="channelTableFields"
+                        :filter="search"
+                        :filter-included-fields="searchOn"
+                        primary-key="id"
+                        >
+                        <template #table-busy>
+                            <div class="text-center text-success my-2">
+                                <b-spinner class="align-middle"></b-spinner>
+                            </div>
+                        </template>
+                        <template #cell(id)="data">
+                            <img v-if="data.item.logo" :src="data.item.logo" style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
+                            <div v-else class="guide-channel-name" style="font-size: 0.9em; padding: 19px 0;">{{ data.item.id }}</div>
+                            <div class="guide-channel-number">
+                                <span v-if="data.item.number" class="badge badge-light" style="min-width: 4em; display: inline-block; margin-right: 1em;">{{ data.item.number }}</span>
+                                <span style="font-size: 0.7em;">{{ data.item.name }}</span>
+                            </div>
+                        </template>
+                        <template #cell(mapped_channel_number)="data">
+                            <input type="text" class="form-control text-center mx-auto map-channel" style="max-width: 250px;" v-model="data.item.mapped_channel_number" />
+                        </template>
+                        <template #cell(channel_enabled)="data">
+                            <b-form-checkbox v-model="data.item.channel_enabled" name="check-button" switch>
+                                {{ data.item.channel_enabled ? "Enabled" :"Disabled" }}
+                            </b-form-checkbox>
+                        </template>
+                        <template #cell(channel_settings)="data">
+                            <a href="#" class="open-channel-settings" aria-label="Customize channel" title="Customize channel" :data-channel-name="data.item.name" data-toggle="modal" data-target="#channel-settings"><i class="las la-fw la-2x la-cog"></i></a>
+                        </template>
+                    </b-table>
+                </b-col>
+                <b-col xs="4" md="2" lg="2">
                     <div class="form-group">
-                        <label for="customChannelLogo">Custom Logo URL</label>
-                        <input type="text" class="form-control" name="customChannelLogo">
+                        <label for="channel_start_number">Starting Channel Number</label>
+                        <input type="text" class="form-control text-center mx-auto" id="channel_start_number" name="channel_start_number" v-model.lazy="channelStartNumber" @change="renumberChannels($event)" />
+                        <small>Enter a starting number to automatically re-number the channels</small>
                     </div>
-                    <div class="form-group">
-                        <label for="customChannelArt">Custom Channel Art URL</label>
-                        <input type="text" class="form-control" name="customChannelArt">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="save-channel-settings">Save</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
+                    <input type="submit" value="Save Channel Map" class="btn btn-primary" />
+                    <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
+                </b-col>
+            </b-row>
+        </b-col>
+    </b-row>
 </template>
 
 <script>
@@ -98,168 +101,73 @@ export default {
     props: {
         title: String,
         source: Object,
-        channelStartNumber: String,
-        channels: Array
+        channelStartNumber: String
+    },
+    data() {
+        return {
+            apiError: false,
+            dataLoading: false,
+            channels: [],
+            channelTableFields: [
+                {
+                    key: 'id',
+                    label: 'Source Channel',
+                    sortable: false,
+                    class: 'text-left align-middle'
+                },
+                {
+                    key: 'mapped_channel_number',
+                    label: 'Channel Number',
+                    sortable: true,
+                    class: 'text-center align-middle'
+                },
+                {
+                    key: 'channel_enabled',
+                    label: 'Channel Status',
+                    sortable: false,
+                    class: 'text-center align-middle'
+                },
+                {
+                    key: 'channel_settings',
+                    label: '',
+                    sortable: false,
+                    class: 'text-center align-middle'
+                }
+            ],
+            search: null,
+            searchOn: [
+                'number',
+                'name',
+                'mapped_channel_number',
+                'callSign',
+                'title',
+                'stationId'
+            ]
+        }
+    },
+    methods: {
+        renumberChannels: function(evt) {
+            let currentNumber = evt.target.value
+            this.channels.forEach(function(o,i,a) {
+                a[i].mapped_channel_number = currentNumber;
+                currentNumber++;
+            })
+        }
+    },
+    mounted () {
+        this.dataLoading = true;
+        axios
+        .get(
+            this.route(
+                'channel-source.source.get-channels',
+                { channelSource: this.source.source_name }
+            )
+        ).then(response => {
+            this.channels = response.data
+        }).catch(error => {
+            console.log(error)
+            this.apiError = true
+        }).finally(() => this.dataLoading = false);
     }
 }
-
-    // $(document).ready(function() {
-    //     var searchChannels = function() {
-    //         var search = encodeURI($("#search_channels").val());
-    //         var channelStatus = $('input[name="channel_status"]:checked').val();
-
-    //         var channelEnabledFilter = channelStatus !== '' ? '[data-channel-enabled="' + channelStatus + '"]' : '';
-
-    //         var searchChannelNumber = [search !== '' ?
-    //             '[data-channel-number*="' + search + '"]' :
-    //             '', channelEnabledFilter
-    //         ].filter(Boolean).join("");
-    //         var searchChannelName = [search !== '' ?
-    //             '[data-channel-name*="' + search.toUpperCase() + '"]' :
-    //             '', channelEnabledFilter
-    //         ].filter(Boolean).join("");
-    //         var searchChannelRemappedNumber = [search !== '' ?
-    //             '[data-channel-remapped-number*="' + search + '"]' :
-    //             '', channelEnabledFilter
-    //         ].filter(Boolean).join("");
-    //         var searchChannelCallSign = [search !== '' ?
-    //             '[data-channel-callsign*="' + search + '"]' :
-    //             '', channelEnabledFilter
-    //         ].filter(Boolean).join("");
-    //         var searchChannelStationId = [search !== '' ?
-    //             '[data-channel-station-id="' + search.toLowerCase() + '"]' :
-    //             '', channelEnabledFilter
-    //         ].filter(Boolean).join("");
-
-    //         var filter = [
-    //             searchChannelNumber,
-    //             searchChannelName,
-    //             searchChannelRemappedNumber,
-    //             searchChannelCallSign,
-    //             searchChannelStationId
-    //         ].filter(Boolean).join(",");
-
-    //         if (filter !== '') {
-    //             $("tr.channel-row").hide()
-    //                 .filter(filter)
-    //                 .show();
-    //         } else {
-    //             $("tr.channel-row").show();
-    //         }
-    //     };
-
-    //     var validateChannelNotDuplicated = function (el) {
-    //         var channelNumber = el.val();
-
-    //         if (channelNumber !== '' &&
-    //                 $('input.map-channel[value="'+channelNumber+'"]').not(el).length > 0 &&
-    //                 !el.hasClass("is-invalid")
-    //             ) {
-    //             el.addClass("is-invalid");
-    //             $("body").trigger("change");
-    //             return false;
-    //         } else if (channelNumber !== '' &&
-    //                 $('input.map-channel[value="'+channelNumber+'"]').not(el).length == 0 &&
-    //                 el.hasClass("is-invalid")) {
-    //             el.removeClass("is-invalid");
-    //             $("body").trigger("change");
-    //             return true;
-    //         } else if (channelNumber === '') {
-    //             $("body").trigger("change");
-    //             return true;
-    //         }
-    //     }
-
-    //     $('input[type="checkbox"].channel-status-checkbox').on('click', function(e) {
-    //         $(this).next().text($(this).next().text() == "Enabled" ? "Disabled" : "Enabled");
-    //         $(this).parent().parent().parent().attr('data-channel-enabled', $(this).prop("checked") ? "1" : "0");
-    //     });
-
-    //     $('#search_channels, input[name="channel_status"]').on('change keyup', function(e) {
-    //         searchChannels();
-    //     });
-
-    //     $('.map-channel').on('focus keyup', function(e) {
-    //         var el = $(this);
-    //         validateChannelNotDuplicated(el);
-    //     });
-
-    //     $('.map-channel').on('change', function(e) {
-    //         var el = $(this);
-
-    //         var channelNumber = el.val() ||
-    //             el.parent().parent().attr('data-channel-number');
-
-    //         el.attr('value', el.val());
-
-    //         el.parent()
-    //             .parent()
-    //             .attr('data-channel-remapped-number', channelNumber);
-    //     });
-
-    //     $('#channel_start_number').on('change', function(e) {
-    //         var channelNumber = $(this).val();
-
-    //         if (channelNumber !== '') {
-    //             $(".map-channel").each(function(i, e) {
-    //                 $(e).val(channelNumber);
-    //                 channelNumber++;
-    //             });
-    //         } else {
-    //             $(".map-channel").val('');
-    //         }
-
-    //         $(".map-channel").trigger('change');
-    //     });
-
-    //     $("body").on('change', function(e) {
-    //         if ($("input.map-channel.is-invalid").length > 0) {
-    //             $("#channelMapForm input[type='submit']").prop('disabled', true);
-    //             $("#duplicateChannelErrorMsg").show();
-    //         } else {
-    //             $("#channelMapForm input[type='submit']").prop('disabled', false);
-    //             $("#duplicateChannelErrorMsg").hide();
-    //         }
-    //     });
-
-    //     $("#channelMapForm input[type='submit']").on('click', function(e){
-    //         e.preventDefault();
-    //         $("#channelMapForm").submit();
-    //     });
-
-    //     var currentChannelEl;
-    //     var modal;
-
-    //     $(".open-channel-settings").on('click', function(e) {
-    //         e.preventDefault();
-    //     });
-
-    //     $("#channel-settings").on('show.bs.modal', function(event) {
-    //         modal = $(this);
-    //         currentChannelEl = $(event.relatedTarget);
-
-    //         $(".modal-title").text(
-    //             currentChannelEl.attr('data-channel-name')
-    //         );
-
-    //         modal.find("[name='customChannelLogo']").val(
-    //             currentChannelEl.siblings('input.custom-logo-input').val()
-    //         );
-
-    //         modal.find("[name='customChannelArt']").val(
-    //             currentChannelEl.siblings('input.custom-channel-art-input').val()
-    //         );
-    //     });
-
-    //     $("#save-channel-settings").on('click', function(e){
-    //         e.preventDefault();
-    //         currentChannelEl.siblings('input.custom-logo-input').val(
-    //             modal.find("[name='customChannelLogo']").val()
-    //         );
-    //         currentChannelEl.siblings('input.custom-channel-art-input').val(
-    //             modal.find("[name='customChannelArt']").val()
-    //         );
-    //         modal.modal('hide');
-    //     });
-    // });
 </script>
