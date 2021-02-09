@@ -17,8 +17,9 @@
                         <b-form-input
                             id="search-input"
                             v-model="search"
-                            type="search"
-                            placeholder="Search channels" />
+                            type="text"
+                            placeholder="Search channels"
+                            debounce="300" />
                         <b-input-group-append>
                             <b-button :disabled="!search" @click="search = ''"><i class="las la-fw la-times"></i></b-button>
                         </b-input-group-append>
@@ -79,7 +80,15 @@
                 <b-col xs="4" md="2" lg="2">
                     <div class="form-group">
                         <label for="channel_start_number">Starting Channel Number</label>
-                        <input type="text" class="form-control text-center mx-auto" id="channel_start_number" name="channel_start_number" v-model.lazy="channelStartNumber" @change="renumberChannels($event)" />
+                        <b-form-input
+                            id="channel_start_number"
+                            class="text-center mx-auto"
+                            type="number"
+                            placeholder="Starting channel number"
+                            v-model="channelRenumberStart"
+                            number
+                            debounce="300"
+                            @update="renumberChannels" />
                         <small>Enter a starting number to automatically re-number the channels</small>
                     </div>
                     <input type="submit" value="Save Channel Map" class="btn btn-primary" />
@@ -101,7 +110,7 @@ export default {
     props: {
         title: String,
         source: Object,
-        channelStartNumber: String
+        channelStartNumber: Number
     },
     data() {
         return {
@@ -142,22 +151,25 @@ export default {
                 'callSign',
                 'title',
                 'stationId'
-            ]
+            ],
+            channelRenumberStart: null
         }
     },
     methods: {
-        renumberChannels: function(evt) {
-            let currentNumber = evt.target.value
+        renumberChannels: function(value) {
+            let currentNumber = value
             this.channels.forEach(function(o,i,a) {
-                a[i].mapped_channel_number = currentNumber;
+                a[i].mapped_channel_number = currentNumber
                 currentNumber++;
             })
         }
     },
-    mounted () {
+    created() {
+        this.channelRenumberStart = this.channelStartNumber
+    },
+    mounted() {
         this.dataLoading = true;
-        axios
-        .get(
+        axios.get(
             this.route(
                 'channel-source.source.get-channels',
                 { channelSource: this.source.source_name }

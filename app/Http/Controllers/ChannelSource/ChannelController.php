@@ -55,7 +55,7 @@ class ChannelController extends Controller
         return Inertia::render('channelsource/Map', [
             'title' => $channelSource->getDisplayName() . ' - External Source Provider',
             'source' => $channelSource->toArray(),
-            'channelStartNumber' => Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
+            'channelStartNumber' => (int) Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
         ]);
     }
 
