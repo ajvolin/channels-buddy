@@ -18,8 +18,7 @@ class CreateSourceChannelsTable extends Migration
             $table->string('channel_id', 100)->unique();
             $table->string('channel_number', 16)->nullable();
             $table->boolean('channel_enabled')->nullable()->default(true);
-            $table->longText('custom_logo')->nullable();
-            $table->longText('custom_channel_art')->nullable();
+            $table->longText('customizations')->nullable();
             $table->timestamps();
             $table->primary(['source', 'channel_id']);
         });

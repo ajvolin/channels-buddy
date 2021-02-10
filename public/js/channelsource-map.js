@@ -110,6 +110,134 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -121,6 +249,11 @@ __webpack_require__.r(__webpack_exports__);
     title: String,
     source: Object,
     channelStartNumber: Number
+  },
+  computed: {
+    logo: function logo() {
+      return this.channels;
+    }
   },
   data: function data() {
     return {
@@ -160,6 +293,9 @@ __webpack_require__.r(__webpack_exports__);
         a[i].mapped_channel_number = currentNumber;
         currentNumber++;
       });
+    },
+    getChannelAttribute: function getChannelAttribute(channel, attribute) {
+      return channel.customizations[attribute] || channel[attribute];
     }
   },
   created: function created() {
@@ -173,6 +309,7 @@ __webpack_require__.r(__webpack_exports__);
       channelSource: this.source.source_name
     })).then(function (response) {
       _this.channels = response.data;
+      console.log(_this.channels);
     })["catch"](function (error) {
       console.log(error);
       _this.apiError = true;
@@ -417,7 +554,7 @@ var render = function() {
                           return [
                             _c(
                               "div",
-                              { staticClass: "text-center text-success my-2" },
+                              { staticClass: "text-center text-primary my-2" },
                               [
                                 _c("b-spinner", { staticClass: "align-middle" })
                               ],
@@ -431,7 +568,7 @@ var render = function() {
                         key: "cell(id)",
                         fn: function(data) {
                           return [
-                            data.item.logo
+                            _vm.getChannelAttribute(data.item, "logo")
                               ? _c("img", {
                                   staticStyle: {
                                     "max-width": "60%",
@@ -439,7 +576,12 @@ var render = function() {
                                     "margin-bottom": "5px",
                                     filter: "drop-shadow(lightgray 1px 1px 1px)"
                                   },
-                                  attrs: { src: data.item.logo }
+                                  attrs: {
+                                    src: _vm.getChannelAttribute(
+                                      data.item,
+                                      "logo"
+                                    )
+                                  }
                                 })
                               : _c(
                                   "div",
@@ -550,23 +692,465 @@ var render = function() {
                         fn: function(data) {
                           return [
                             _c(
-                              "a",
+                              "b-button",
                               {
-                                staticClass: "open-channel-settings",
                                 attrs: {
-                                  href: "#",
-                                  "aria-label": "Customize channel",
-                                  title: "Customize channel",
-                                  "data-channel-name": data.item.name,
-                                  "data-toggle": "modal",
-                                  "data-target": "#channel-settings"
-                                }
+                                  variant: "link",
+                                  "aria-label": "Customize channel"
+                                },
+                                on: { click: data.toggleDetails }
                               },
                               [
                                 _c("i", {
                                   staticClass: "las la-fw la-2x la-cog"
                                 })
                               ]
+                            )
+                          ]
+                        }
+                      },
+                      {
+                        key: "row-details",
+                        fn: function(data) {
+                          return [
+                            _c(
+                              "b-row",
+                              [
+                                _c(
+                                  "b-col",
+                                  { attrs: { sm: "8", "offset-sm": "2" } },
+                                  [
+                                    _c(
+                                      "b-card",
+                                      {
+                                        attrs: {
+                                          "bg-variant": "white",
+                                          "no-body": ""
+                                        },
+                                        scopedSlots: _vm._u(
+                                          [
+                                            {
+                                              key: "header",
+                                              fn: function() {
+                                                return [
+                                                  _c(
+                                                    "b-row",
+                                                    [
+                                                      _c(
+                                                        "b-col",
+                                                        {
+                                                          staticClass:
+                                                            "my-auto",
+                                                          attrs: { xs: "9" }
+                                                        },
+                                                        [
+                                                          _c(
+                                                            "h4",
+                                                            {
+                                                              staticClass:
+                                                                "mb-0"
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(
+                                                                  data.item.name
+                                                                )
+                                                              )
+                                                            ]
+                                                          )
+                                                        ]
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "b-col",
+                                                        { attrs: { xs: "3" } },
+                                                        [
+                                                          _vm.getChannelAttribute(
+                                                            data.item,
+                                                            "logo"
+                                                          )
+                                                            ? _c("img", {
+                                                                staticClass:
+                                                                  "img-fluid float-right",
+                                                                staticStyle: {
+                                                                  "max-height":
+                                                                    "50px",
+                                                                  filter:
+                                                                    "drop-shadow(darkgray 1px 1px 1px)"
+                                                                },
+                                                                attrs: {
+                                                                  src: _vm.getChannelAttribute(
+                                                                    data.item,
+                                                                    "logo"
+                                                                  ),
+                                                                  alt:
+                                                                    "Channel logo"
+                                                                }
+                                                              })
+                                                            : _vm._e()
+                                                        ]
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ]
+                                              },
+                                              proxy: true
+                                            }
+                                          ],
+                                          null,
+                                          true
+                                        )
+                                      },
+                                      [
+                                        _vm._v(" "),
+                                        _vm.getChannelAttribute(
+                                          data.item,
+                                          "channelArt"
+                                        )
+                                          ? _c("b-card-img", {
+                                              attrs: {
+                                                top: "",
+                                                src: _vm.getChannelAttribute(
+                                                  data.item,
+                                                  "channelArt"
+                                                ),
+                                                alt: "Channel art"
+                                              }
+                                            })
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        _c(
+                                          "b-card-body",
+                                          [
+                                            _c("h5", [
+                                              _vm._v("Channel Details")
+                                            ]),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Channel Name",
+                                                  "label-for": "channelName",
+                                                  description: data.item.name
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelName",
+                                                    type: "text",
+                                                    placeholder: "Channel name"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .name,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "name",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.name"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Call Sign",
+                                                  "label-for":
+                                                    "channelCallSign",
+                                                  description:
+                                                    data.item.callSign || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelCallSign",
+                                                    type: "text",
+                                                    placeholder: "Call Sign"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .callSign,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "callSign",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.callSign"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Gracenote Station ID",
+                                                  "label-for":
+                                                    "channelStationId",
+                                                  description:
+                                                    data.item.stationId || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelStationId",
+                                                    type: "text",
+                                                    placeholder:
+                                                      "Gracenote Station ID"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .stationId,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "stationId",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.stationId"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Category",
+                                                  "label-for":
+                                                    "channelCategory",
+                                                  description:
+                                                    data.item.category || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelCategory",
+                                                    type: "text",
+                                                    placeholder: "Category"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .category,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "category",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.category"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c("hr"),
+                                            _vm._v(" "),
+                                            _c("h5", [
+                                              _vm._v("Channel Images")
+                                            ]),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Channel Logo",
+                                                  "label-for": "channelLogo",
+                                                  description:
+                                                    data.item.logo || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelLogo",
+                                                    type: "url",
+                                                    placeholder:
+                                                      "URL to channel logo image"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .logo,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "logo",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.logo"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Channel Art",
+                                                  "label-for": "channelArt",
+                                                  description:
+                                                    data.item.channelArt || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelArt",
+                                                    type: "url",
+                                                    placeholder:
+                                                      "URL to channel art image"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .channelArt,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "channelArt",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.channelArt"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c("hr"),
+                                            _vm._v(" "),
+                                            _c("h5", [_vm._v("Guide Details")]),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Channel Title",
+                                                  "label-for": "channelTitle",
+                                                  description:
+                                                    data.item.title || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-input", {
+                                                  attrs: {
+                                                    id: "channelTitle",
+                                                    type: "text",
+                                                    placeholder:
+                                                      "Channel title (used for guide timeslot)"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .title,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "title",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.title"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "b-form-group",
+                                              {
+                                                attrs: {
+                                                  label: "Channel Description",
+                                                  "label-for": "channelDescr",
+                                                  description:
+                                                    data.item.description || ""
+                                                }
+                                              },
+                                              [
+                                                _c("b-form-textarea", {
+                                                  attrs: {
+                                                    id: "channelDescr",
+                                                    rows: "3",
+                                                    "max-rows": "6",
+                                                    placeholder:
+                                                      "Channel description (used for guide timeslot)"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      data.item.customizations
+                                                        .description,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        data.item
+                                                          .customizations,
+                                                        "description",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "data.item.customizations.description"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
                             )
                           ]
                         }

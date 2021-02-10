@@ -23,20 +23,35 @@ class ChannelController extends Controller
             ->keyBy("channel_id");
 
         $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
-            $channel->mapped_channel_number = $existingChannels->get($key)->channel_number ?? $channel->number;
-            $channel->channel_enabled = (bool) ($existingChannels->get($key)->channel_enabled ?? true);
-            $channel->logo =
-                $existingChannels->get($key)->custom_logo ?? $channel->logo ?? null;
-            $channel->channelArt =
-                $existingChannels->get($key)->custom_channel_art ?? $channel->channelArt ?? null;
-            $channel->custom_logo =
-                $existingChannels->get($key)->custom_logo ?? null;
-            $channel->custom_channel_art =
-                $existingChannels->get($key)->custom_channel_art ?? null;
+            $existingChannel =
+                $existingChannels->get($key) ?? null;
+            $channel->mapped_channel_number =
+                $existingChannel->channel_number ?? null;
+
+            $channel->channel_enabled =
+                (bool) ($existingChannel
+                        ->channel_enabled ?? true);
+
+            $channel->customizations =
+                $existingChannel->customizations ??
+                    [
+                        'callSign'  => null,
+                        'category'  => null,
+                        'channelArt' => null,
+                        'description' => null,
+                        'logo' => null,
+                        'name' => null,
+                        'stationId' => null,
+                        'title' => null
+                    ];
+
             return $channel;
         })->sortBy(function($channel) {
             return $channel->sortValue ??
                 $channel->number ??
+                $channel->name ??
+                $channel->title ??
+                $channel->callSign ??
                 $channel->id;
         }, SORT_NATURAL | SORT_FLAG_CASE);
         

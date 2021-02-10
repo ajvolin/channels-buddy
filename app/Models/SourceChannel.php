@@ -14,13 +14,18 @@ use Illuminate\Database\Eloquent\Model;
 class SourceChannel extends Model
 {
     use HasFactory;
+    public $incrementing = false;
+    public $primaryKey = 'channel_id';
 
     protected $fillable = [
         'source',
         'channel_id',
         'channel_number',
         'channel_enabled',
-        'custom_logo',
-        'custom_channel_art'
+        'customizations'
+    ];
+
+    protected $casts = [
+        'customizations' => 'array',
     ];
 }
