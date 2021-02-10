@@ -58,9 +58,52 @@ class ChannelController extends Controller
         return response()->json($channels->values(), 200);
     }
 
+    public function updateChannel(Request $request)
+    {
+        $sourceName = $request->channelSource->getSourceName();
+        $channel = (object) $request->channel;
+
+        $sourceChannel = SourceChannel::firstOrNew([
+            'source' => $sourceName,
+            'channel_id' => $channel->id
+        ]);
+
+        $sourceChannel->channel_number =
+            $channel->mapped_channel_number ??
+                $channel->number ?? null;
+        $sourceChannel->channel_enabled =
+            (int) $channel->channel_enabled ?? 0;
+        $sourceChannel->customizations =
+            $channel->customizations;
+        $sourceChannel->save();
+
+        return response()->json($request->channel, 200);
+    }
+
     public function updateChannels(Request $request)
     {
+        $sourceName = $request->channelSource->getSourceName();
+        $channels = collect($request->channels)
+            ->transform(function($channel, $key) use ($sourceName) {
+                $channel = (object) $channel;
+                return [
+                    'source' => $sourceName,
+                    'channel_id' => $channel->id,
+                    'channel_number' => $channel->mapped_channel_number ??
+                        $channel->number ?? null,
+                    'channel_enabled' =>
+                        (int) $channel->channel_enabled ?? 0,
+                    'customizations' => json_encode($channel->customizations)
+                ];
+            })->values()->toArray();
 
+        SourceChannel::upsert(
+            $channels,
+            [ 'source', 'channel_id' ],
+            [ 'channel_number', 'channel_enabled', 'customizations' ],
+        );
+
+        return response()->json($channels, 200);
     }
 
     public function mapUi(ChannelSourceProvider $channelSource)

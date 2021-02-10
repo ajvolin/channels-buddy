@@ -2,15 +2,8 @@
     "/js/app.js": "/js/app.js",
     "/js/manifest.js": "/js/manifest.js",
     "/js/vendor.js": "/js/vendor.js",
-<<<<<<< HEAD
-    "/js/Home.js": "/js/Home.js?id=28429d3256d2e2e5b33d",
-    "/js/Log.js": "/js/Log.js?id=6d2a23787ede9c5d6f4a",
-    "/js/channels-Remap.js": "/js/channels-Remap.js?id=8c98b3d2d021a3dcebb3",
-    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=4b5cb5b689565213916a"
-=======
     "/js/Home.js": "/js/Home.js?id=2565ed47e231c25a67d9",
     "/js/Log.js": "/js/Log.js?id=f353d7ed8a4a59ce1b47",
     "/js/channels-Remap.js": "/js/channels-Remap.js?id=6d187145ba803579931b",
-    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=ef506d0a51f976375ca0"
->>>>>>> 8b2c3bc0530b5c18f0d80fdbb8981ee9bf430a9c
+    "/js/channelsource-Map.js": "/js/channelsource-Map.js?id=6e81e4df8418c6b65a39"
 }

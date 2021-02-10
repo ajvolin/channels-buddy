@@ -5,7 +5,7 @@ import Vue from 'vue'
 import VueMeta from 'vue-meta'
 import VTooltip from 'v-tooltip'
 import { BootstrapVue } from 'bootstrap-vue'
-import { InertiaApp } from "@inertiajs/inertia-vue"
+import { App, plugin } from '@inertiajs/inertia-vue'
 import route from 'ziggy-js'
 import MainLayout from './layouts/MainLayout.vue'
 
@@ -16,7 +16,7 @@ Vue.mixin({
     }
 })
 Vue.use(VTooltip)
-Vue.use(InertiaApp)
+Vue.use(plugin)
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
 
@@ -47,7 +47,7 @@ new Vue({
     metaInfo: {
         titleTemplate: (title) => title ? `${title} - ` + app_name : app_name
     },
-    render: h => h(InertiaApp, {
+    render: h => h(App, {
         props: {
             initialPage: JSON.parse(app.dataset.page),
             resolveComponent: name => import(/* webpackChunkName: "[request]" */ `./pages/${name}`)

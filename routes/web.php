@@ -41,6 +41,9 @@ Route::get('/channels/{source}/guide', [GuideController::class, 'xmltv'])
 Route::get('/source/{channelSource}/channels', [ChannelSourceChannelController::class, 'getChannels'])
     ->name('channel-source.source.get-channels');
 
+Route::put('/source/{channelSource}/channel', [ChannelSourceChannelController::class, 'updateChannel'])
+    ->name('channel-source.source.update-channel');
+
 Route::put('/source/{channelSource}/channels', [ChannelSourceChannelController::class, 'updateChannels'])
     ->name('channel-source.source.update-channels');
 
