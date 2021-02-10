@@ -110,6 +110,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+<<<<<<< HEAD
 //
 //
 //
@@ -238,6 +239,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+=======
+>>>>>>> 8b2c3bc0530b5c18f0d80fdbb8981ee9bf430a9c
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -249,11 +252,14 @@ __webpack_require__.r(__webpack_exports__);
     title: String,
     source: Object,
     channelStartNumber: Number
+<<<<<<< HEAD
   },
   computed: {
     logo: function logo() {
       return this.channels;
     }
+=======
+>>>>>>> 8b2c3bc0530b5c18f0d80fdbb8981ee9bf430a9c
   },
   data: function data() {
     return {
