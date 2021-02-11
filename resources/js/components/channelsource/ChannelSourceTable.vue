@@ -1,29 +1,26 @@
 <template>
-    <b-card bg-variant="white" no-body>
-        <b-input-group class="my-3">
+    <div>
+        <b-input-group class="mb-3">
             <b-form-input
                 id="search-input"
-                v-model="search"
+                v-model="channelSearch"
                 type="text"
                 placeholder="Search channels"
                 :disabled="isBusy"
                 debounce="300" />
+                <b-form-select
+                    :disabled="isBusy"
+                    :options="channelStatusFilterOptions"
+                    v-model="channelStatusFilterSelected"
+                    style="max-width: 200px;" />
             <b-input-group-append>
-                <b-button :disabled="!search" @click="search = ''"><i class="las la-fw la-times"></i></b-button>
+                <b-button
+                    :disabled="!channelSearch && !channelStatusFilterSelected"
+                    @click="channelSearch = ''; channelStatusFilterSelected = null">
+                    <i class="las la-fw la-times-circle"></i>
+                </b-button>
             </b-input-group-append>
         </b-input-group>
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_any" name="channel_status" class="custom-control-input" value="" checked />
-            <label class="custom-control-label" for="channel_status_any">All Channels</label>
-        </div>
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_enabled" name="channel_status" class="custom-control-input" value="1" />
-            <label class="custom-control-label" for="channel_status_enabled">Enabled Channels</label>
-        </div>
-        <div class="custom-control custom-radio custom-control-inline">
-            <input type="radio" id="channel_status_disabled" name="channel_status" class="custom-control-input" value="0" />
-            <label class="custom-control-label" for="channel_status_disabled">Disabled Channels</label>
-        </div>
         <b-table
             hover
             head-variant="light"
@@ -31,7 +28,8 @@
             :busy="isBusy"
             :items="channels"
             :fields="channelTableFields"
-            :filter="search"
+            :filter="channelFilter"
+            :filter-function="filterChannelsTable"
             :filter-included-fields="searchOn"
             primary-key="id">
             <template #table-busy>
@@ -39,7 +37,7 @@
                     <b-spinner class="align-middle" />
                 </div>
             </template>
-            <template #cell(id)="data">
+            <template #cell(name)="data">
                 <img v-if="getChannelAttribute(data.item,'logo')" :src="getChannelAttribute(data.item,'logo')" style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
                 <div v-else class="guide-channel-name" style="font-size: 0.9em; padding: 19px 0;">{{ data.item.id }}</div>
                 <div class="guide-channel-number">
@@ -51,7 +49,10 @@
                 <input type="text" class="form-control text-center mx-auto map-channel" style="max-width: 250px;" v-model="data.item.mapped_channel_number" />
             </template>
             <template #cell(channel_enabled)="data">
-                <b-form-checkbox v-model="data.item.channel_enabled" name="check-button" switch>
+                <b-form-checkbox
+                    v-model="data.item.channel_enabled"
+                    name="check-button"
+                    switch>
                     {{ data.item.channel_enabled ? "Enabled" : "Disabled" }}
                 </b-form-checkbox>
             </template>
@@ -59,13 +60,13 @@
                 <b-button block class="text-center" variant="link" aria-label="Customize channel" @click="$bvModal.show(data.item.id)">
                     <i class="las la-fw la-2x la-cog"></i>
                 </b-button>
-                <channel-source-channel-card
-                    :channel="data"
+                <channel-source-channel-modal
+                    :channel="data.item"
                     :getChannelAttribute="getChannelAttribute"
                     :saveChannel="saveChannel" />
             </template>
         </b-table>
-    </b-card>
+    </div>
 </template>
 
 <script>
@@ -76,11 +77,31 @@
             isBusy: Boolean,
             saveChannel: Function
         },
+        computed: {
+            channelFilter: function() {
+                if ((this.channelSearch == '' ||
+                        this.channelSearch === null) &&
+                        this.channelStatusFilterSelected ===  null){
+                    return null
+                }
+                return [
+                    (this.channelSearch !== null && this.channelSearch != '') ? this.channelSearch : null,
+                    this.channelStatusFilterSelected
+                ]
+            }
+        },
         data() {
             return {
+                channelSearch: null,
+                channelStatusFilterSelected: null,
+                channelStatusFilterOptions: [
+                    { value: null, text: 'All Channels' },
+                    { value: true, text: 'Enabled Channels' },
+                    { value: false, text: 'Disabled Channels' }
+                ],
                 channelTableFields: [
                     {
-                        key: 'id',
+                        key: 'name',
                         label: 'Source Channel',
                         sortable: false,
                         class: 'text-left align-middle'
@@ -88,7 +109,7 @@
                     {
                         key: 'mapped_channel_number',
                         label: 'Channel Number',
-                        sortable: true,
+                        sortable: false,
                         class: 'text-center align-middle'
                     },
                     {
@@ -104,7 +125,6 @@
                         class: 'align-middle'
                     }
                 ],
-                search: null,
                 searchOn: [
                     'number',
                     'name',
@@ -116,6 +136,31 @@
             }
         },
         methods: {
+            filterChannelsTable: function(row, filter) {
+                const searchValues = [];
+                this.searchOn.forEach((k) => {
+                    if (row[k]) {
+                        searchValues.push(row[k])
+                    }
+                })
+                
+                const searchMatch = 
+                    (filter[0] !== null) ? searchValues
+                        .join(' ')
+                        .toLowerCase()
+                        .includes(
+                            filter[0].toLowerCase()
+                        ) : false
+
+                if (filter[0] !== null && filter[1] !== null){
+                    return searchMatch && 
+                        row.channel_enabled == filter[1];
+                }
+                else {
+                    return searchMatch ||
+                        row.channel_enabled == filter[1];
+                }
+            },
             getChannelAttribute(channel, attribute) {
                 return channel.customizations[attribute] || channel[attribute];
             }

@@ -1,11 +1,11 @@
 <template>
     <b-modal
-        :id="channel.item.id"
+        v-if="channel"
+        :id="channel.id"
         button-size="sm"
         centered
         content-class="shadow"
         header-bg-variant="light"
-        hide-backdrop
         lazy
         no-close-on-backdrop
         no-close-on-esc
@@ -14,10 +14,10 @@
         title="Edit channel"
         @ok="callSaveChannel">
         <template #modal-header>
-            <h5 class="my-auto">{{ channel.item.name }}</h5>
+            <h5 class="my-auto">{{ channel.name }}</h5>
             <img
-                v-if="getChannelAttribute(channel.item,'logo')"
-                :src="getChannelAttribute(channel.item,'logo')"
+                v-if="getChannelAttribute(channel,'logo')"
+                :src="getChannelAttribute(channel,'logo')"
                 class="img-fluid float-right"
                 style="max-height: 50px; filter: drop-shadow(darkgray 1px 1px 1px);"
                 alt="Channel logo" />
@@ -25,86 +25,79 @@
         <b-card bg-variant="white" no-body>
             <b-card-img
                 top
-                v-if="getChannelAttribute(channel.item,'channelArt')"
-                :src="getChannelAttribute(channel.item,'channelArt')"
+                v-if="getChannelAttribute(channel,'channelArt')"
+                :src="getChannelAttribute(channel,'channelArt')"
                 style="background: #000;"
                 alt="Channel art">
             </b-card-img>
             <b-card-body>
-                <h5>Channel Details</h5>
+                <h5 class="d-inline-block">Channel</h5>
+                <b-form-checkbox
+                    class="my-auto float-right d-inline-block"
+                    v-model="channel.channel_enabled"
+                    name="check-button"
+                    switch />
                 <b-form-group
                     label="Channel Name"
                     label-for="channelName"
-                    :description="channel.item.name">
+                    :description="channel.name">
                     <b-form-input
                         id="channelName"
                         type="text"
                         placeholder="Channel name"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.name" />
+                        v-model.lazy="channel.customizations.name" />
                 </b-form-group>
 
                 <b-form-group
                     label="Call Sign"
                     label-for="channelCallSign"
-                    :description="channel.item.callSign || ''">
+                    :description="channel.callSign || ''">
                     <b-form-input
                         id="channelCallSign"
                         type="text"
                         placeholder="Call Sign"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.callSign" />
-                </b-form-group>
-
-                <b-form-group
-                    label="Gracenote Station ID"
-                    label-for="channelStationId"
-                    :description="channel.item.stationId || ''">
-                    <b-form-input
-                        id="channelStationId"
-                        type="text"
-                        placeholder="Gracenote Station ID"
-                        :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.stationId" />
+                        v-model.lazy="channel.customizations.callSign" />
                 </b-form-group>
 
                 <b-form-group
                     label="Category"
                     label-for="channelCategory"
-                    :description="channel.item.category || ''">
+                    :description="channel.category || ''">
                     <b-form-input
                         id="channelCategory"
                         type="text"
                         placeholder="Category"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.category" />
+                        v-model.lazy="channel.customizations.category" />
                 </b-form-group>
                     
                 <hr/>
 
-                <h5>Channel Images</h5>
+                <h5>Images</h5>
                 <b-form-group
                     label="Channel Logo"
                     label-for="channelLogo"
-                    :description="channel.item.logo || ''">
+                    :description="channel.logo || ''">
                     <b-form-input
                         id="channelLogo"
                         type="url"
                         placeholder="URL to channel logo image"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.logo" />
+                        v-model.lazy="channel.customizations.logo" />
                 </b-form-group>
 
                 <b-form-group
                     label="Channel Art"
                     label-for="channelArt"
-                    :description="channel.item.channelArt || ''">
+                    :description="channel.channelArt || ''">
                     <b-form-input
                         id="channelArt"
                         type="url"
                         placeholder="URL to channel art image"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.channelArt" />
+                        v-model.lazy="channel.customizations.channelArt" />
                 </b-form-group>
 
                 <hr/>
@@ -113,26 +106,38 @@
                 <b-form-group
                     label="Channel Title"
                     label-for="channelTitle"
-                    :description="channel.item.title || ''">
+                    :description="channel.title || ''">
                     <b-form-input
                         id="channelTitle"
                         type="text"
                         placeholder="Channel title (used for guide timeslot)"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.title" />
+                        v-model.lazy="channel.customizations.title" />
                 </b-form-group>
 
                 <b-form-group
                     label="Channel Description"
                     label-for="channelDescr"
-                    :description="channel.item.description || ''">
+                    :description="channel.description || ''">
                     <b-form-textarea
                         id="channelDescr"
                         rows="3"
                         max-rows="6"
                         placeholder="Channel description (used for guide timeslot)"
                         :debounce="inputDebounce"
-                        v-model.lazy="channel.item.customizations.description" />
+                        v-model.lazy="channel.customizations.description" />
+                </b-form-group>
+
+                <b-form-group
+                    label="Gracenote Station ID"
+                    label-for="channelStationId"
+                    :description="channel.stationId || ''">
+                    <b-form-input
+                        id="channelStationId"
+                        type="text"
+                        placeholder="Gracenote Station ID"
+                        :debounce="inputDebounce"
+                        v-model.lazy="channel.customizations.stationId" />
                 </b-form-group>
             </b-card-body>
         </b-card>
@@ -153,7 +158,7 @@
 
 <script>
     export default {
-        name: 'ChannelSourceChannelCard',
+        name: 'ChannelSourceChannelModel',
         props: {
             channel: Object,
             getChannelAttribute: Function,
@@ -172,24 +177,45 @@
         methods: {
             callSaveChannel() {
                 this.saving = true
-                this.saveChannel(this.channel.item, () => {
+                this.saveChannel(this.channel, () => {
                     this.saving = false
                     this.cloneOriginalChannel()
-                    this.$bvModal.hide(this.channel.item.id)
+                    this.$bvModal.hide(this.channel.id)
                 });
             },
             cancelEdit() {
-                Object.keys(this.channel.item.customizations).forEach((key) => {
-                    this.channel.item.customizations[key] = this.originalChannel.customizations[key]
+                Object.keys(this.channel.customizations).forEach((key) => {
+                    this.channel.customizations[key] = this.originalChannel.customizations[key]
                 })
-                this.$bvModal.hide(this.channel.item.id)
+                this.channel.channel_enabled = this.originalChannel.channel_enabled
+                this.$bvModal.hide(this.channel.id)
+            },
+            confirmMsgBox(message, callback) {
+                this.$bvModal.msgBoxConfirm(message, {
+                    size: 'sm',
+                    buttonSize: 'sm',
+                    okVariant: 'danger',
+                    okTitle: 'Yes',
+                    centered: true,
+                    hideHeaderClose: true,
+                    noCloseOnBackdrop: true,
+                    noCloseOnEsc: true,
+                }).then(value => {
+                    if (value) {
+                        callback()
+                    }
+                }).catch(err => {
+                    
+                })
             },
             cloneOriginalChannel() {
-                this.originalChannel = JSON.parse(JSON.stringify(this.channel.item))
+                this.originalChannel = JSON.parse(JSON.stringify(this.channel))
             },
             resetCustomizations() {
-                Object.keys(this.channel.item.customizations).forEach((key) => {
-                    this.channel.item.customizations[key] = null
+                this.confirmMsgBox('Are you sure?', () => {
+                    Object.keys(this.channel.customizations).forEach((key) => {
+                        this.channel.customizations[key] = null
+                    })
                 })
             }
         }

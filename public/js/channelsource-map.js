@@ -60,6 +60,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -88,9 +89,8 @@ __webpack_require__.r(__webpack_exports__);
         autoHideDelay: 5000,
         appendToast: true,
         solid: true,
-        toaster: 'b-toaster-bottom-right',
-        variant: error ? 'danger' : 'success',
-        noCloseButton: true
+        toaster: 'b-toaster-top-right',
+        variant: error ? 'danger' : 'success'
       });
     },
     renumberChannels: function renumberChannels(value) {
@@ -116,7 +116,9 @@ __webpack_require__.r(__webpack_exports__);
 
         _this.makeToast(true, 'Error', 'Unable to save ' + channel.name + '.');
       })["finally"](function () {
-        return callback();
+        if (callback !== undefined) {
+          callback();
+        }
       });
     },
     saveChannels: function saveChannels() {
@@ -271,16 +273,13 @@ var render = function() {
                     "div",
                     { staticClass: "form-group" },
                     [
-                      _c("label", { attrs: { for: "channel_start_number" } }, [
-                        _vm._v("Starting Channel Number")
-                      ]),
-                      _vm._v(" "),
                       _c("b-form-input", {
                         staticClass: "text-center mx-auto",
                         attrs: {
                           id: "channel_start_number",
                           type: "number",
                           placeholder: "Starting channel number",
+                          min: "1",
                           number: "",
                           debounce: "300",
                           disabled: _vm.saving || _vm.dataLoading
@@ -294,6 +293,10 @@ var render = function() {
                           expression: "channelRenumberStart"
                         }
                       }),
+                      _vm._v(" "),
+                      _c("label", { attrs: { for: "channel_start_number" } }, [
+                        _vm._v("Starting Channel Number")
+                      ]),
                       _vm._v(" "),
                       _c("small", [
                         _vm._v(

@@ -25,17 +25,18 @@
                 </b-col>
                 <b-col xs="4" md="2" lg="2">
                     <div class="form-group">
-                        <label for="channel_start_number">Starting Channel Number</label>
                         <b-form-input
                             id="channel_start_number"
                             class="text-center mx-auto"
                             type="number"
                             placeholder="Starting channel number"
                             v-model="channelRenumberStart"
+                            min="1"
                             number
                             debounce="300"
                             :disabled="saving || dataLoading"
                             @update="renumberChannels" />
+                            <label for="channel_start_number">Starting Channel Number</label>
                         <small>Enter a starting number to automatically re-number the channels</small>
                     </div>
                     <b-button block size="sm" variant="primary" @click="saveChannels" :disabled="saving || dataLoading">
@@ -78,9 +79,8 @@
                     autoHideDelay: 5000,
                     appendToast: true,
                     solid: true,
-                    toaster: 'b-toaster-bottom-right',
+                    toaster: 'b-toaster-top-right',
                     variant: error ? 'danger' : 'success',
-                    noCloseButton: true,
                 })
             },
             renumberChannels: function(value) {
@@ -108,7 +108,11 @@
                         'Error',
                         'Unable to save ' + channel.name + '.'
                     )
-                }).finally(() => callback())
+                }).finally(() => {
+                    if (callback !== undefined) {
+                        callback()
+                    }
+                })
             },
             saveChannels: function() {
                 this.saving = true
