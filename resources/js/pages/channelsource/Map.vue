@@ -34,10 +34,14 @@
                             v-model="channelRenumberStart"
                             number
                             debounce="300"
+                            :disabled="saving || dataLoading"
                             @update="renumberChannels" />
                         <small>Enter a starting number to automatically re-number the channels</small>
                     </div>
-                    <input type="submit" value="Save Channel Map" @click="saveChannels" class="btn btn-primary" />
+                    <b-button block size="sm" variant="primary" @click="saveChannels" :disabled="saving || dataLoading">
+                        <b-spinner v-if="saving" small></b-spinner>
+                        {{ saving ? 'Saving Channel Map' : 'Save Channel Map' }}
+                    </b-button>
                     <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
                 </b-col>
             </b-row>
@@ -63,10 +67,22 @@
                 apiError: false,
                 dataLoading: false,
                 channels: [],
-                channelRenumberStart: null
+                channelRenumberStart: null,
+                saving: false
             }
         },
         methods: {
+            makeToast: function(error, title, message) {
+                this.$bvToast.toast(message, {
+                    title: title,
+                    autoHideDelay: 5000,
+                    appendToast: true,
+                    solid: true,
+                    toaster: 'b-toaster-bottom-right',
+                    variant: error ? 'danger' : 'success',
+                    noCloseButton: true,
+                })
+            },
             renumberChannels: function(value) {
                 let currentNumber = value
                 this.channels.forEach(function(o,i,a) {
@@ -74,31 +90,49 @@
                     currentNumber++;
                 })
             },
-            saveChannel: function(channel) {
+            saveChannel: function(channel, callback) {
                 axios.put(
                     this.route(
                         'channel-source.source.update-channel',
                         { channelSource: this.source.source_name }
                     ), { channel: channel }
                 ).then(response => {
-                    console.log('Updated channel ' + this.source.display_name + ': ' + channel.id)
-                    console.log(response.data)
+                    console.log('Updated channel ' + this.source.display_name + ': ' + channel.name)
+                    this.makeToast(false,
+                        'Success',
+                        response.data.message
+                    )
                 }).catch(error => {
                     console.log(error)
-                })
+                    this.makeToast(true,
+                        'Error',
+                        'Unable to save ' + channel.name + '.'
+                    )
+                }).finally(() => callback())
             },
             saveChannels: function() {
+                this.saving = true
                 axios.put(
                     this.route(
                         'channel-source.source.update-channels',
                         { channelSource: this.source.source_name }
-                    ), { channels: this.channels }
+                    ), {
+                        channelStartNumber: this.channelRenumberStart,
+                        channels: this.channels
+                    }
                 ).then(response => {
                     console.log('Updated channels for ' + this.source.display_name)
-                    console.log(response.data)
+                    this.makeToast(false,
+                        'Success',
+                        response.data.message
+                    )
                 }).catch(error => {
                     console.log(error)
-                })
+                    this.makeToast(true,
+                        'Error',
+                        'Unable to save channels.'
+                    )
+                }).finally(() => { this.saving = false })
             }
         },
         created() {
@@ -113,7 +147,6 @@
                 )
             ).then(response => {
                 this.channels = response.data
-                // console.log(this.channels)
             }).catch(error => {
                 console.log(error)
                 this.apiError = true

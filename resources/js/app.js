@@ -6,6 +6,7 @@ import VueMeta from 'vue-meta'
 import VTooltip from 'v-tooltip'
 import { BootstrapVue } from 'bootstrap-vue'
 import { App, plugin } from '@inertiajs/inertia-vue'
+import { InertiaProgress } from '@inertiajs/progress'
 import route from 'ziggy-js'
 import MainLayout from './layouts/MainLayout.vue'
 
@@ -19,6 +20,10 @@ Vue.use(VTooltip)
 Vue.use(plugin)
 Vue.use(VueMeta)
 Vue.use(BootstrapVue)
+
+InertiaProgress.init({
+    showSpinner: true
+})
 
 // Register global components
 const requireComponents = require.context('./components', true, /[A-Z]\w+\.(vue|js)$/)

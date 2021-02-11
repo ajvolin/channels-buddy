@@ -6,6 +6,7 @@
                 v-model="search"
                 type="text"
                 placeholder="Search channels"
+                :disabled="isBusy"
                 debounce="300" />
             <b-input-group-append>
                 <b-button :disabled="!search" @click="search = ''"><i class="las la-fw la-times"></i></b-button>
@@ -55,19 +56,13 @@
                 </b-form-checkbox>
             </template>
             <template #cell(channel_settings)="data">
-                <b-button variant="link" aria-label="Customize channel" @click="data.toggleDetails">
+                <b-button block class="text-center" variant="link" aria-label="Customize channel" @click="$bvModal.show(data.item.id)">
                     <i class="las la-fw la-2x la-cog"></i>
                 </b-button>
-            </template>
-            <template #row-details="data">
-                <b-row>
-                    <b-col sm="6" offset-sm="3">
-                        <channel-source-channel-card
-                            :channel="data"
-                            :getChannelAttribute="getChannelAttribute"
-                            :saveChannel="saveChannel" />
-                    </b-col>
-                </b-row>
+                <channel-source-channel-card
+                    :channel="data"
+                    :getChannelAttribute="getChannelAttribute"
+                    :saveChannel="saveChannel" />
             </template>
         </b-table>
     </b-card>
@@ -106,7 +101,7 @@
                         key: 'channel_settings',
                         label: '',
                         sortable: false,
-                        class: 'text-center align-middle'
+                        class: 'align-middle'
                     }
                 ],
                 search: null,

@@ -50,9 +50,6 @@ Route::put('/source/{channelSource}/channels', [ChannelSourceChannelController::
 Route::get('/source/{channelSource}', [ChannelSourceChannelController::class, 'mapUi'])
     ->name('channel-source.source.map-ui');
 
-Route::post('/source/{channelSource}/map', [ChannelSourceChannelController::class, 'applyMap'])
-    ->name('channel-source.source.apply-map');
-
 Route::get('/source/{channelSource}/playlist', [ChannelSourceChannelController::class, 'playlist'])
     ->name('channel-source.source.playlist');
 

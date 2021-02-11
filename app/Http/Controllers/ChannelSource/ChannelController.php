@@ -9,101 +9,137 @@ use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use Throwable;
 
 class ChannelController extends Controller
 {
     public function getChannels(ChannelSourceProvider $channelSource)
     {
-        $sourceName = $channelSource->getSourceName();
-        $service = $channelSource->getChannelSourceService();
-        $channels = $service->getChannels()->channels;
+        try {
+            $sourceName = $channelSource->getSourceName();
+            $service = $channelSource->getChannelSourceService();
+            $channels = $service->getChannels()->channels;
 
-        $existingChannels = SourceChannel::where('source', $sourceName)
-            ->get()
-            ->keyBy("channel_id");
+            $existingChannels = SourceChannel::where('source', $sourceName)
+                ->get()
+                ->keyBy("channel_id");
 
-        $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
-            $existingChannel =
-                $existingChannels->get($key) ?? null;
-            $channel->mapped_channel_number =
-                $existingChannel->channel_number ?? null;
+            $channels = $channels->map(function ($channel, $key) use ($existingChannels) {
+                $existingChannel =
+                    $existingChannels->get($key) ?? null;
+                $channel->mapped_channel_number =
+                    $existingChannel->channel_number ?? null;
 
-            $channel->channel_enabled =
-                (bool) ($existingChannel
-                        ->channel_enabled ?? true);
+                $channel->channel_enabled =
+                    (bool) ($existingChannel
+                            ->channel_enabled ?? true);
 
-            $channel->customizations =
-                $existingChannel->customizations ??
-                    [
-                        'callSign'  => null,
-                        'category'  => null,
-                        'channelArt' => null,
-                        'description' => null,
-                        'logo' => null,
-                        'name' => null,
-                        'stationId' => null,
-                        'title' => null
-                    ];
+                $channel->customizations =
+                    $existingChannel->customizations ??
+                        [
+                            'callSign'  => null,
+                            'category'  => null,
+                            'channelArt' => null,
+                            'description' => null,
+                            'logo' => null,
+                            'name' => null,
+                            'stationId' => null,
+                            'title' => null
+                        ];
 
-            return $channel;
-        })->sortBy(function($channel) {
-            return $channel->sortValue ??
-                $channel->number ??
-                $channel->name ??
-                $channel->title ??
-                $channel->callSign ??
-                $channel->id;
-        }, SORT_NATURAL | SORT_FLAG_CASE);
-        
-        return response()->json($channels->values(), 200);
+                return $channel;
+            })->sortBy(function($channel) {
+                return $channel->sortValue ??
+                    $channel->number ??
+                    $channel->name ??
+                    $channel->title ??
+                    $channel->callSign ??
+                    $channel->id;
+            }, SORT_NATURAL | SORT_FLAG_CASE);
+            
+            return response()->json($channels->values(), 200);
+        } catch (Throwable $e) {
+            report($e);
+            return response()->json([
+                'error' => true,
+                'message' => 'Unable to load channels, an error has occurred.'
+            ], 500);
+        }
     }
 
     public function updateChannel(Request $request)
     {
-        $sourceName = $request->channelSource->getSourceName();
-        $channel = (object) $request->channel;
+        try {
+            $sourceName = $request->channelSource->getSourceName();
+            $channel = $request->channel;
 
-        $sourceChannel = SourceChannel::firstOrNew([
-            'source' => $sourceName,
-            'channel_id' => $channel->id
-        ]);
+            $sourceChannel = SourceChannel::firstOrNew([
+                'source' => $sourceName,
+                'channel_id' => $channel['id']
+            ]);
 
-        $sourceChannel->channel_number =
-            $channel->mapped_channel_number ??
-                $channel->number ?? null;
-        $sourceChannel->channel_enabled =
-            (int) $channel->channel_enabled ?? 0;
-        $sourceChannel->customizations =
-            $channel->customizations;
-        $sourceChannel->save();
+            $sourceChannel->channel_number =
+                $channel['mapped_channel_number'] ??
+                    $channel['number'] ?? null;
+            $sourceChannel->channel_enabled =
+                (int) $channel['channel_enabled'] ?? 0;
+            $sourceChannel->customizations =
+                $channel['customizations'];
+            $sourceChannel->save();
 
-        return response()->json($request->channel, 200);
+            return response()->json([
+                'error' => false,
+                'message' => sprintf('%s saved.', $channel['name'])
+            ], 200);
+        } catch(Throwable $e) {
+            report($e);
+            return response()->json([
+                'error' => true,
+                'message' => 'Unable to save channel.'
+            ], 400);
+        }
     }
 
     public function updateChannels(Request $request)
     {
-        $sourceName = $request->channelSource->getSourceName();
-        $channels = collect($request->channels)
-            ->transform(function($channel, $key) use ($sourceName) {
-                $channel = (object) $channel;
-                return [
-                    'source' => $sourceName,
-                    'channel_id' => $channel->id,
-                    'channel_number' => $channel->mapped_channel_number ??
-                        $channel->number ?? null,
-                    'channel_enabled' =>
-                        (int) $channel->channel_enabled ?? 0,
-                    'customizations' => json_encode($channel->customizations)
-                ];
-            })->values()->toArray();
+        try {
+            $sourceName = $request->channelSource->getSourceName();
+            $channels = collect($request->channels)
+                ->transform(function($channel, $key) use ($sourceName) {
+                    $channel = (object) $channel;
+                    return [
+                        'source' => $sourceName,
+                        'channel_id' => $channel->id,
+                        'channel_number' => $channel->mapped_channel_number ??
+                            $channel->number ?? null,
+                        'channel_enabled' =>
+                            (int) $channel->channel_enabled ?? 0,
+                        'customizations' => json_encode($channel->customizations)
+                    ];
+                })->values()->toArray();
 
-        SourceChannel::upsert(
-            $channels,
-            [ 'source', 'channel_id' ],
-            [ 'channel_number', 'channel_enabled', 'customizations' ],
-        );
+            SourceChannel::upsert(
+                $channels,
+                [ 'source', 'channel_id' ],
+                [ 'channel_number', 'channel_enabled', 'customizations' ],
+            );
 
-        return response()->json($channels, 200);
+            Setting::updateSetting(
+                "channelsource.{$sourceName}.channel_start_number",
+                $request->channelStartNumber
+            );
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Channels saved.'
+            ], 200);
+        } catch(Throwable $e) {
+            report($e);
+            return response()->json([
+                'error' => true,
+                'message' => 'Unable to save channels.'
+            ], 400);
+        }
     }
 
     public function mapUi(ChannelSourceProvider $channelSource)
@@ -113,40 +149,11 @@ class ChannelController extends Controller
         return Inertia::render('channelsource/Map', [
             'title' => $channelSource->getDisplayName() . ' - External Source Provider',
             'source' => $channelSource->toArray(),
-            'channelStartNumber' => (int) Setting::getSetting("{$sourceName}_channelsource.channel_start_number"),
+            'channelStartNumber' =>
+                (int) Setting::getSetting(
+                    "channelsource.{$sourceName}.channel_start_number"
+                ),
         ]);
-    }
-
-    public function applyMap(Request $request)
-    {
-        $sourceName = $request->channelSource->getSourceName();
-        
-        $channels = collect($request->channel)
-            ->transform(function ($channel, $key) use ($sourceName) {
-            return [
-                'source' => $sourceName,
-                'channel_id' => $key,
-                'channel_number' => $channel['mapped'] ?? $channel['number'],
-                'channel_enabled' => $channel['enabled'] ?? 0,
-                'custom_logo' => $channel['custom_logo'] ?? null,
-                'custom_channel_art' => $channel['custom_channel_art'] ?? null
-            ];
-        })->values()->toArray();
-
-        SourceChannel::upsert(
-            $channels,
-            [ 'source', 'channel_id' ],
-            [ 'channel_number', 'channel_enabled', 'custom_logo', 'custom_channel_art' ],
-        );
-
-        Setting::updateSetting(
-            "{$sourceName}_channelsource.channel_start_number",
-            $request->channel_start_number
-        );
-
-        Cache::forget("{$sourceName}_channelsource_m3u");
-
-        return redirect(route('channel-source.source.map-ui', ['channelSource' => $sourceName]));
     }
 
     public function playlist(Request $request)

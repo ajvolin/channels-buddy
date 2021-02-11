@@ -56,6 +56,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -73,10 +77,22 @@ __webpack_require__.r(__webpack_exports__);
       apiError: false,
       dataLoading: false,
       channels: [],
-      channelRenumberStart: null
+      channelRenumberStart: null,
+      saving: false
     };
   },
   methods: {
+    makeToast: function makeToast(error, title, message) {
+      this.$bvToast.toast(message, {
+        title: title,
+        autoHideDelay: 5000,
+        appendToast: true,
+        solid: true,
+        toaster: 'b-toaster-bottom-right',
+        variant: error ? 'danger' : 'success',
+        noCloseButton: true
+      });
+    },
     renumberChannels: function renumberChannels(value) {
       var currentNumber = value;
       this.channels.forEach(function (o, i, a) {
@@ -84,7 +100,7 @@ __webpack_require__.r(__webpack_exports__);
         currentNumber++;
       });
     },
-    saveChannel: function saveChannel(channel) {
+    saveChannel: function saveChannel(channel, callback) {
       var _this = this;
 
       axios.put(this.route('channel-source.source.update-channel', {
@@ -92,24 +108,36 @@ __webpack_require__.r(__webpack_exports__);
       }), {
         channel: channel
       }).then(function (response) {
-        console.log('Updated channel ' + _this.source.display_name + ': ' + channel.id);
-        console.log(response.data);
+        console.log('Updated channel ' + _this.source.display_name + ': ' + channel.name);
+
+        _this.makeToast(false, 'Success', response.data.message);
       })["catch"](function (error) {
         console.log(error);
+
+        _this.makeToast(true, 'Error', 'Unable to save ' + channel.name + '.');
+      })["finally"](function () {
+        return callback();
       });
     },
     saveChannels: function saveChannels() {
       var _this2 = this;
 
+      this.saving = true;
       axios.put(this.route('channel-source.source.update-channels', {
         channelSource: this.source.source_name
       }), {
+        channelStartNumber: this.channelRenumberStart,
         channels: this.channels
       }).then(function (response) {
         console.log('Updated channels for ' + _this2.source.display_name);
-        console.log(response.data);
+
+        _this2.makeToast(false, 'Success', response.data.message);
       })["catch"](function (error) {
         console.log(error);
+
+        _this2.makeToast(true, 'Error', 'Unable to save channels.');
+      })["finally"](function () {
+        _this2.saving = false;
       });
     }
   },
@@ -123,7 +151,7 @@ __webpack_require__.r(__webpack_exports__);
     axios.get(this.route('channel-source.source.get-channels', {
       channelSource: this.source.source_name
     })).then(function (response) {
-      _this3.channels = response.data; // console.log(this.channels)
+      _this3.channels = response.data;
     })["catch"](function (error) {
       console.log(error);
       _this3.apiError = true;
@@ -235,59 +263,87 @@ var render = function() {
                 1
               ),
               _vm._v(" "),
-              _c("b-col", { attrs: { xs: "4", md: "2", lg: "2" } }, [
-                _c(
-                  "div",
-                  { staticClass: "form-group" },
-                  [
-                    _c("label", { attrs: { for: "channel_start_number" } }, [
-                      _vm._v("Starting Channel Number")
-                    ]),
-                    _vm._v(" "),
-                    _c("b-form-input", {
-                      staticClass: "text-center mx-auto",
-                      attrs: {
-                        id: "channel_start_number",
-                        type: "number",
-                        placeholder: "Starting channel number",
-                        number: "",
-                        debounce: "300"
-                      },
-                      on: { update: _vm.renumberChannels },
-                      model: {
-                        value: _vm.channelRenumberStart,
-                        callback: function($$v) {
-                          _vm.channelRenumberStart = $$v
+              _c(
+                "b-col",
+                { attrs: { xs: "4", md: "2", lg: "2" } },
+                [
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("label", { attrs: { for: "channel_start_number" } }, [
+                        _vm._v("Starting Channel Number")
+                      ]),
+                      _vm._v(" "),
+                      _c("b-form-input", {
+                        staticClass: "text-center mx-auto",
+                        attrs: {
+                          id: "channel_start_number",
+                          type: "number",
+                          placeholder: "Starting channel number",
+                          number: "",
+                          debounce: "300",
+                          disabled: _vm.saving || _vm.dataLoading
                         },
-                        expression: "channelRenumberStart"
-                      }
-                    }),
-                    _vm._v(" "),
-                    _c("small", [
+                        on: { update: _vm.renumberChannels },
+                        model: {
+                          value: _vm.channelRenumberStart,
+                          callback: function($$v) {
+                            _vm.channelRenumberStart = $$v
+                          },
+                          expression: "channelRenumberStart"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("small", [
+                        _vm._v(
+                          "Enter a starting number to automatically re-number the channels"
+                        )
+                      ])
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-button",
+                    {
+                      attrs: {
+                        block: "",
+                        size: "sm",
+                        variant: "primary",
+                        disabled: _vm.saving || _vm.dataLoading
+                      },
+                      on: { click: _vm.saveChannels }
+                    },
+                    [
+                      _vm.saving
+                        ? _c("b-spinner", { attrs: { small: "" } })
+                        : _vm._e(),
                       _vm._v(
-                        "Enter a starting number to automatically re-number the channels"
+                        "\n                    " +
+                          _vm._s(
+                            _vm.saving
+                              ? "Saving Channel Map"
+                              : "Save Channel Map"
+                          ) +
+                          "\n                "
                       )
-                    ])
-                  ],
-                  1
-                ),
-                _vm._v(" "),
-                _c("input", {
-                  staticClass: "btn btn-primary",
-                  attrs: { type: "submit", value: "Save Channel Map" },
-                  on: { click: _vm.saveChannels }
-                }),
-                _vm._v(" "),
-                _c(
-                  "span",
-                  {
-                    staticClass: "text-danger",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "duplicateChannelErrorMsg" }
-                  },
-                  [_vm._v("Duplicate channel numbers detected.")]
-                )
-              ])
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "span",
+                    {
+                      staticClass: "text-danger",
+                      staticStyle: { display: "none" },
+                      attrs: { id: "duplicateChannelErrorMsg" }
+                    },
+                    [_vm._v("Duplicate channel numbers detected.")]
+                  )
+                ],
+                1
+              )
             ],
             1
           )
@@ -309,15 +365,14 @@ render._withStripped = true
 /*!**************************************************!*\
   !*** ./resources/js/pages/channelsource/Map.vue ***!
   \**************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Map_vue_vue_type_template_id_02a8221c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Map.vue?vue&type=template&id=02a8221c& */ "./resources/js/pages/channelsource/Map.vue?vue&type=template&id=02a8221c&");
 /* harmony import */ var _Map_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Map.vue?vue&type=script&lang=js& */ "./resources/js/pages/channelsource/Map.vue?vue&type=script&lang=js&");
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Map_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Map_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -347,7 +402,7 @@ component.options.__file = "resources/js/pages/channelsource/Map.vue"
 /*!***************************************************************************!*\
   !*** ./resources/js/pages/channelsource/Map.vue?vue&type=script&lang=js& ***!
   \***************************************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

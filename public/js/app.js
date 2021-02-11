@@ -283,6 +283,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceChannelCard',
   props: {
@@ -292,18 +309,44 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      inputDebounce: 300
+      saving: false,
+      inputDebounce: 300,
+      originalChannel: null
     };
   },
+  mounted: function mounted() {
+    this.cloneOriginalChannel();
+  },
   methods: {
-    resetCustomizations: function resetCustomizations(channel) {
-      Object.keys(channel.customizations).forEach(function (key) {
-        channel.customizations[key] = null;
+    callSaveChannel: function callSaveChannel() {
+      var _this = this;
+
+      this.saving = true;
+      this.saveChannel(this.channel.item, function () {
+        _this.saving = false;
+
+        _this.cloneOriginalChannel();
+
+        _this.$bvModal.hide(_this.channel.item.id);
       });
     },
-    callSaveChannel: function callSaveChannel(channel) {
-      this.saveChannel(channel.item);
-      channel.toggleDetails();
+    cancelEdit: function cancelEdit() {
+      var _this2 = this;
+
+      Object.keys(this.channel.item.customizations).forEach(function (key) {
+        _this2.channel.item.customizations[key] = _this2.originalChannel.customizations[key];
+      });
+      this.$bvModal.hide(this.channel.item.id);
+    },
+    cloneOriginalChannel: function cloneOriginalChannel() {
+      this.originalChannel = JSON.parse(JSON.stringify(this.channel.item));
+    },
+    resetCustomizations: function resetCustomizations() {
+      var _this3 = this;
+
+      Object.keys(this.channel.item.customizations).forEach(function (key) {
+        _this3.channel.item.customizations[key] = null;
+      });
     }
   }
 });
@@ -319,11 +362,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
 //
 //
 //
@@ -422,7 +460,7 @@ __webpack_require__.r(__webpack_exports__);
         key: 'channel_settings',
         label: '',
         sortable: false,
-        "class": 'text-center align-middle'
+        "class": 'align-middle'
       }],
       search: null,
       searchOn: ['number', 'name', 'mapped_channel_number', 'callSign', 'title', 'stationId']
@@ -719,41 +757,112 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c(
-    "b-card",
+    "b-modal",
     {
-      attrs: { "bg-variant": "white", "no-body": "" },
+      attrs: {
+        id: _vm.channel.item.id,
+        "button-size": "sm",
+        centered: "",
+        "content-class": "shadow",
+        "header-bg-variant": "light",
+        "hide-backdrop": "",
+        lazy: "",
+        "no-close-on-backdrop": "",
+        "no-close-on-esc": "",
+        scrollable: "",
+        static: "",
+        title: "Edit channel"
+      },
+      on: { ok: _vm.callSaveChannel },
       scopedSlots: _vm._u([
         {
-          key: "header",
+          key: "modal-header",
+          fn: function() {
+            return [
+              _c("h5", { staticClass: "my-auto" }, [
+                _vm._v(_vm._s(_vm.channel.item.name))
+              ]),
+              _vm._v(" "),
+              _vm.getChannelAttribute(_vm.channel.item, "logo")
+                ? _c("img", {
+                    staticClass: "img-fluid float-right",
+                    staticStyle: {
+                      "max-height": "50px",
+                      filter: "drop-shadow(darkgray 1px 1px 1px)"
+                    },
+                    attrs: {
+                      src: _vm.getChannelAttribute(_vm.channel.item, "logo"),
+                      alt: "Channel logo"
+                    }
+                  })
+                : _vm._e()
+            ]
+          },
+          proxy: true
+        },
+        {
+          key: "modal-footer",
           fn: function() {
             return [
               _c(
-                "b-row",
+                "div",
+                { staticClass: "mr-auto" },
                 [
-                  _c("b-col", { staticClass: "my-auto", attrs: { xs: "9" } }, [
-                    _c("h4", { staticClass: "mb-0" }, [
-                      _vm._v(_vm._s(_vm.channel.item.name))
-                    ])
-                  ]),
+                  _c(
+                    "b-button",
+                    {
+                      attrs: { size: "sm", variant: "danger" },
+                      on: {
+                        click: function($event) {
+                          return _vm.resetCustomizations()
+                        }
+                      }
+                    },
+                    [_vm._v("Clear customizations")]
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "float-right" },
+                [
+                  _c(
+                    "b-button",
+                    {
+                      attrs: { size: "sm" },
+                      on: {
+                        click: function($event) {
+                          return _vm.cancelEdit()
+                        }
+                      }
+                    },
+                    [_vm._v("Cancel")]
+                  ),
                   _vm._v(" "),
-                  _c("b-col", { attrs: { xs: "3" } }, [
-                    _vm.getChannelAttribute(_vm.channel.item, "logo")
-                      ? _c("img", {
-                          staticClass: "img-fluid float-right",
-                          staticStyle: {
-                            "max-height": "50px",
-                            filter: "drop-shadow(darkgray 1px 1px 1px)"
-                          },
-                          attrs: {
-                            src: _vm.getChannelAttribute(
-                              _vm.channel.item,
-                              "logo"
-                            ),
-                            alt: "Channel logo"
-                          }
-                        })
-                      : _vm._e()
-                  ])
+                  _c(
+                    "b-button",
+                    {
+                      attrs: { size: "sm", variant: "primary" },
+                      on: {
+                        click: function($event) {
+                          return _vm.callSaveChannel()
+                        }
+                      }
+                    },
+                    [
+                      _vm.saving
+                        ? _c("b-spinner", { attrs: { small: "" } })
+                        : _vm._e(),
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(_vm.saving ? "Saving" : "Save") +
+                          "\n            "
+                      )
+                    ],
+                    1
+                  )
                 ],
                 1
               )
@@ -765,295 +874,286 @@ var render = function() {
     },
     [
       _vm._v(" "),
-      _vm.getChannelAttribute(_vm.channel.item, "channelArt")
-        ? _c("b-card-img", {
-            staticStyle: { background: "#000" },
-            attrs: {
-              top: "",
-              src: _vm.getChannelAttribute(_vm.channel.item, "channelArt"),
-              alt: "Channel art"
-            }
-          })
-        : _vm._e(),
-      _vm._v(" "),
       _c(
-        "b-card-body",
+        "b-card",
+        { attrs: { "bg-variant": "white", "no-body": "" } },
         [
-          _c("h5", [_vm._v("Channel Details")]),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Channel Name",
-                "label-for": "channelName",
-                description: _vm.channel.item.name
-              }
-            },
-            [
-              _c("b-form-input", {
+          _vm.getChannelAttribute(_vm.channel.item, "channelArt")
+            ? _c("b-card-img", {
+                staticStyle: { background: "#000" },
                 attrs: {
-                  id: "channelName",
-                  type: "text",
-                  placeholder: "Channel name",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.name,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "name", $$v)
-                  },
-                  expression: "channel.item.customizations.name"
+                  top: "",
+                  src: _vm.getChannelAttribute(_vm.channel.item, "channelArt"),
+                  alt: "Channel art"
                 }
               })
-            ],
-            1
-          ),
+            : _vm._e(),
           _vm._v(" "),
           _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Call Sign",
-                "label-for": "channelCallSign",
-                description: _vm.channel.item.callSign || ""
-              }
-            },
+            "b-card-body",
             [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelCallSign",
-                  type: "text",
-                  placeholder: "Call Sign",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.callSign,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "callSign", $$v)
-                  },
-                  expression: "channel.item.customizations.callSign"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Gracenote Station ID",
-                "label-for": "channelStationId",
-                description: _vm.channel.item.stationId || ""
-              }
-            },
-            [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelStationId",
-                  type: "text",
-                  placeholder: "Gracenote Station ID",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.stationId,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "stationId", $$v)
-                  },
-                  expression: "channel.item.customizations.stationId"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Category",
-                "label-for": "channelCategory",
-                description: _vm.channel.item.category || ""
-              }
-            },
-            [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelCategory",
-                  type: "text",
-                  placeholder: "Category",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.category,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "category", $$v)
-                  },
-                  expression: "channel.item.customizations.category"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("hr"),
-          _vm._v(" "),
-          _c("h5", [_vm._v("Channel Images")]),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Channel Logo",
-                "label-for": "channelLogo",
-                description: _vm.channel.item.logo || ""
-              }
-            },
-            [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelLogo",
-                  type: "url",
-                  placeholder: "URL to channel logo image",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.logo,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "logo", $$v)
-                  },
-                  expression: "channel.item.customizations.logo"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Channel Art",
-                "label-for": "channelArt",
-                description: _vm.channel.item.channelArt || ""
-              }
-            },
-            [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelArt",
-                  type: "url",
-                  placeholder: "URL to channel art image",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.channelArt,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "channelArt", $$v)
-                  },
-                  expression: "channel.item.customizations.channelArt"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("hr"),
-          _vm._v(" "),
-          _c("h5", [_vm._v("Guide Details")]),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Channel Title",
-                "label-for": "channelTitle",
-                description: _vm.channel.item.title || ""
-              }
-            },
-            [
-              _c("b-form-input", {
-                attrs: {
-                  id: "channelTitle",
-                  type: "text",
-                  placeholder: "Channel title (used for guide timeslot)",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.title,
-                  callback: function($$v) {
-                    _vm.$set(_vm.channel.item.customizations, "title", $$v)
-                  },
-                  expression: "channel.item.customizations.title"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                label: "Channel Description",
-                "label-for": "channelDescr",
-                description: _vm.channel.item.description || ""
-              }
-            },
-            [
-              _c("b-form-textarea", {
-                attrs: {
-                  id: "channelDescr",
-                  rows: "3",
-                  "max-rows": "6",
-                  placeholder: "Channel description (used for guide timeslot)",
-                  debounce: _vm.inputDebounce
-                },
-                model: {
-                  value: _vm.channel.item.customizations.description,
-                  callback: function($$v) {
-                    _vm.$set(
-                      _vm.channel.item.customizations,
-                      "description",
-                      $$v
-                    )
-                  },
-                  expression: "channel.item.customizations.description"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "float-right" },
-            [
+              _c("h5", [_vm._v("Channel Details")]),
+              _vm._v(" "),
               _c(
-                "b-button",
+                "b-form-group",
                 {
-                  attrs: { size: "sm", variant: "danger" },
-                  on: {
-                    click: function($event) {
-                      return _vm.resetCustomizations(_vm.channel.item)
-                    }
+                  attrs: {
+                    label: "Channel Name",
+                    "label-for": "channelName",
+                    description: _vm.channel.item.name
                   }
                 },
-                [_vm._v("Clear customizations")]
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelName",
+                      type: "text",
+                      placeholder: "Channel name",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.name,
+                      callback: function($$v) {
+                        _vm.$set(_vm.channel.item.customizations, "name", $$v)
+                      },
+                      expression: "channel.item.customizations.name"
+                    }
+                  })
+                ],
+                1
               ),
               _vm._v(" "),
               _c(
-                "b-button",
+                "b-form-group",
                 {
-                  attrs: { size: "sm", variant: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.callSaveChannel(_vm.channel)
-                    }
+                  attrs: {
+                    label: "Call Sign",
+                    "label-for": "channelCallSign",
+                    description: _vm.channel.item.callSign || ""
                   }
                 },
-                [_vm._v("Save")]
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelCallSign",
+                      type: "text",
+                      placeholder: "Call Sign",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.callSign,
+                      callback: function($$v) {
+                        _vm.$set(
+                          _vm.channel.item.customizations,
+                          "callSign",
+                          $$v
+                        )
+                      },
+                      expression: "channel.item.customizations.callSign"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Gracenote Station ID",
+                    "label-for": "channelStationId",
+                    description: _vm.channel.item.stationId || ""
+                  }
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelStationId",
+                      type: "text",
+                      placeholder: "Gracenote Station ID",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.stationId,
+                      callback: function($$v) {
+                        _vm.$set(
+                          _vm.channel.item.customizations,
+                          "stationId",
+                          $$v
+                        )
+                      },
+                      expression: "channel.item.customizations.stationId"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Category",
+                    "label-for": "channelCategory",
+                    description: _vm.channel.item.category || ""
+                  }
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelCategory",
+                      type: "text",
+                      placeholder: "Category",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.category,
+                      callback: function($$v) {
+                        _vm.$set(
+                          _vm.channel.item.customizations,
+                          "category",
+                          $$v
+                        )
+                      },
+                      expression: "channel.item.customizations.category"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("hr"),
+              _vm._v(" "),
+              _c("h5", [_vm._v("Channel Images")]),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Channel Logo",
+                    "label-for": "channelLogo",
+                    description: _vm.channel.item.logo || ""
+                  }
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelLogo",
+                      type: "url",
+                      placeholder: "URL to channel logo image",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.logo,
+                      callback: function($$v) {
+                        _vm.$set(_vm.channel.item.customizations, "logo", $$v)
+                      },
+                      expression: "channel.item.customizations.logo"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Channel Art",
+                    "label-for": "channelArt",
+                    description: _vm.channel.item.channelArt || ""
+                  }
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelArt",
+                      type: "url",
+                      placeholder: "URL to channel art image",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.channelArt,
+                      callback: function($$v) {
+                        _vm.$set(
+                          _vm.channel.item.customizations,
+                          "channelArt",
+                          $$v
+                        )
+                      },
+                      expression: "channel.item.customizations.channelArt"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("hr"),
+              _vm._v(" "),
+              _c("h5", [_vm._v("Guide Details")]),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Channel Title",
+                    "label-for": "channelTitle",
+                    description: _vm.channel.item.title || ""
+                  }
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "channelTitle",
+                      type: "text",
+                      placeholder: "Channel title (used for guide timeslot)",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.title,
+                      callback: function($$v) {
+                        _vm.$set(_vm.channel.item.customizations, "title", $$v)
+                      },
+                      expression: "channel.item.customizations.title"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: "Channel Description",
+                    "label-for": "channelDescr",
+                    description: _vm.channel.item.description || ""
+                  }
+                },
+                [
+                  _c("b-form-textarea", {
+                    attrs: {
+                      id: "channelDescr",
+                      rows: "3",
+                      "max-rows": "6",
+                      placeholder:
+                        "Channel description (used for guide timeslot)",
+                      debounce: _vm.inputDebounce
+                    },
+                    model: {
+                      value: _vm.channel.item.customizations.description,
+                      callback: function($$v) {
+                        _vm.$set(
+                          _vm.channel.item.customizations,
+                          "description",
+                          $$v
+                        )
+                      },
+                      expression: "channel.item.customizations.description"
+                    }
+                  })
+                ],
+                1
               )
             ],
             1
@@ -1100,6 +1200,7 @@ var render = function() {
               id: "search-input",
               type: "text",
               placeholder: "Search channels",
+              disabled: _vm.isBusy,
               debounce: "300"
             },
             model: {
@@ -1351,41 +1452,28 @@ var render = function() {
                 _c(
                   "b-button",
                   {
+                    staticClass: "text-center",
                     attrs: {
+                      block: "",
                       variant: "link",
                       "aria-label": "Customize channel"
                     },
-                    on: { click: data.toggleDetails }
+                    on: {
+                      click: function($event) {
+                        return _vm.$bvModal.show(data.item.id)
+                      }
+                    }
                   },
                   [_c("i", { staticClass: "las la-fw la-2x la-cog" })]
-                )
-              ]
-            }
-          },
-          {
-            key: "row-details",
-            fn: function(data) {
-              return [
-                _c(
-                  "b-row",
-                  [
-                    _c(
-                      "b-col",
-                      { attrs: { sm: "6", "offset-sm": "3" } },
-                      [
-                        _c("channel-source-channel-card", {
-                          attrs: {
-                            channel: data,
-                            getChannelAttribute: _vm.getChannelAttribute,
-                            saveChannel: _vm.saveChannel
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ],
-                  1
-                )
+                ),
+                _vm._v(" "),
+                _c("channel-source-channel-card", {
+                  attrs: {
+                    channel: data,
+                    getChannelAttribute: _vm.getChannelAttribute,
+                    saveChannel: _vm.saveChannel
+                  }
+                })
               ]
             }
           }
@@ -1468,10 +1556,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var bootstrap_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! bootstrap-vue */ "./node_modules/bootstrap-vue/esm/index.js");
 /* harmony import */ var _inertiajs_inertia_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @inertiajs/inertia-vue */ "./node_modules/@inertiajs/inertia-vue/dist/index.js");
 /* harmony import */ var _inertiajs_inertia_vue__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_inertiajs_inertia_vue__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var ziggy_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ziggy-js */ "./node_modules/ziggy-js/dist/index.js");
-/* harmony import */ var ziggy_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(ziggy_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _layouts_MainLayout_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./layouts/MainLayout.vue */ "./resources/js/layouts/MainLayout.vue");
+/* harmony import */ var _inertiajs_progress__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @inertiajs/progress */ "./node_modules/@inertiajs/progress/dist/index.js");
+/* harmony import */ var _inertiajs_progress__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_inertiajs_progress__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var ziggy_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ziggy-js */ "./node_modules/ziggy-js/dist/index.js");
+/* harmony import */ var ziggy_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(ziggy_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _layouts_MainLayout_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./layouts/MainLayout.vue */ "./resources/js/layouts/MainLayout.vue");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
+
 
 
 
@@ -1486,14 +1577,17 @@ vue__WEBPACK_IMPORTED_MODULE_1___default.a.mixin({
   methods: {
     route: function route(name, params, absolute) {
       var config = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : Ziggy;
-      return ziggy_js__WEBPACK_IMPORTED_MODULE_6___default()(name, params, absolute, config);
+      return ziggy_js__WEBPACK_IMPORTED_MODULE_7___default()(name, params, absolute, config);
     }
   }
 });
 vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(v_tooltip__WEBPACK_IMPORTED_MODULE_3__["default"]);
 vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(_inertiajs_inertia_vue__WEBPACK_IMPORTED_MODULE_5__["plugin"]);
 vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(vue_meta__WEBPACK_IMPORTED_MODULE_2__["default"]);
-vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(bootstrap_vue__WEBPACK_IMPORTED_MODULE_4__["BootstrapVue"]); // Register global components
+vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(bootstrap_vue__WEBPACK_IMPORTED_MODULE_4__["BootstrapVue"]);
+_inertiajs_progress__WEBPACK_IMPORTED_MODULE_6__["InertiaProgress"].init({
+  showSpinner: true
+}); // Register global components
 
 var requireComponents = __webpack_require__("./resources/js/components sync recursive [A-Z]\\w+\\.(vue|js)$");
 
@@ -1521,7 +1615,7 @@ new vue__WEBPACK_IMPORTED_MODULE_1___default.a({
         resolveComponent: function resolveComponent(name) {
           return __webpack_require__("./resources/js/pages lazy recursive ^\\.\\/.*$")("./".concat(name)).then(function (module) {
             if (!module["default"].layout) {
-              module["default"].layout = _layouts_MainLayout_vue__WEBPACK_IMPORTED_MODULE_7__["default"];
+              module["default"].layout = _layouts_MainLayout_vue__WEBPACK_IMPORTED_MODULE_8__["default"];
             }
 
             return module["default"];
@@ -2299,7 +2393,7 @@ module.exports = webpackAsyncContext;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Apps/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
 
 
 /***/ })
