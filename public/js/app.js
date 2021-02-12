@@ -335,6 +335,25 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceChannelModel',
   props: {
@@ -1191,6 +1210,88 @@ var render = function() {
                           expression: "channel.customizations.category"
                         }
                       })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-form-group",
+                    {
+                      attrs: {
+                        label: "Channel Video Resolution",
+                        "label-for": "channelDefinition"
+                      }
+                    },
+                    [
+                      _c(
+                        "b-button-group",
+                        {
+                          staticClass: "w-100",
+                          attrs: { id: "channelDefinition" }
+                        },
+                        [
+                          _c(
+                            "b-button",
+                            {
+                              attrs: {
+                                pressed: _vm.getChannelAttribute(
+                                  _vm.channel,
+                                  "isSd"
+                                )
+                              },
+                              on: {
+                                click: function($event) {
+                                  _vm.channel.customizations.isSd = true
+                                  _vm.channel.customizations.isHd = false
+                                  _vm.channel.customizations.isUhd = false
+                                }
+                              }
+                            },
+                            [_vm._v("SD")]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "b-button",
+                            {
+                              attrs: {
+                                pressed: _vm.getChannelAttribute(
+                                  _vm.channel,
+                                  "isHd"
+                                )
+                              },
+                              on: {
+                                click: function($event) {
+                                  _vm.channel.customizations.isSd = false
+                                  _vm.channel.customizations.isHd = true
+                                  _vm.channel.customizations.isUhd = false
+                                }
+                              }
+                            },
+                            [_vm._v("HD")]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "b-button",
+                            {
+                              attrs: {
+                                pressed: _vm.getChannelAttribute(
+                                  _vm.channel,
+                                  "isUhd"
+                                )
+                              },
+                              on: {
+                                click: function($event) {
+                                  _vm.channel.customizations.isSd = false
+                                  _vm.channel.customizations.isHd = false
+                                  _vm.channel.customizations.isUhd = true
+                                }
+                              }
+                            },
+                            [_vm._v("UHD")]
+                          )
+                        ],
+                        1
+                      )
                     ],
                     1
                   ),

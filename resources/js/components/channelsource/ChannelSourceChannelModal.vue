@@ -70,6 +70,25 @@
                         :debounce="inputDebounce"
                         v-model.lazy="channel.customizations.category" />
                 </b-form-group>
+
+                <b-form-group
+                    label="Channel Video Resolution"
+                    label-for="channelDefinition">
+                    <b-button-group id="channelDefinition" class="w-100">
+                        <b-button
+                            :pressed="getChannelAttribute(channel,'isSd')"
+                            @click="channel.customizations.isSd = true; channel.customizations.isHd = false; channel.customizations.isUhd = false;"
+                            >SD</b-button>
+                        <b-button
+                            :pressed="getChannelAttribute(channel,'isHd')"
+                            @click="channel.customizations.isSd = false; channel.customizations.isHd = true; channel.customizations.isUhd = false;"
+                            >HD</b-button>
+                        <b-button
+                            :pressed="getChannelAttribute(channel,'isUhd')"
+                            @click="channel.customizations.isSd = false; channel.customizations.isHd = false; channel.customizations.isUhd = true;"
+                            >UHD</b-button>
+                    </b-button-group>
+                </b-form-group>
                     
                 <hr/>
 
