@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\SourceChannel;
 use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
 use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
+use ChannelsBuddy\SourceProvider\Models\Channel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Throwable;
@@ -33,19 +34,9 @@ class ChannelController extends Controller
                 $channel->channel_enabled =
                     (bool) ($existingChannel
                             ->channel_enabled ?? true);
-
                 $channel->customizations =
                     $existingChannel->customizations ??
-                        [
-                            'callSign'  => null,
-                            'category'  => null,
-                            'channelArt' => null,
-                            'description' => null,
-                            'logo' => null,
-                            'name' => null,
-                            'stationId' => null,
-                            'title' => null
-                        ];
+                        (new Channel())->toArray();
 
                 return $channel;
             })->sortBy(function($channel) {
