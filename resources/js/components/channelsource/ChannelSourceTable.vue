@@ -3,20 +3,37 @@
         <b-input-group class="mb-3">
             <b-form-input
                 id="search-input"
+                class="border border-secondary"
                 v-model="channelSearch"
                 type="text"
                 placeholder="Search channels"
                 :disabled="isBusy"
                 debounce="300" />
-                <b-form-select
-                    :disabled="isBusy"
-                    :options="channelStatusFilterOptions"
-                    v-model="channelStatusFilterSelected"
-                    style="max-width: 200px;" />
             <b-input-group-append>
+                <b-dropdown
+                :disabled="isBusy"
+                :text="channelStatusFilterOptions[channelStatusFilterSelected].text"
+                variant="outline-secondary"
+                right>
+                    <b-dropdown-item-button
+                        @click="channelStatusFilterSelected = 0"
+                        :disabled="channelStatusFilterSelected == 0">
+                        {{ channelStatusFilterOptions[0].text }}
+                    </b-dropdown-item-button>
+                    <b-dropdown-item-button
+                        @click="channelStatusFilterSelected = 1"
+                        :disabled="channelStatusFilterSelected == 1">
+                        {{ channelStatusFilterOptions[1].text }}
+                    </b-dropdown-item-button>
+                    <b-dropdown-item-button
+                        @click="channelStatusFilterSelected = 2"
+                        :disabled="channelStatusFilterSelected == 2">
+                        {{ channelStatusFilterOptions[2].text }}
+                    </b-dropdown-item-button>
+                </b-dropdown>
                 <b-button
-                    :disabled="!channelSearch && !channelStatusFilterSelected"
-                    @click="channelSearch = ''; channelStatusFilterSelected = null">
+                    :disabled="!channelSearch && channelStatusFilterSelected == 0"
+                    @click="channelSearch = ''; channelStatusFilterSelected = 0">
                     <i class="las la-fw la-times-circle"></i>
                 </b-button>
             </b-input-group-append>
@@ -81,19 +98,19 @@
             channelFilter: function() {
                 if ((this.channelSearch == '' ||
                         this.channelSearch === null) &&
-                        this.channelStatusFilterSelected ===  null){
+                        this.channelStatusFilterOptions[this.channelStatusFilterSelected].value ===  null){
                     return null
                 }
                 return [
                     (this.channelSearch !== null && this.channelSearch != '') ? this.channelSearch : null,
-                    this.channelStatusFilterSelected
+                    this.channelStatusFilterOptions[this.channelStatusFilterSelected].value
                 ]
             }
         },
         data() {
             return {
                 channelSearch: null,
-                channelStatusFilterSelected: null,
+                channelStatusFilterSelected: 0,
                 channelStatusFilterOptions: [
                     { value: null, text: 'All Channels' },
                     { value: true, text: 'Enabled Channels' },

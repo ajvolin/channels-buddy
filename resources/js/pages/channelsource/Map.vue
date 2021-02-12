@@ -24,26 +24,28 @@
                         :saveChannel="saveChannel" />
                 </b-col>
                 <b-col xs="4" md="2" lg="2">
-                    <div class="form-group">
-                        <b-form-input
-                            id="channel_start_number"
-                            class="text-center mx-auto"
-                            type="number"
-                            placeholder="Starting channel number"
-                            v-model="channelRenumberStart"
-                            min="1"
-                            number
-                            debounce="300"
-                            :disabled="saving || dataLoading"
-                            @update="renumberChannels" />
-                            <label for="channel_start_number">Starting Channel Number</label>
-                        <small>Enter a starting number to automatically re-number the channels</small>
+                    <div class="sticky-top" style="top:75px;">
+                        <div class="form-group">
+                            <b-form-input
+                                id="channel_start_number"
+                                class="text-center mx-auto border border-secondary"
+                                type="number"
+                                placeholder="Starting channel number"
+                                v-model="channelRenumberStart"
+                                min="1"
+                                number
+                                debounce="300"
+                                :disabled="saving || dataLoading"
+                                @update="renumberChannels" />
+                                <label for="channel_start_number">Starting Channel Number</label>
+                            <small>Enter a starting number to automatically re-number the channels</small>
+                        </div>
+                        <b-button block size="sm" variant="primary" @click="saveChannels" :disabled="saving || dataLoading">
+                            <b-spinner v-if="saving" small></b-spinner>
+                            {{ saving ? 'Saving Channel Map' : 'Save Channel Map' }}
+                        </b-button>
+                        <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
                     </div>
-                    <b-button block size="sm" variant="primary" @click="saveChannels" :disabled="saving || dataLoading">
-                        <b-spinner v-if="saving" small></b-spinner>
-                        {{ saving ? 'Saving Channel Map' : 'Save Channel Map' }}
-                    </b-button>
-                    <span id="duplicateChannelErrorMsg" class="text-danger" style="display: none;">Duplicate channel numbers detected.</span>
                 </b-col>
             </b-row>
         </b-col>
@@ -61,6 +63,7 @@
         props: {
             title: String,
             source: Object,
+            sources: Array,
             channelStartNumber: Number
         },
         data() {

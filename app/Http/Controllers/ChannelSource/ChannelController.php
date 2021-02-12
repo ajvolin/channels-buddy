@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\SourceChannel;
 use ChannelsBuddy\SourceProvider\ChannelSourceProvider;
+use ChannelsBuddy\SourceProvider\ChannelSourceProviders;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Throwable;
 
@@ -142,13 +142,16 @@ class ChannelController extends Controller
         }
     }
 
-    public function mapUi(ChannelSourceProvider $channelSource)
+    public function mapUi(ChannelSourceProvider $channelSource, ChannelSourceProviders $sourceProviders)
     {
         $sourceName = $channelSource->getSourceName();
-
+        $sources =
+            collect($sourceProviders->toArray()['providers'])->values() ?? [];
+            
         return Inertia::render('channelsource/Map', [
             'title' => $channelSource->getDisplayName() . ' - External Source Provider',
             'source' => $channelSource->toArray(),
+            'sources' => $sources,
             'channelStartNumber' =>
                 (int) Setting::getSetting(
                     "channelsource.{$sourceName}.channel_start_number"

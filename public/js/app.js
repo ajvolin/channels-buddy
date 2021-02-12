@@ -46,8 +46,40 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  name: 'Navbar'
+  name: 'Navbar',
+  props: {
+    items: Array
+  }
 });
 
 /***/ }),
@@ -303,8 +335,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceChannelModel',
   props: {
@@ -316,7 +346,8 @@ __webpack_require__.r(__webpack_exports__);
     return {
       saving: false,
       inputDebounce: 300,
-      originalChannel: null
+      originalChannel: null,
+      channelStatus: this.channel.channel_enabled
     };
   },
   mounted: function mounted() {
@@ -327,6 +358,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       this.saving = true;
+      this.channel.channel_enabled = this.channelStatus;
       this.saveChannel(this.channel, function () {
         _this.saving = false;
 
@@ -342,6 +374,7 @@ __webpack_require__.r(__webpack_exports__);
         _this2.channel.customizations[key] = _this2.originalChannel.customizations[key];
       });
       this.channel.channel_enabled = this.originalChannel.channel_enabled;
+      this.channelStatus = this.channel.channel_enabled;
       this.$bvModal.hide(this.channel.id);
     },
     confirmMsgBox: function confirmMsgBox(message, callback) {
@@ -352,8 +385,7 @@ __webpack_require__.r(__webpack_exports__);
         okTitle: 'Yes',
         centered: true,
         hideHeaderClose: true,
-        noCloseOnBackdrop: true,
-        noCloseOnEsc: true
+        noCloseOnBackdrop: true
       }).then(function (value) {
         if (value) {
           callback();
@@ -362,6 +394,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     cloneOriginalChannel: function cloneOriginalChannel() {
       this.originalChannel = JSON.parse(JSON.stringify(this.channel));
+    },
+    handleHide: function handleHide(event) {
+      if (event.trigger == 'esc' || event.trigger == 'backdrop') {
+        this.cancelEdit();
+      }
     },
     resetCustomizations: function resetCustomizations() {
       var _this3 = this;
@@ -457,6 +494,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceTable',
   props: {
@@ -466,17 +520,17 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     channelFilter: function channelFilter() {
-      if ((this.channelSearch == '' || this.channelSearch === null) && this.channelStatusFilterSelected === null) {
+      if ((this.channelSearch == '' || this.channelSearch === null) && this.channelStatusFilterOptions[this.channelStatusFilterSelected].value === null) {
         return null;
       }
 
-      return [this.channelSearch !== null && this.channelSearch != '' ? this.channelSearch : null, this.channelStatusFilterSelected];
+      return [this.channelSearch !== null && this.channelSearch != '' ? this.channelSearch : null, this.channelStatusFilterOptions[this.channelStatusFilterSelected].value];
     }
   },
   data: function data() {
     return {
       channelSearch: null,
-      channelStatusFilterSelected: null,
+      channelStatusFilterSelected: 0,
       channelStatusFilterOptions: [{
         value: null,
         text: 'All Channels'
@@ -578,7 +632,10 @@ __webpack_require__.r(__webpack_exports__);
   components: {
     BlankLayout: _BlankLayout_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
-  name: 'MainLayout'
+  name: 'MainLayout',
+  props: {
+    navbarItems: Array
+  }
 });
 
 /***/ }),
@@ -648,7 +705,79 @@ var render = function() {
         "b-collapse",
         { attrs: { id: "nav-collapse", "is-nav": "" } },
         [
-          _c("b-navbar-nav"),
+          _c(
+            "b-navbar-nav",
+            [
+              _vm._l(_vm.items, function(item, key) {
+                return [
+                  item.type == "link"
+                    ? _c(
+                        "b-nav-item",
+                        {
+                          key: "navbar_item_" + key,
+                          attrs: {
+                            to: item.url,
+                            active: item.isActive,
+                            disabled: item.isDisabled,
+                            "router-component-name": "b-inertia-link"
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n                    " +
+                              _vm._s(item.text) +
+                              "\n                "
+                          )
+                        ]
+                      )
+                    : item.type == "text"
+                    ? _c("b-nav-text", { key: "navbar_item_" + key }, [
+                        _vm._v(
+                          "\n                    " +
+                            _vm._s(item.text) +
+                            "\n                "
+                        )
+                      ])
+                    : item.type == "dropdown"
+                    ? _c(
+                        "b-nav-item-dropdown",
+                        {
+                          key: "navbar_item_" + key,
+                          attrs: { text: item.text }
+                        },
+                        _vm._l(item.items, function(dd_item, dd_key) {
+                          return _c(
+                            "b-dropdown-item",
+                            {
+                              key:
+                                "navbar_item_" +
+                                key +
+                                "_dropdown_item_" +
+                                dd_key,
+                              attrs: {
+                                to: dd_item.url,
+                                active: dd_item.isActive,
+                                disabled: dd_item.isDisabled,
+                                "router-component-name": "b-inertia-link"
+                              }
+                            },
+                            [
+                              _vm._v(
+                                "\n                        " +
+                                  _vm._s(dd_item.text) +
+                                  "\n                    "
+                              )
+                            ]
+                          )
+                        }),
+                        1
+                      )
+                    : _vm._e()
+                ]
+              })
+            ],
+            2
+          ),
           _vm._v(" "),
           _c(
             "b-navbar-nav",
@@ -827,13 +956,11 @@ var render = function() {
             "content-class": "shadow",
             "header-bg-variant": "light",
             lazy: "",
-            "no-close-on-backdrop": "",
-            "no-close-on-esc": "",
             scrollable: "",
             static: "",
             title: "Edit channel"
           },
-          on: { ok: _vm.callSaveChannel },
+          on: { hide: _vm.handleHide },
           scopedSlots: _vm._u(
             [
               {
@@ -965,11 +1092,11 @@ var render = function() {
                     staticClass: "my-auto float-right d-inline-block",
                     attrs: { name: "check-button", switch: "" },
                     model: {
-                      value: _vm.channel.channel_enabled,
+                      value: _vm.channelStatus,
                       callback: function($$v) {
-                        _vm.$set(_vm.channel, "channel_enabled", $$v)
+                        _vm.channelStatus = $$v
                       },
-                      expression: "channel.channel_enabled"
+                      expression: "channelStatus"
                     }
                   }),
                   _vm._v(" "),
@@ -1276,6 +1403,7 @@ var render = function() {
         { staticClass: "mb-3" },
         [
           _c("b-form-input", {
+            staticClass: "border border-secondary",
             attrs: {
               id: "search-input",
               type: "text",
@@ -1292,35 +1420,94 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("b-form-select", {
-            staticStyle: { "max-width": "200px" },
-            attrs: {
-              disabled: _vm.isBusy,
-              options: _vm.channelStatusFilterOptions
-            },
-            model: {
-              value: _vm.channelStatusFilterSelected,
-              callback: function($$v) {
-                _vm.channelStatusFilterSelected = $$v
-              },
-              expression: "channelStatusFilterSelected"
-            }
-          }),
-          _vm._v(" "),
           _c(
             "b-input-group-append",
             [
+              _c(
+                "b-dropdown",
+                {
+                  attrs: {
+                    disabled: _vm.isBusy,
+                    text:
+                      _vm.channelStatusFilterOptions[
+                        _vm.channelStatusFilterSelected
+                      ].text,
+                    variant: "outline-secondary",
+                    right: ""
+                  }
+                },
+                [
+                  _c(
+                    "b-dropdown-item-button",
+                    {
+                      attrs: { disabled: _vm.channelStatusFilterSelected == 0 },
+                      on: {
+                        click: function($event) {
+                          _vm.channelStatusFilterSelected = 0
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                    " +
+                          _vm._s(_vm.channelStatusFilterOptions[0].text) +
+                          "\n                "
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-dropdown-item-button",
+                    {
+                      attrs: { disabled: _vm.channelStatusFilterSelected == 1 },
+                      on: {
+                        click: function($event) {
+                          _vm.channelStatusFilterSelected = 1
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                    " +
+                          _vm._s(_vm.channelStatusFilterOptions[1].text) +
+                          "\n                "
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-dropdown-item-button",
+                    {
+                      attrs: { disabled: _vm.channelStatusFilterSelected == 2 },
+                      on: {
+                        click: function($event) {
+                          _vm.channelStatusFilterSelected = 2
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                    " +
+                          _vm._s(_vm.channelStatusFilterOptions[2].text) +
+                          "\n                "
+                      )
+                    ]
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
               _c(
                 "b-button",
                 {
                   attrs: {
                     disabled:
-                      !_vm.channelSearch && !_vm.channelStatusFilterSelected
+                      !_vm.channelSearch && _vm.channelStatusFilterSelected == 0
                   },
                   on: {
                     click: function($event) {
                       _vm.channelSearch = ""
-                      _vm.channelStatusFilterSelected = null
+                      _vm.channelStatusFilterSelected = 0
                     }
                   }
                 },
@@ -1553,7 +1740,15 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("blank-layout", [_c("Navbar"), _vm._v(" "), _vm._t("default")], 2)
+  return _c(
+    "blank-layout",
+    [
+      _c("Navbar", { attrs: { items: _vm.navbarItems } }),
+      _vm._v(" "),
+      _vm._t("default")
+    ],
+    2
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -2421,7 +2616,7 @@ module.exports = webpackAsyncContext;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Apps/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
 
 
 /***/ })

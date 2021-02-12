@@ -1,6 +1,6 @@
 <template>
     <blank-layout>
-        <Navbar/>
+        <Navbar :items="navbarItems" />
         <slot/>
     </blank-layout>
 </template>
@@ -9,6 +9,9 @@
     import BlankLayout from './BlankLayout.vue';
     export default {
         components: { BlankLayout },
-        name: 'MainLayout'
+        name: 'MainLayout',
+        props: {
+            navbarItems: Array
+        }
     };
 </script>

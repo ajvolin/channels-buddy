@@ -61,6 +61,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   metaInfo: function metaInfo() {
     return {
@@ -71,6 +73,7 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     title: String,
     source: Object,
+    sources: Array,
     channelStartNumber: Number
   },
   data: function data() {
@@ -265,88 +268,93 @@ var render = function() {
                 1
               ),
               _vm._v(" "),
-              _c(
-                "b-col",
-                { attrs: { xs: "4", md: "2", lg: "2" } },
-                [
-                  _c(
-                    "div",
-                    { staticClass: "form-group" },
-                    [
-                      _c("b-form-input", {
-                        staticClass: "text-center mx-auto",
+              _c("b-col", { attrs: { xs: "4", md: "2", lg: "2" } }, [
+                _c(
+                  "div",
+                  { staticClass: "sticky-top", staticStyle: { top: "75px" } },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "form-group" },
+                      [
+                        _c("b-form-input", {
+                          staticClass:
+                            "text-center mx-auto border border-secondary",
+                          attrs: {
+                            id: "channel_start_number",
+                            type: "number",
+                            placeholder: "Starting channel number",
+                            min: "1",
+                            number: "",
+                            debounce: "300",
+                            disabled: _vm.saving || _vm.dataLoading
+                          },
+                          on: { update: _vm.renumberChannels },
+                          model: {
+                            value: _vm.channelRenumberStart,
+                            callback: function($$v) {
+                              _vm.channelRenumberStart = $$v
+                            },
+                            expression: "channelRenumberStart"
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c(
+                          "label",
+                          { attrs: { for: "channel_start_number" } },
+                          [_vm._v("Starting Channel Number")]
+                        ),
+                        _vm._v(" "),
+                        _c("small", [
+                          _vm._v(
+                            "Enter a starting number to automatically re-number the channels"
+                          )
+                        ])
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "b-button",
+                      {
                         attrs: {
-                          id: "channel_start_number",
-                          type: "number",
-                          placeholder: "Starting channel number",
-                          min: "1",
-                          number: "",
-                          debounce: "300",
+                          block: "",
+                          size: "sm",
+                          variant: "primary",
                           disabled: _vm.saving || _vm.dataLoading
                         },
-                        on: { update: _vm.renumberChannels },
-                        model: {
-                          value: _vm.channelRenumberStart,
-                          callback: function($$v) {
-                            _vm.channelRenumberStart = $$v
-                          },
-                          expression: "channelRenumberStart"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("label", { attrs: { for: "channel_start_number" } }, [
-                        _vm._v("Starting Channel Number")
-                      ]),
-                      _vm._v(" "),
-                      _c("small", [
-                        _vm._v(
-                          "Enter a starting number to automatically re-number the channels"
-                        )
-                      ])
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "b-button",
-                    {
-                      attrs: {
-                        block: "",
-                        size: "sm",
-                        variant: "primary",
-                        disabled: _vm.saving || _vm.dataLoading
+                        on: { click: _vm.saveChannels }
                       },
-                      on: { click: _vm.saveChannels }
-                    },
-                    [
-                      _vm.saving
-                        ? _c("b-spinner", { attrs: { small: "" } })
-                        : _vm._e(),
-                      _vm._v(
-                        "\n                    " +
-                          _vm._s(
-                            _vm.saving
-                              ? "Saving Channel Map"
-                              : "Save Channel Map"
-                          ) +
-                          "\n                "
-                      )
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "span",
-                    {
-                      staticClass: "text-danger",
-                      staticStyle: { display: "none" },
-                      attrs: { id: "duplicateChannelErrorMsg" }
-                    },
-                    [_vm._v("Duplicate channel numbers detected.")]
-                  )
-                ],
-                1
-              )
+                      [
+                        _vm.saving
+                          ? _c("b-spinner", { attrs: { small: "" } })
+                          : _vm._e(),
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(
+                              _vm.saving
+                                ? "Saving Channel Map"
+                                : "Save Channel Map"
+                            ) +
+                            "\n                    "
+                        )
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "span",
+                      {
+                        staticClass: "text-danger",
+                        staticStyle: { display: "none" },
+                        attrs: { id: "duplicateChannelErrorMsg" }
+                      },
+                      [_vm._v("Duplicate channel numbers detected.")]
+                    )
+                  ],
+                  1
+                )
+              ])
             ],
             1
           )

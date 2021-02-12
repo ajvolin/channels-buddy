@@ -7,12 +7,10 @@
         content-class="shadow"
         header-bg-variant="light"
         lazy
-        no-close-on-backdrop
-        no-close-on-esc
         scrollable
         static
         title="Edit channel"
-        @ok="callSaveChannel">
+        @hide="handleHide">
         <template #modal-header>
             <h5 class="my-auto">{{ channel.name }}</h5>
             <img
@@ -34,7 +32,7 @@
                 <h5 class="d-inline-block">Channel</h5>
                 <b-form-checkbox
                     class="my-auto float-right d-inline-block"
-                    v-model="channel.channel_enabled"
+                    v-model="channelStatus"
                     name="check-button"
                     switch />
                 <b-form-group
@@ -168,7 +166,8 @@
             return {
                 saving: false,
                 inputDebounce: 300,
-                originalChannel: null
+                originalChannel: null,
+                channelStatus: this.channel.channel_enabled
             }
         },
         mounted() {
@@ -177,6 +176,7 @@
         methods: {
             callSaveChannel() {
                 this.saving = true
+                this.channel.channel_enabled = this.channelStatus
                 this.saveChannel(this.channel, () => {
                     this.saving = false
                     this.cloneOriginalChannel()
@@ -188,6 +188,7 @@
                     this.channel.customizations[key] = this.originalChannel.customizations[key]
                 })
                 this.channel.channel_enabled = this.originalChannel.channel_enabled
+                this.channelStatus = this.channel.channel_enabled
                 this.$bvModal.hide(this.channel.id)
             },
             confirmMsgBox(message, callback) {
@@ -198,8 +199,7 @@
                     okTitle: 'Yes',
                     centered: true,
                     hideHeaderClose: true,
-                    noCloseOnBackdrop: true,
-                    noCloseOnEsc: true,
+                    noCloseOnBackdrop: true
                 }).then(value => {
                     if (value) {
                         callback()
@@ -210,6 +210,11 @@
             },
             cloneOriginalChannel() {
                 this.originalChannel = JSON.parse(JSON.stringify(this.channel))
+            },
+            handleHide(event) {
+                if (event.trigger == 'esc' || event.trigger == 'backdrop') {
+                    this.cancelEdit()
+                }
             },
             resetCustomizations() {
                 this.confirmMsgBox('Are you sure?', () => {
