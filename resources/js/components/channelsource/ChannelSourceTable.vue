@@ -55,7 +55,10 @@
                 </div>
             </template>
             <template #cell(name)="data">
-                <img v-if="getChannelAttribute(data.item,'logo')" :src="getChannelAttribute(data.item,'logo')" style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
+                <b-img-lazy
+                    v-if="getChannelAttribute(data.item,'logo')"
+                    :src="getChannelAttribute(data.item,'logo')"
+                    style="max-width: 60%; max-height: 50px; margin-bottom: 5px; filter: drop-shadow(lightgray 1px 1px 1px);" />
                 <div v-else class="guide-channel-name" style="font-size: 0.9em; padding: 19px 0;">{{ data.item.id }}</div>
                 <div class="guide-channel-number">
                     <span v-if="data.item.number" class="badge badge-light" style="min-width: 4em; display: inline-block; margin-right: 1em;">{{ data.item.number }}</span>

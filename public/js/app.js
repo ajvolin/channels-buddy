@@ -354,6 +354,45 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceChannelModel',
   props: {
@@ -419,6 +458,9 @@ __webpack_require__.r(__webpack_exports__);
         this.cancelEdit();
       }
     },
+    handleShow: function handleShow(event) {
+      this.channelStatus = this.channel.channel_enabled;
+    },
     resetCustomizations: function resetCustomizations() {
       var _this3 = this;
 
@@ -427,6 +469,30 @@ __webpack_require__.r(__webpack_exports__);
           _this3.channel.customizations[key] = null;
         });
       });
+    },
+    setChannelDefinition: function setChannelDefinition(type) {
+      switch (type) {
+        case 'SD':
+          this.channel.customizations.isSd = this.channel.customizations.isSd !== null ? !this.channel.customizations.isSd : true;
+          this.channel.customizations.isHd = false;
+          this.channel.customizations.isUhd = false;
+          break;
+
+        case 'HD':
+          this.channel.customizations.isHd = this.channel.customizations.isHd !== null ? !this.channel.customizations.isHd : true;
+          this.channel.customizations.isSd = false;
+          this.channel.customizations.isUhd = false;
+          break;
+
+        case 'UHD':
+          this.channel.customizations.isUhd = this.channel.customizations.isUhd !== null ? !this.channel.customizations.isUhd : true;
+          this.channel.customizations.isSd = false;
+          this.channel.customizations.isHd = false;
+          break;
+
+        default:
+          console.log("Invalid channel definition value ".concat(type));
+      }
     }
   }
 });
@@ -442,6 +508,9 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
 //
 //
 //
@@ -979,7 +1048,7 @@ var render = function() {
             static: "",
             title: "Edit channel"
           },
-          on: { hide: _vm.handleHide },
+          on: { show: _vm.handleShow, hide: _vm.handleHide },
           scopedSlots: _vm._u(
             [
               {
@@ -991,7 +1060,7 @@ var render = function() {
                     ]),
                     _vm._v(" "),
                     _vm.getChannelAttribute(_vm.channel, "logo")
-                      ? _c("img", {
+                      ? _c("b-img-lazy", {
                           staticClass: "img-fluid float-right",
                           staticStyle: {
                             "max-height": "50px",
@@ -1080,7 +1149,7 @@ var render = function() {
             ],
             null,
             false,
-            3568606270
+            3716063026
           )
         },
         [
@@ -1090,7 +1159,7 @@ var render = function() {
             { attrs: { "bg-variant": "white", "no-body": "" } },
             [
               _vm.getChannelAttribute(_vm.channel, "channelArt")
-                ? _c("b-card-img", {
+                ? _c("b-card-img-lazy", {
                     staticStyle: { background: "#000" },
                     attrs: {
                       top: "",
@@ -1162,7 +1231,7 @@ var render = function() {
                         attrs: {
                           id: "channelCallSign",
                           type: "text",
-                          placeholder: "Call Sign",
+                          placeholder: "Call sign",
                           debounce: _vm.inputDebounce
                         },
                         model: {
@@ -1241,9 +1310,7 @@ var render = function() {
                               },
                               on: {
                                 click: function($event) {
-                                  _vm.channel.customizations.isSd = true
-                                  _vm.channel.customizations.isHd = false
-                                  _vm.channel.customizations.isUhd = false
+                                  return _vm.setChannelDefinition("SD")
                                 }
                               }
                             },
@@ -1261,9 +1328,7 @@ var render = function() {
                               },
                               on: {
                                 click: function($event) {
-                                  _vm.channel.customizations.isSd = false
-                                  _vm.channel.customizations.isHd = true
-                                  _vm.channel.customizations.isUhd = false
+                                  return _vm.setChannelDefinition("HD")
                                 }
                               }
                             },
@@ -1281,9 +1346,7 @@ var render = function() {
                               },
                               on: {
                                 click: function($event) {
-                                  _vm.channel.customizations.isSd = false
-                                  _vm.channel.customizations.isHd = false
-                                  _vm.channel.customizations.isUhd = true
+                                  return _vm.setChannelDefinition("UHD")
                                 }
                               }
                             },
@@ -1458,6 +1521,109 @@ var render = function() {
                             )
                           },
                           expression: "channel.customizations.stationId"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c("hr"),
+                  _vm._v(" "),
+                  _c("h5", [_vm._v("Stream")]),
+                  _vm._v(" "),
+                  _c(
+                    "b-form-group",
+                    {
+                      attrs: {
+                        label: "Audio Codec",
+                        "label-for": "audioCodec",
+                        description: _vm.channel.audioCodec || ""
+                      }
+                    },
+                    [
+                      _c("b-form-input", {
+                        attrs: {
+                          id: "audioCodec",
+                          type: "text",
+                          placeholder: "Audio codec (i.e. AAC)",
+                          debounce: _vm.inputDebounce
+                        },
+                        model: {
+                          value: _vm.channel.customizations.audioCodec,
+                          callback: function($$v) {
+                            _vm.$set(
+                              _vm.channel.customizations,
+                              "audioCodec",
+                              $$v
+                            )
+                          },
+                          expression: "channel.customizations.audioCodec"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-form-group",
+                    {
+                      attrs: {
+                        label: "Video Codec",
+                        "label-for": "videoCodec",
+                        description: _vm.channel.videoCodec || ""
+                      }
+                    },
+                    [
+                      _c("b-form-input", {
+                        attrs: {
+                          id: "videoCodec",
+                          type: "text",
+                          placeholder: "Video codec (i.e. h264)",
+                          debounce: _vm.inputDebounce
+                        },
+                        model: {
+                          value: _vm.channel.customizations.videoCodec,
+                          callback: function($$v) {
+                            _vm.$set(
+                              _vm.channel.customizations,
+                              "videoCodec",
+                              $$v
+                            )
+                          },
+                          expression: "channel.customizations.videoCodec"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "b-form-group",
+                    {
+                      attrs: {
+                        label: "Stream URL",
+                        "label-for": "streamUrl",
+                        description: _vm.channel.streamUrl || ""
+                      }
+                    },
+                    [
+                      _c("b-form-input", {
+                        attrs: {
+                          id: "streamUrl",
+                          type: "text",
+                          placeholder: "Stream URL",
+                          debounce: _vm.inputDebounce
+                        },
+                        model: {
+                          value: _vm.channel.customizations.streamUrl,
+                          callback: function($$v) {
+                            _vm.$set(
+                              _vm.channel.customizations,
+                              "streamUrl",
+                              $$v
+                            )
+                          },
+                          expression: "channel.customizations.streamUrl"
                         }
                       })
                     ],
@@ -1654,7 +1820,7 @@ var render = function() {
             fn: function(data) {
               return [
                 _vm.getChannelAttribute(data.item, "logo")
-                  ? _c("img", {
+                  ? _c("b-img-lazy", {
                       staticStyle: {
                         "max-width": "60%",
                         "max-height": "50px",
@@ -2717,7 +2883,7 @@ module.exports = webpackAsyncContext;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Apps/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/avolin/Projects/PHP/Personal/Laravel/channels-buddy/resources/js/app.js */"./resources/js/app.js");
 
 
 /***/ })

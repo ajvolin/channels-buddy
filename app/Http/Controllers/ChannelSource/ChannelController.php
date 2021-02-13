@@ -34,15 +34,18 @@ class ChannelController extends Controller
                 $channel->channel_enabled =
                     (bool) ($existingChannel
                             ->channel_enabled ?? true);
-                $channel->customizations =
-                    $existingChannel->customizations ??
-                        (new Channel())->toArray();
+                $channel->customizations = array_merge(
+                    (new Channel())->toArray(),
+                    $existingChannel->customizations ?? []
+                );
+                    
 
                 return $channel;
             })->sortBy(function($channel) {
                 return $channel->sortValue ??
                     $channel->number ??
                     $channel->name ??
+                    $channel->guideName ??
                     $channel->title ??
                     $channel->callSign ??
                     $channel->id;
@@ -75,7 +78,9 @@ class ChannelController extends Controller
             $sourceChannel->channel_enabled =
                 (int) $channel['channel_enabled'] ?? 0;
             $sourceChannel->customizations =
-                $channel['customizations'];
+                $this->getCustomizedChannelProperties(
+                    $channel['customizations']
+                );
             $sourceChannel->save();
 
             return response()->json([
@@ -97,15 +102,20 @@ class ChannelController extends Controller
             $sourceName = $request->channelSource->getSourceName();
             $channels = collect($request->channels)
                 ->transform(function($channel, $key) use ($sourceName) {
-                    $channel = (object) $channel;
+                    $channel = $channel;
+                    $customizations =
+                        $this->getCustomizedChannelProperties(
+                            $channel['customizations']
+                        );
                     return [
                         'source' => $sourceName,
-                        'channel_id' => $channel->id,
-                        'channel_number' => $channel->mapped_channel_number ??
-                            $channel->number ?? null,
+                        'channel_id' => $channel['id'],
+                        'channel_number' => $channel['mapped_channel_number'] ??
+                            $channel['number'] ?? null,
                         'channel_enabled' =>
-                            (int) $channel->channel_enabled ?? 0,
-                        'customizations' => json_encode($channel->customizations)
+                            (int) $channel['channel_enabled'] ?? 0,
+                        'customizations' => $customizations ?
+                            json_encode($customizations) : null
                     ];
                 })->values()->toArray();
 
@@ -168,12 +178,26 @@ class ChannelController extends Controller
                 $channels->filter(function ($channel, $key) use ($existingChannels) {
                     return $existingChannels->get($key)->channel_enabled ?? false;
                 })->map(function($channel, $key) use ($existingChannels, $sourceName) {
-                    $channel->mappedChannelNum =
-                        $existingChannels->get($key)->channel_number ?? $channel->number ?? null;
-                    $channel->logo = $existingChannels->get($key)->custom_logo ??
-                        $channel->logo ?? null;
-                    $channel->channelArt = $existingChannels->get($key)->custom_channel_art ??
-                        $channel->channelArt ?? null;
+                    $existingChannel = $existingChannels->get($key);
+                    
+                    $channel->number = $existingChannel->channel_number ??
+                        $channel->number ?? null;
+
+                    if (!is_null($existingChannel->customizations)) {
+                        foreach ($existingChannel->customizations as $k => $v) {
+                            $channel->{$k} = $v;
+                        }
+                    }
+
+                    if (!is_null($channel->isSd ?? $channel->isHd ?? $channel->isUhd ?? null)) {
+                        $channel->groupTitle =
+                        (isset($channel->isSd) && $channel->isSd ? 'SD' :
+                            (isset($channel->isHd) && $channel->isHd ? 'HD' :
+                                (isset($channel->isUhd) && $channel->isUhd ? 'UHD' : '')
+                            )
+                        );
+                    }
+
                     $channel->id =
                         sprintf('%s.%s', $sourceName, $channel->id);
                     return $channel;
@@ -190,5 +214,13 @@ class ChannelController extends Controller
             'Content-Type' => 'application/x-mpegurl',
             'X-Accel-Buffering' => 'no'
         ]);
+    }
+
+    private function getCustomizedChannelProperties($customized)
+    {
+        $customized = array_filter($customized,
+            fn($value) => !is_null($value) && $value !== ''
+        );
+        return count($customized) > 0 ? $customized : null;
     }
 }

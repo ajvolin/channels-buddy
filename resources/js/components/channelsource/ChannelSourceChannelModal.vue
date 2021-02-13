@@ -10,10 +10,11 @@
         scrollable
         static
         title="Edit channel"
+        @show="handleShow"
         @hide="handleHide">
         <template #modal-header>
             <h5 class="my-auto">{{ channel.name }}</h5>
-            <img
+            <b-img-lazy
                 v-if="getChannelAttribute(channel,'logo')"
                 :src="getChannelAttribute(channel,'logo')"
                 class="img-fluid float-right"
@@ -21,13 +22,12 @@
                 alt="Channel logo" />
         </template>
         <b-card bg-variant="white" no-body>
-            <b-card-img
+            <b-card-img-lazy
                 top
                 v-if="getChannelAttribute(channel,'channelArt')"
                 :src="getChannelAttribute(channel,'channelArt')"
                 style="background: #000;"
-                alt="Channel art">
-            </b-card-img>
+                alt="Channel art" />
             <b-card-body>
                 <h5 class="d-inline-block">Channel</h5>
                 <b-form-checkbox
@@ -54,7 +54,7 @@
                     <b-form-input
                         id="channelCallSign"
                         type="text"
-                        placeholder="Call Sign"
+                        placeholder="Call sign"
                         :debounce="inputDebounce"
                         v-model.lazy="channel.customizations.callSign" />
                 </b-form-group>
@@ -77,15 +77,15 @@
                     <b-button-group id="channelDefinition" class="w-100">
                         <b-button
                             :pressed="getChannelAttribute(channel,'isSd')"
-                            @click="channel.customizations.isSd = true; channel.customizations.isHd = false; channel.customizations.isUhd = false;"
+                            @click="setChannelDefinition('SD')"
                             >SD</b-button>
                         <b-button
                             :pressed="getChannelAttribute(channel,'isHd')"
-                            @click="channel.customizations.isSd = false; channel.customizations.isHd = true; channel.customizations.isUhd = false;"
+                            @click="setChannelDefinition('HD')"
                             >HD</b-button>
                         <b-button
                             :pressed="getChannelAttribute(channel,'isUhd')"
-                            @click="channel.customizations.isSd = false; channel.customizations.isHd = false; channel.customizations.isUhd = true;"
+                            @click="setChannelDefinition('UHD')"
                             >UHD</b-button>
                     </b-button-group>
                 </b-form-group>
@@ -155,6 +155,45 @@
                         placeholder="Gracenote Station ID"
                         :debounce="inputDebounce"
                         v-model.lazy="channel.customizations.stationId" />
+                </b-form-group>
+
+                <hr/>
+
+                <h5>Stream</h5>
+                <b-form-group
+                    label="Audio Codec"
+                    label-for="audioCodec"
+                    :description="channel.audioCodec || ''">
+                    <b-form-input
+                        id="audioCodec"
+                        type="text"
+                        placeholder="Audio codec (i.e. AAC)"
+                        :debounce="inputDebounce"
+                        v-model.lazy="channel.customizations.audioCodec" />
+                </b-form-group>
+
+                <b-form-group
+                    label="Video Codec"
+                    label-for="videoCodec"
+                    :description="channel.videoCodec || ''">
+                    <b-form-input
+                        id="videoCodec"
+                        type="text"
+                        placeholder="Video codec (i.e. h264)"
+                        :debounce="inputDebounce"
+                        v-model.lazy="channel.customizations.videoCodec" />
+                </b-form-group>
+
+                <b-form-group
+                    label="Stream URL"
+                    label-for="streamUrl"
+                    :description="channel.streamUrl || ''">
+                    <b-form-input
+                        id="streamUrl"
+                        type="text"
+                        placeholder="Stream URL"
+                        :debounce="inputDebounce"
+                        v-model.lazy="channel.customizations.streamUrl" />
                 </b-form-group>
             </b-card-body>
         </b-card>
@@ -235,12 +274,42 @@
                     this.cancelEdit()
                 }
             },
+            handleShow(event) {
+                this.channelStatus = this.channel.channel_enabled
+            },
             resetCustomizations() {
                 this.confirmMsgBox('Are you sure?', () => {
                     Object.keys(this.channel.customizations).forEach((key) => {
                         this.channel.customizations[key] = null
                     })
                 })
+            },
+            setChannelDefinition(type) {
+                switch (type) {
+                    case 'SD':
+                        this.channel.customizations.isSd = 
+                            (this.channel.customizations.isSd !== null ?
+                                !this.channel.customizations.isSd : true);
+                        this.channel.customizations.isHd = false;
+                        this.channel.customizations.isUhd = false;
+                        break;
+                    case 'HD':
+                        this.channel.customizations.isHd = 
+                            (this.channel.customizations.isHd !== null ?
+                                !this.channel.customizations.isHd : true);
+                        this.channel.customizations.isSd = false;
+                        this.channel.customizations.isUhd = false;
+                        break;
+                    case 'UHD':
+                        this.channel.customizations.isUhd = 
+                            (this.channel.customizations.isUhd !== null ?
+                                !this.channel.customizations.isUhd : true);
+                        this.channel.customizations.isSd = false;
+                        this.channel.customizations.isHd = false;
+                        break;
+                    default:
+                        console.log(`Invalid channel definition value ${type}`);
+                }
             }
         }
     }
