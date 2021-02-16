@@ -18,16 +18,11 @@
                 v-if="getChannelAttribute(channel,'logo')"
                 :src="getChannelAttribute(channel,'logo')"
                 class="img-fluid float-right"
+                blank-height="50px"
                 style="max-height: 50px; filter: drop-shadow(darkgray 1px 1px 1px);"
                 alt="Channel logo" />
         </template>
         <b-card bg-variant="white" no-body>
-            <b-card-img-lazy
-                top
-                v-if="getChannelAttribute(channel,'channelArt')"
-                :src="getChannelAttribute(channel,'channelArt')"
-                style="background: #000;"
-                alt="Channel art" />
             <b-card-body>
                 <h5 class="d-inline-block">Channel</h5>
                 <b-form-checkbox
@@ -117,6 +112,14 @@
                         v-model.lazy="channel.customizations.channelArt" />
                 </b-form-group>
 
+                <b-img-lazy
+                    rounded
+                    fluid-grow
+                    v-if="getChannelAttribute(channel,'channelArt')"
+                    :src="getChannelAttribute(channel,'channelArt')"
+                    style="background: #000;"
+                    alt="Channel art" />
+
                 <hr/>
 
                 <h5>Guide Details</h5>
@@ -184,17 +187,6 @@
                         v-model.lazy="channel.customizations.videoCodec" />
                 </b-form-group>
 
-                <b-form-group
-                    label="Stream URL"
-                    label-for="streamUrl"
-                    :description="channel.streamUrl || ''">
-                    <b-form-input
-                        id="streamUrl"
-                        type="text"
-                        placeholder="Stream URL"
-                        :debounce="inputDebounce"
-                        v-model.lazy="channel.customizations.streamUrl" />
-                </b-form-group>
             </b-card-body>
         </b-card>
         <template #modal-footer>
@@ -227,9 +219,6 @@
                 originalChannel: null,
                 channelStatus: this.channel.channel_enabled
             }
-        },
-        mounted() {
-            this.cloneOriginalChannel()
         },
         methods: {
             callSaveChannel() {
@@ -275,6 +264,7 @@
                 }
             },
             handleShow(event) {
+                this.cloneOriginalChannel()
                 this.channelStatus = this.channel.channel_enabled
             },
             resetCustomizations() {

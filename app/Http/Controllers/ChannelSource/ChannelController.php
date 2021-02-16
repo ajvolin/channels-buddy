@@ -38,8 +38,7 @@ class ChannelController extends Controller
                     (new Channel())->toArray(),
                     $existingChannel->customizations ?? []
                 );
-                    
-
+                
                 return $channel;
             })->sortBy(function($channel) {
                 return $channel->sortValue ??

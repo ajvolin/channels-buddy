@@ -28,11 +28,11 @@ class AddSourceChannelCustomizationsColumn extends Migration
                 ->each(function($channel) {
                     $customizations = [];
                     if(!is_null($channel->custom_logo)) {
-                        $customizations['custom_logo'] =
+                        $customizations['logo'] =
                             $channel->custom_logo;
                     }
                     if(!is_null($channel->custom_channel_art)) {
-                        $customizations['custom_channel_art'] =
+                        $customizations['channelArt'] =
                             $channel->custom_channel_art;
                     }
                     $channel->customizations = $customizations;
@@ -64,9 +64,9 @@ class AddSourceChannelCustomizationsColumn extends Migration
                 ->get()
                 ->each(function($channel) {
                     $channel->custom_logo = 
-                        $channel->customizations['custom_logo'] ?? null;
+                        $channel->customizations['logo'] ?? null;
                     $channel->custom_channel_art = 
-                        $channel->customizations['custom_channel_art'] ?? null;
+                        $channel->customizations['channelArt'] ?? null;
                     $channel->save();
                 });
 

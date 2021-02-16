@@ -385,14 +385,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'ChannelSourceChannelModel',
   props: {
@@ -407,9 +399,6 @@ __webpack_require__.r(__webpack_exports__);
       originalChannel: null,
       channelStatus: this.channel.channel_enabled
     };
-  },
-  mounted: function mounted() {
-    this.cloneOriginalChannel();
   },
   methods: {
     callSaveChannel: function callSaveChannel() {
@@ -459,6 +448,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     handleShow: function handleShow(event) {
+      this.cloneOriginalChannel();
       this.channelStatus = this.channel.channel_enabled;
     },
     resetCustomizations: function resetCustomizations() {
@@ -650,6 +640,9 @@ __webpack_require__.r(__webpack_exports__);
         sortable: false,
         "class": 'align-middle'
       }],
+      totalRows: null,
+      currentPage: 1,
+      perPage: 25,
       searchOn: ['number', 'name', 'mapped_channel_number', 'callSign', 'title', 'stationId']
     };
   },
@@ -671,6 +664,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     getChannelAttribute: function getChannelAttribute(channel, attribute) {
       return channel.customizations[attribute] || channel[attribute];
+    },
+    onFiltered: function onFiltered(filteredItems) {
+      this.totalRows = filteredItems.length;
+      this.currentPage = 1;
     }
   }
 });
@@ -1068,6 +1065,7 @@ var render = function() {
                           },
                           attrs: {
                             src: _vm.getChannelAttribute(_vm.channel, "logo"),
+                            "blank-height": "50px",
                             alt: "Channel logo"
                           }
                         })
@@ -1149,7 +1147,7 @@ var render = function() {
             ],
             null,
             false,
-            3716063026
+            2747225265
           )
         },
         [
@@ -1158,17 +1156,6 @@ var render = function() {
             "b-card",
             { attrs: { "bg-variant": "white", "no-body": "" } },
             [
-              _vm.getChannelAttribute(_vm.channel, "channelArt")
-                ? _c("b-card-img-lazy", {
-                    staticStyle: { background: "#000" },
-                    attrs: {
-                      top: "",
-                      src: _vm.getChannelAttribute(_vm.channel, "channelArt"),
-                      alt: "Channel art"
-                    }
-                  })
-                : _vm._e(),
-              _vm._v(" "),
               _c(
                 "b-card-body",
                 [
@@ -1425,6 +1412,21 @@ var render = function() {
                     1
                   ),
                   _vm._v(" "),
+                  _vm.getChannelAttribute(_vm.channel, "channelArt")
+                    ? _c("b-img-lazy", {
+                        staticStyle: { background: "#000" },
+                        attrs: {
+                          rounded: "",
+                          "fluid-grow": "",
+                          src: _vm.getChannelAttribute(
+                            _vm.channel,
+                            "channelArt"
+                          ),
+                          alt: "Channel art"
+                        }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
                   _c("hr"),
                   _vm._v(" "),
                   _c("h5", [_vm._v("Guide Details")]),
@@ -1591,39 +1593,6 @@ var render = function() {
                             )
                           },
                           expression: "channel.customizations.videoCodec"
-                        }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "b-form-group",
-                    {
-                      attrs: {
-                        label: "Stream URL",
-                        "label-for": "streamUrl",
-                        description: _vm.channel.streamUrl || ""
-                      }
-                    },
-                    [
-                      _c("b-form-input", {
-                        attrs: {
-                          id: "streamUrl",
-                          type: "text",
-                          placeholder: "Stream URL",
-                          debounce: _vm.inputDebounce
-                        },
-                        model: {
-                          value: _vm.channel.customizations.streamUrl,
-                          callback: function($$v) {
-                            _vm.$set(
-                              _vm.channel.customizations,
-                              "streamUrl",
-                              $$v
-                            )
-                          },
-                          expression: "channel.customizations.streamUrl"
                         }
                       })
                     ],

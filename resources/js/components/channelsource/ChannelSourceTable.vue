@@ -145,6 +145,9 @@
                         class: 'align-middle'
                     }
                 ],
+                totalRows: null,
+                currentPage: 1,
+                perPage: 25,
                 searchOn: [
                     'number',
                     'name',
@@ -183,6 +186,10 @@
             },
             getChannelAttribute(channel, attribute) {
                 return channel.customizations[attribute] || channel[attribute];
+            },
+            onFiltered(filteredItems) {
+                this.totalRows = filteredItems.length
+                this.currentPage = 1
             }
         }
     }
