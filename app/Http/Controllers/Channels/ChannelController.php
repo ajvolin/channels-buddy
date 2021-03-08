@@ -126,7 +126,7 @@ class ChannelController extends Controller
                         sprintf('%s.%s', $this->sourceName, $channel->id);
 
                     return $channel;
-                });
+                })->unique();
 
             foreach($channels as $channel) {
                 echo view('playlist.channel', [
